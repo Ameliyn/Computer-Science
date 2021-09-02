@@ -1,0 +1,25 @@
+---- ls -> list files
+---- cd -> change directory
+---- *command* & -> multithread (allow for use of console while in emacs)
+---- ctrl-c -> close what working on
+---- sftp *target@computername* -> "Secure file transfer protocol"
+---- get *filename* -> take file from that computer and copy it to your computer
+---- filename cheat: *partofFile*.pdf -> asterisks are wildcards and it gets any file that
+     includes "partofFile" and ends in .pdf
+---- cc -> call c compiler
+---- gcc -o *name* *fileName* -> set a.out to be *name*
+---- cc -lm -lX11 ->  "-lm" => link to math  "-lX11" => link to linux graphical library.
+---- gcc -o *CompiledFileName* *FiletoCompile.c* -lm -lX11 -> use all stuff before and make
+     it work for graphical things
+---- gcc -O (capital O, makes the compiler optimize the code)
+
+CS 367 Graphics office hours: MWF 10:20-11:20 in Bodine 301
+
+
+Functions and Parameter Passing in C:
+--Functions pass copies of values inherently (as expected, methods cannot directly
+  edit main program variables.
+  --CAREFUL: Arrays break this. AND ONLY ARRAYS (because methods send memory location of
+    initial part of array. In methods, always make copies of the arrays if you don't
+    want to change them.
+--Arrays don't have a .length, that is why G_polygon needs the number of items.
