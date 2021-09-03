@@ -12,6 +12,7 @@
 ---- gcc -o *CompiledFileName* *FiletoCompile.c* -lm -lX11 -> use all stuff before and make
      it work for graphical things
 ---- gcc -O (capital O, makes the compiler optimize the code)
+---- fg creates a whole bunch of files that are different steps of the compiler.
 
 CS 367 Graphics office hours: MWF 10:20-11:20 in Bodine 301
 
