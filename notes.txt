@@ -24,7 +24,7 @@ C programming shit:
     --can use pointers to pass things to pass actual things
       (arrays are always pointers so that makes sense)
 ----"->" operator (instead of "class.method" (java) we use "class->method")
-    --but we can still us ".variable" for public variables
+    --but we can still us ".variable" for public variables on non-pointers
 ----1 byte = 8 bits = 256 possible numbers
 ----Data types:
     --char => 1 byte
@@ -38,9 +38,13 @@ C programming shit:
   --c = 65; //initializes char c to 65 ('a')
   --char *p; //declares pointer p to be pointer of type char
   --p = &c;  //p gets memory location of c
+  --p = 0; //sets p to be the memory location 0
+  --printf("%c\n", *p); //*p gets the value of the pointer (goes back and forth)
+    --printf line returns "Segmentation fault (core dumped)" because the OS got mad.
     --char *p is a pointer of type char in memory (declared by "*")
       --standardly takes up 8 bytes (64bit computing)
     --generate pointer of existing thing "&c"
+    --can manufacture addresses
 ----Structs:
   --"struct cplx {double re; double im;}"
   --*in main* "struct cplx c1 = {1.0, 0.0}"
