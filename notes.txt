@@ -13,14 +13,70 @@
      it work for graphical things
 ---- gcc -O (capital O, makes the compiler optimize the code)
 ---- fg creates a whole bunch of files that are different steps of the compiler.
+----"|" takes the output of the previous command and pipes it through another command
+----"man" brings us the manual for a command
+
+
+C programming shit:
+----"#define" makes constant GLOBAL variables for the program
+----"#include" includes something, libraries are in <> and files are just names
+----C passes everything EXCEPT ARRAYS by value (as copies)
+    --can use pointers to pass things to pass actual things
+      (arrays are always pointers so that makes sense)
+----"->" operator (instead of "class.method" (java) we use "class->method")
+    --but we can still us ".variable" for public variables
+----1 byte = 8 bits = 256 possible numbers
+----Data types:
+    --char => 1 byte
+    --int => 4 bytes
+    --long => 8 bytes
+    --float => 4 bytes
+    --double => 8 bytes
+    --long double => 10 bytes
+----Pointers:
+  --char c; //declares char c
+  --c = 65; //initializes char c to 65 ('a')
+  --char *p; //declares pointer p to be pointer of type char
+  --p = &c;  //p gets memory location of c
+    --char *p is a pointer of type char in memory (declared by "*")
+      --standardly takes up 8 bytes (64bit computing)
+    --generate pointer of existing thing "&c"
+----Structs:
+  --"struct cplx {double re; double im;}"
+  --*in main* "struct cplx c1 = {1.0, 0.0}"
+    --an inanimate object to store multiple variables (two doubles in this case)
+    --can create with simple curly braces
+----Bitwise operations:
+    --FUTURE SKYE FIGURE THIS OUT
+
 
 CS 367 Graphics office hours: MWF 10:20-11:20 in Bodine 301
 
 
-Functions and Parameter Passing in C:
+Functions and Parameter Passing in C: (2 September, 2021 Jeff)
 --Functions pass copies of values inherently (as expected, methods cannot directly
   edit main program variables.
   --CAREFUL: Arrays break this. AND ONLY ARRAYS (because methods send memory location of
     initial part of array. In methods, always make copies of the arrays if you don't
     want to change them.
 --Arrays don't have a .length, that is why G_polygon needs the number of items.
+
+
+A look behind the curtain and pointers: (3 September, 2021 Alain)
+--fg shows us the steps the compiler goes throug, then call "cc hello.c"
+  --First the cpp makes "hello.i" (DONT KNOW WHAT THIS IS LMAO GOOD LUCK)
+  --Then ccl (c compiler) creates "hello.s" in assembly language. (mostly assembly instructions)
+    --First column are largely labels ("main:")
+    --first column contains psuedoinstructions (".anything")
+  --Then as makes "hello.o" which is a binary file (hard to show with less/emacs/regular editors
+    --some code allows us to read it like assembly "objdump -d hello.o | less"
+      --objdump is a tool in linux that lets us look at binary files (converts it to stuff we can read)
+      --"-d" tells the program to find the instructions, and largely ignore the raw data
+      --"|" takes the output of the previous command and pipes it through another command
+      --objdump will show largely the same thing as "hello.s"
+  --Then "ld" makes "hello" which is the executable file
+    --"ld" includes the libraries? tf? I think they are inherent libraries that allow c to work
+      --by default it includes the libraries (so i was right a line above this)
+        (such as IO, or string, etc)
+      --"-lm" tells the compiler to include math AS WELL AS "#include <math.h>" (we do it twice because C)
+      
