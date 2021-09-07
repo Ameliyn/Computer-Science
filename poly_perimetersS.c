@@ -156,6 +156,7 @@ int test02()
   G_clear() ;
 
 
+  //print grid
   G_rgb(0.4,0.4,0.4);
 
   for(int i = 0; i < sheight; i = i + 10){
@@ -165,6 +166,7 @@ int test02()
   for(int i = 0; i < swidth; i = i+10){
     G_line(i,0,i,sheight);
   }
+  //end print grid
   
   G_rgb(1,0,0) ;
   m = click_and_save(xp,yp) ;
@@ -194,11 +196,45 @@ int test02()
 	     
 }
 
-
-
-
-int main()
+int main(int argc, char **argv)
 {
-  //test01() ;
-  test02() ;
+  if(argc == 1){test02();}
+
+  
+  double xp[500], yp[500];
+  int numpoints;
+
+  swidth = 700 ; sheight = 700 ;
+  G_init_graphics(swidth, sheight) ;
+  G_rgb(0,0,0) ;
+  G_clear() ;
+
+  
+  for(int i = 1; i < argc; i++){
+
+    if(i%5 == 0) G_rgb(0.69,0.4,1);
+    else if(i%5 == 1) G_rgb(1,0,0);
+    else if(i%5 == 2) G_rgb(1,0.6,0.2);
+    else if(i%5 == 3) G_rgb(1,1,0.4);
+    else if(i%5 == 4) G_rgb(0.4,1,0.4);
+    
+
+    FILE *fp;
+    fp = fopen(argv[i],"r");
+    if(fp == NULL){printf("Can't read the file\n"); continue;}
+
+    fscanf(fp, "%d", &numpoints);
+
+    for(int j = 0; j < numpoints; j++){
+      fscanf(fp, "%lf %lf", &xp[j], &yp[j]);
+    }
+
+    print_poly(xp,yp,numpoints);
+    G_fill_polygon(xp,yp,numpoints);
+
+    int fclose(FILE *fp);
+  }
+
+  G_wait_key();
+  
 }
