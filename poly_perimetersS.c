@@ -204,7 +204,7 @@ int main(int argc, char **argv)
   double xp[500], yp[500];
   int numpoints;
 
-  swidth = 700 ; sheight = 700 ;
+  swidth = 900 ; sheight = 900 ;
   G_init_graphics(swidth, sheight) ;
   G_rgb(0,0,0) ;
   G_clear() ;
