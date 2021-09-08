@@ -48,6 +48,7 @@ C programming shit:
       --standardly takes up 8 bytes (64bit computing)
     --generate pointer of existing thing "&c"
     --can manufacture addresses
+    --*p is the same as p[0] in this previous code (dereferencing a pointer gives you the value)
 ----Structs:
   --"struct cplx {double re; double im;}"
   --*in main* "struct cplx c1 = {1.0, 0.0}"
