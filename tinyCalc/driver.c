@@ -23,6 +23,24 @@ int main()
   printf(" Enter 'm' or 'M' followed by a location (0-4) to load a previous\n");
   printf(" result from memory.\n");
   printf("\n> ");
- 
+
+  char command;
+  double operand;
+  while(True){
+    scanf("%c%lf",command,operand);
+    if(check_command(command) == TC_COMMAND_OK){
+      if(read_command(*command,*operand) == TC_COMMAND_QUIT) break;
+      else if(command == 'm' || command == 'M')
+	printf("\n>%.2f", mem_read(tc_memory_t, (int)operand))
+      else{
+	execute_calculation(command,mem_read(tc_memory_t, 0),operand);
+	printf("\n%.2f", mem_read(tc_memory_t, 0));
+      }
+      
+    }
+
+    printf("\n> ");
+  }
+  
   return 0;
 }
