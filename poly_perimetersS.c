@@ -65,61 +65,139 @@ double find_intersection(double xOne, double xTwo, double yOne, double yTwo, dou
   else return x;
 }
 
+//returns -1.0 and changes flag if slope 1/0 or returns double slope of line from two points
+double slope(double xOne, double xTwo, double yOne, double yTwo, int *flag){
+  if(xTwo - xOne == 0) {*flag+=1; return -1.0;}
+  return (yTwo - yOne) / (xTwo - xOne);
+}
+
 void my_fill_polygon(double xp[], double yp[], int numpoints){
   
-  double xpositions[1000], intersection;
+  double xpositions[numpoints], intersection;
   int xpoints, hcounter;
   
   for(int y = 0; y < sheight; y++)
   {
     xpoints = 0;
+    hcounter = 0;
     for(int i = 0; i < numpoints; i++)
     {
-      
-      if(i+1 < numpoints){
-	intersection = find_intersection(xp[i],xp[i+1],yp[i],yp[i+1],y);
-	if(intersection > 0) {
-	  xpositions[xpoints] = intersection;
+      if(yp[i] == y) //if we are at a vertex
+      {
+	hcounter = 1;
+	printf("VERTEX DETECTED AT Y %d! \n",y);
+	int flag = 0;
+	double slope1,slope2;
+	
+	if(i == 0){
+	  slope1 = slope(xp[numpoints-1],xp[i],yp[numpoints-1],yp[i], &flag);
+	  slope2 = slope(xp[i+1],xp[i],yp[i+1],yp[i], &flag);
+	}
+	else if(i + 1 == numpoints){
+	  slope1 = slope(xp[i-1],xp[i],yp[i-1],yp[i], &flag);
+	  slope2 = slope(xp[0],xp[i],yp[0],yp[i], &flag);
+	}
+	else
+	{
+	  slope1 = slope(xp[i-1],xp[i],yp[i-1],yp[i], &flag);
+	  slope2 = slope(xp[i+1],xp[i],yp[i+1],yp[i], &flag);
+	}
+	//end slope gathering
+
+	printf("slope 1 %.2f slope 2 %.2f\n",slope1,slope2);
+	if(flag == 2) { //if both vertical
+	  xpositions[xpoints] = xp[i];
 	  xpoints++;
-	  /*if(yp[i] != y && xp[i] != intersection)
+	  continue;
+	}
+	else if(flag == 1 && (slope1 == 0 || slope2 == 0))
+	{
+	  xpositions[xpoints] = xp[i];
+	  xpoints++;
+	  
+	}
+	else if(slope1 == 0 && slope2 == 0){ //if both horizontal
+	  
+	}
+	else if((slope1 == 0 && slope2 != 0)){ //if previous horizontal
+	  xpositions[xpoints] = xp[i];
+	  xpoints++;
+	  
+	}
+	else if(slope2 == 0 && slope1 != 0) //if next horizontal
+	{
+	  if(i + 1 == numpoints){
+	    xpositions[xpoints] = xp[i];
+	    xpositions[xpoints+1] = xp[0];
+	    xpoints+=2;
+	  }
+	  else
 	  {
-	    xpositions[xpoints] = intersection;
+	    xpositions[xpoints] = xp[i];
+	    xpositions[xpoints+1] = xp[i+1];
+	    xpoints+=2;
+	  }
+	}
+	else if((slope1 > 0 && slope2 > 0) || (slope1 < 0 && slope2 < 0)) //if both positive/negative
+	{
+	  if((i == 0 && ((yp[numpoints-1] < y && yp[i+1] < y) || (yp[numpoints-1] > y && yp[i+1] > y)))
+	     || (i + 1 == numpoints && ((yp[i-1] > y && yp[0] > y) || (yp[i-1] < y && yp[0] < y)))
+	     || ((yp[i-1] < y && yp[i+1] > y) || (yp[i-1] > y && yp[i+1] < y))
+	     )
+	  {
+	    printf("Added it twice!\n");
+	    xpositions[xpoints] = xp[i];
+	    xpoints++;
+	    xpositions[xpoints] = xp[i];
 	    xpoints++;
 	  }
 	  else
 	  {
-	    xpositions[xpoints] = intersection;
-	    xpoints++;
-	    i++;
-	    }*/
+	    printf("Add it once\n");
+	    xpositions[xpoints] = xp[i];
+	    xpoints++;	    
+	  }
+	  
+	}
+	else
+	{
+	  printf("Added it twice (outer)!\n");
+	  xpositions[xpoints] = xp[i];
+	  xpoints++;
+	  
+	  
+	}
+	
+      }
+      else if(i+1 < numpoints) //if not at point do as normal
+      {
+	intersection = find_intersection(xp[i],xp[i+1],yp[i],yp[i+1],y);
+	if(intersection > 0) {  
+	  xpositions[xpoints] = intersection;
+	  xpoints++;
 	}
       }
-      else{
+      else
+      {
 	intersection = find_intersection(xp[i],xp[0],yp[i],yp[0],y);
 	if(intersection > 0) {
 	  xpositions[xpoints] = intersection;
 	  xpoints++;
-	  /*if(yp[i] != y && xp[i] != intersection)
-	  {
-	    xpositions[xpoints] = intersection;
-	    xpoints++;
-	  }
-	  else
-	  {
-	    xpositions[xpoints] = intersection;
-	    xpoints++;
-	    i++;
-	    }*/
 	}
       }
-
-      
     } // end for i
     if(xpoints == 0) continue;
     sort(xpositions, xpoints);
-    
+    if(hcounter == 1){
+    printf("Xpositions: [");
+    for(int i = 0; i < xpoints; i++)
+    {
+      printf("%.2f, ",xpositions[xpoints]);
+    }
+    printf("]\n");}
     for(int i = 0; i < xpoints; i+=2)
-    {	
+    {
+      
       if(i+1 < xpoints){
 	G_line(xpositions[i],y,xpositions[i+1],y);
       }
@@ -335,6 +413,18 @@ void test04(char *argv){
   G_rgb(0,0,0) ;
   G_clear() ;
 
+  //print grid
+  G_rgb(0.4,0.4,0.4);
+
+  for(int i = 0; i < sheight; i = i + 100){
+    G_line(0,i,swidth,i);
+  }
+
+  for(int i = 0; i < swidth; i = i+100){
+    G_line(i,0,i,sheight);
+  }
+  //end print grid
+
 
     FILE *fp;
     fp = fopen(argv,"r");
@@ -377,6 +467,20 @@ int main(int argc, char **argv)
   G_init_graphics(swidth, sheight) ;
   G_rgb(0,0,0) ;
   G_clear() ;
+
+  //print grid
+  G_rgb(0.4,0.4,0.4);
+
+  for(int i = 0; i < sheight; i = i + 100){
+    G_line(0,i,swidth,i);
+  }
+
+  for(int i = 0; i < swidth; i = i+100){
+    G_line(i,0,i,sheight);
+  }
+  //end print grid
+
+  
 
   for(int i = 1; i < argc; i++){
 
