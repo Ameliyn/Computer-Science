@@ -16,6 +16,14 @@
 
 /* put your application code in this file. */
 
+void init_mem(tc_memory_t *mem){
+  mem->most_recent = 0;
+  for(int i = 0; i < TC_MEM_SZ; i++){
+    mem->vals[i] = 0.0;
+  }
+}
+
+
 int main()
 {
   printf("\nWelcome to TinyCalc!\n\n Enter an operation <+, - , *, /, ^>");
@@ -24,23 +32,23 @@ int main()
   printf(" result from memory.\n");
   printf("\n> ");
 
+  struct _tc_mem memory;
+  init_mem(&memory);
   char command;
   double operand;
-  while(True){
-    scanf("%c%lf",command,operand);
-    if(check_command(command) == TC_COMMAND_OK){
-      if(read_command(*command,*operand) == TC_COMMAND_QUIT) break;
-      else if(command == 'm' || command == 'M')
-	printf("\n>%.2f", mem_read(tc_memory_t, (int)operand))
-      else{
-	execute_calculation(command,mem_read(tc_memory_t, 0),operand);
-	printf("\n%.2f", mem_read(tc_memory_t, 0));
-      }
-      
+  double accumulator = 0.0;
+  
+  while(read_command(&command,&operand) != TC_COMMAND_QUIT){
+    if(command == 'm' || command == 'M'){
+      accumulator = mem_read(memory, (int)operand);
+      printf("%.2f", accumulator);
     }
-
+    else{
+      execute_calculation(command,operand,&accumulator);
+      mem_save(&memory,accumulator);
+      printf("%.2f", mem_read(memory, 0));
+    } 
     printf("\n> ");
   }
-  
   return 0;
 }
