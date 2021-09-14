@@ -1,0 +1,19 @@
+int numpoints;
+int numpolys;
+double x[30000];
+double y[30000];
+int psize[12000];
+int cont[12000][20];
+double red[12000];
+double grn[12000];
+double blu[12000];
+
+
+void load_files(int numFiles, char* argc){
+
+
+
+
+
+
+}

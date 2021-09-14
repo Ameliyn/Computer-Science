@@ -15,6 +15,7 @@
 ---- fg creates a whole bunch of files that are different steps of the compiler.
 ----"|" takes the output of the previous command and pipes it through another command
 ----"man" brings us the manual for a command
+----"tar xfz *filename*.tgz" untar file (similar to a zip file, but different?)
 
 
 C programming shit:
@@ -94,3 +95,19 @@ A look behind the curtain and pointers: (3 September, 2021 Alain)
       --"-lm" tells the compiler to include math AS WELL AS "#include <math.h>"
         (we do it twice because C)
       
+.xy file structure:
+--Number of Verticies (int)
+--double coordinates of verticies (double x double y)
+--Number of polygons (int)
+--Each polygon ("number of verticies" "verticy number" "verticy number") (all ints)
+--Each polygon's color ("double r" "double g" "double b")
+
+
+
+CS367 Lab Notes:
+
+--Count triangles twice, count non-triangles once
+  --triangles are poitive slope then negative slope or negative slope then positive slope
+    when vertex is in between xouters
+    --perhaps worry about if a line is drawn twice on a polygon or not (two horizontal overlapping lines with
+      vertex in the middle)

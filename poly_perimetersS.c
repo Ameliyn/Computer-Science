@@ -79,7 +79,9 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
       if(i+1 < numpoints){
 	intersection = find_intersection(xp[i],xp[i+1],yp[i],yp[i+1],y);
 	if(intersection > 0) {
-	  if(yp[i] != y || xp[i] != intersection)
+	  xpositions[xpoints] = intersection;
+	  xpoints++;
+	  /*if(yp[i] != y && xp[i] != intersection)
 	  {
 	    xpositions[xpoints] = intersection;
 	    xpoints++;
@@ -89,14 +91,15 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
 	    xpositions[xpoints] = intersection;
 	    xpoints++;
 	    i++;
-	  }
-	  
+	    }*/
 	}
       }
       else{
 	intersection = find_intersection(xp[i],xp[0],yp[i],yp[0],y);
 	if(intersection > 0) {
-	  if(yp[i] != y || xp[i] != intersection)
+	  xpositions[xpoints] = intersection;
+	  xpoints++;
+	  /*if(yp[i] != y && xp[i] != intersection)
 	  {
 	    xpositions[xpoints] = intersection;
 	    xpoints++;
@@ -106,7 +109,7 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
 	    xpositions[xpoints] = intersection;
 	    xpoints++;
 	    i++;
-	  }
+	    }*/
 	}
       }
 
@@ -114,16 +117,14 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
     } // end for i
     if(xpoints == 0) continue;
     sort(xpositions, xpoints);
-
+    
     for(int i = 0; i < xpoints; i+=2)
     {	
       if(i+1 < xpoints){
 	G_line(xpositions[i],y,xpositions[i+1],y);
       }
-      else {
-	G_line(xpositions[i],y,xpositions[0],y);
-      }
-
+      
+      //if(i%10 == 0) G_wait_key();
     }
     
   }
