@@ -67,7 +67,10 @@ double find_intersection(double xOne, double xTwo, double yOne, double yTwo, dou
 
 //returns -1.0 and changes flag if slope 1/0 or returns double slope of line from two points
 double slope(double xOne, double xTwo, double yOne, double yTwo, int *flag){
-  if(xTwo - xOne == 0) {*flag+=1; return -1.0;}
+  if(xTwo - xOne == 0) {
+    *flag+=1;
+    return -1.0;
+  }
   return (yTwo - yOne) / (xTwo - xOne);
 }
 
@@ -85,91 +88,116 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
       if(yp[i] == y) //if we are at a vertex
       {
 	hcounter = 1;
-	printf("VERTEX DETECTED AT Y %d! \n",y);
+	printf("VERTEX DETECTED AT (%.2f,%d)! \n",xp[i],y);
 	int flag = 0;
+	int flag2 = 0;
 	double slope1,slope2;
 	
 	if(i == 0){
 	  slope1 = slope(xp[numpoints-1],xp[i],yp[numpoints-1],yp[i], &flag);
-	  slope2 = slope(xp[i+1],xp[i],yp[i+1],yp[i], &flag);
+	  if(flag == 1 && yp[numpoints-1] > y) slope1 = 1.0;
+	  slope2 = slope(xp[i+1],xp[i],yp[i+1],yp[i], &flag2);
+	  if(flag2 == 1 && yp[i+1] > y) slope2 = 1.0;
 	}
 	else if(i + 1 == numpoints){
 	  slope1 = slope(xp[i-1],xp[i],yp[i-1],yp[i], &flag);
-	  slope2 = slope(xp[0],xp[i],yp[0],yp[i], &flag);
+	  if(flag == 1 && yp[i-1] > y) slope1 = 1.0;
+	  slope2 = slope(xp[0],xp[i],yp[0],yp[i], &flag2);
+	  if(flag2 == 1 && yp[0] > y) slope2 = 1.0;
 	}
 	else
 	{
 	  slope1 = slope(xp[i-1],xp[i],yp[i-1],yp[i], &flag);
+	  if(flag == 1 && yp[i-1] > y) slope1 = 1.0;
 	  slope2 = slope(xp[i+1],xp[i],yp[i+1],yp[i], &flag);
+	  if(flag2 == 1 && yp[i+1] > y) slope2 = 1.0;
 	}
 	//end slope gathering
-
+	flag+=flag2;
+	
 	printf("slope 1 %.2f slope 2 %.2f\n",slope1,slope2);
+	
 	if(flag == 2) { //if both vertical
 	  xpositions[xpoints] = xp[i];
 	  xpoints++;
-	  continue;
 	}
 	else if(flag == 1 && (slope1 == 0 || slope2 == 0))
 	{
 	  xpositions[xpoints] = xp[i];
 	  xpoints++;
-	  
-	}
-	else if(slope1 == 0 && slope2 == 0){ //if both horizontal
-	  
-	}
-	else if((slope1 == 0 && slope2 != 0)){ //if previous horizontal
-	  xpositions[xpoints] = xp[i];
-	  xpoints++;
-	  
-	}
-	else if(slope2 == 0 && slope1 != 0) //if next horizontal
-	{
-	  if(i + 1 == numpoints){
-	    xpositions[xpoints] = xp[i];
-	    xpositions[xpoints+1] = xp[0];
-	    xpoints+=2;
-	  }
-	  else
-	  {
-	    xpositions[xpoints] = xp[i];
-	    xpositions[xpoints+1] = xp[i+1];
-	    xpoints+=2;
-	  }
 	}
 	else if((slope1 > 0 && slope2 > 0) || (slope1 < 0 && slope2 < 0)) //if both positive/negative
 	{
-	  if((i == 0 && ((yp[numpoints-1] < y && yp[i+1] < y) || (yp[numpoints-1] > y && yp[i+1] > y)))
-	     || (i + 1 == numpoints && ((yp[i-1] > y && yp[0] > y) || (yp[i-1] < y && yp[0] < y)))
-	     || ((yp[i-1] < y && yp[i+1] > y) || (yp[i-1] > y && yp[i+1] < y))
-	     )
+	  if((i == 0 && ((yp[numpoints-1] <= y && yp[i+1] <= y) || (yp[numpoints-1] >= y && yp[i+1] >= y))))
 	  {
-	    printf("Added it twice!\n");
+	    printf("Added it twice! i==0\n");
 	    xpositions[xpoints] = xp[i];
 	    xpoints++;
 	    xpositions[xpoints] = xp[i];
 	    xpoints++;
 	  }
+	  else if (i + 1 == numpoints && ((yp[i-1] >= y && yp[0] >= y) || (yp[i-1] <= y && yp[0] <= y))){
+	    printf("Added it twice! i+1 == numpoints\n");
+	    xpositions[xpoints] = xp[i];
+	    xpoints++;
+	    xpositions[xpoints] = xp[i];
+	    xpoints++;
+
+	  }
+	  else if ((yp[i-1] <= y && yp[i+1] >= y) || (yp[i-1] >= y && yp[i+1] <= y)){
+	    printf("Added it twice! regular i\n");
+	    xpositions[xpoints] = xp[i];
+	    xpoints++;
+	    xpositions[xpoints] = xp[i];
+	    xpoints++;
+
+	  }
 	  else
 	  {
-	    printf("Add it once\n");
-	    xpositions[xpoints] = xp[i];
-	    xpoints++;	    
+	    if(i == 0 && ((xp[numpoints-1] < xp[i] && xp[i+1] > xp[i]) || (xp[numpoints-1] > xp[i] && xp[i+1] < xp[i])))
+	    {
+	      printf("Added It Twice (triangle)\n");
+	      xpositions[xpoints] = xp[i];
+	      xpoints++;
+	      xpositions[xpoints] = xp[i];
+	      xpoints++;
+	    }
+	    else if(i + 1 == numpoints && ((xp[i-1] < xp[i] && xp[0] > xp[i]) || (xp[i-1] > xp[i] && xp[0] < xp[i])))
+	    {
+	      printf("Added It Twice (triangle)\n");
+	      xpositions[xpoints] = xp[i];
+	      xpoints++;
+	      xpositions[xpoints] = xp[i];
+	      xpoints++;
+	    }
+	    else if((xp[i-1] < xp[i] && xp[i+1] > xp[i]) || (xp[i-1] > xp[i] && xp[i+1] < xp[i]))
+	    {
+	      printf("Added It Twice (triangle)\n");
+	      xpositions[xpoints] = xp[i];
+	      xpoints++;
+	      xpositions[xpoints] = xp[i];
+	      xpoints++;
+	    }
+	    else
+	    {
+	      printf("Add it once\n");
+	      xpositions[xpoints] = xp[i];
+	      xpoints++;	    
+	    }
 	  }
 	  
 	}
 	else
 	{
-	  printf("Added it twice (outer)!\n");
+	  printf("Added it twice Neg/Positive Slope!\n");
 	  xpositions[xpoints] = xp[i];
 	  xpoints++;
-	  
-	  
+	  xpositions[xpoints] = xp[i];
+	  xpoints++;
 	}
 	
       }
-      else if(i+1 < numpoints) //if not at point do as normal
+      else if(i+1 < numpoints) //if not at vertex do as normal
       {
 	intersection = find_intersection(xp[i],xp[i+1],yp[i],yp[i+1],y);
 	if(intersection > 0) {  
@@ -186,19 +214,35 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
 	}
       }
     } // end for i
+
     if(xpoints == 0) continue;
-    sort(xpositions, xpoints);
+
+    //print xPositions
     if(hcounter == 1){
     printf("Xpositions: [");
     for(int i = 0; i < xpoints; i++)
     {
-      printf("%.2f, ",xpositions[xpoints]);
+      printf("%.2f, ",xpositions[i]);
     }
     printf("]\n");}
+
+    sort(xpositions, xpoints);
+
+    //print xPositions
+    if(hcounter == 1){
+    printf("Xpositions: [");
+    for(int i = 0; i < xpoints; i++)
+    {
+      printf("%.2f, ",xpositions[i]);
+    }
+    printf("]\n");}
+
+    
     for(int i = 0; i < xpoints; i+=2)
     {
-      
       if(i+1 < xpoints){
+	if(hcounter == 1)
+	  printf("Drawing line from %.2f,%d to %.2f,%d\n",xpositions[i],y,xpositions[i+1],y);
 	G_line(xpositions[i],y,xpositions[i+1],y);
       }
       
