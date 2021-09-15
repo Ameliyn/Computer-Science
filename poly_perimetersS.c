@@ -197,22 +197,26 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
 	}
 	
       }
-      else if(i+1 < numpoints) //if not at vertex do as normal
-      {
-	intersection = find_intersection(xp[i],xp[i+1],yp[i],yp[i+1],y);
-	if(intersection > 0) {  
-	  xpositions[xpoints] = intersection;
-	  xpoints++;
-	}
-      }
       else
       {
-	intersection = find_intersection(xp[i],xp[0],yp[i],yp[0],y);
-	if(intersection > 0) {
-	  xpositions[xpoints] = intersection;
-	  xpoints++;
+	if(i+1 < numpoints)
+	{
+	  intersection = find_intersection(xp[i],xp[i+1],yp[i],yp[i+1],y);
+	  if(intersection > 0) {
+	    xpositions[xpoints] = intersection;
+	    xpoints++;
+	  }
+	}
+	else
+	{
+	  intersection = find_intersection(xp[i],xp[0],yp[i],yp[0],y);
+	  if(intersection > 0) {
+	    xpositions[xpoints] = intersection;
+	    xpoints++;
+	  }
 	}
       }
+      
     } // end for i
 
     if(xpoints == 0) continue;
