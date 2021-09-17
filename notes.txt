@@ -104,10 +104,29 @@ A look behind the curtain and pointers: (3 September, 2021 Alain)
 
 
 
-CS367 Lab Notes:
+CS367 poly_perimetersS Lab:
 
 --Count triangles twice, count non-triangles once
   --triangles are poitive slope then negative slope or negative slope then positive slope
     when vertex is in between xouters
     --perhaps worry about if a line is drawn twice on a polygon or not (two horizontal overlapping lines with
       vertex in the middle)
+
+
+
+Bitwise and Signed/Unsigned shit:
+--When evaluating, if you have one unsigned and one signed, they are evaluated as unsigned
+--signed -1 = 11111111111111111111111111111111	(255U = -1)
+         -2 = 11111111111111111111111111111110	(You subtract 1 from 255U to get -2)
+	 -3 = 11111111111111111111111111111101  (You subtract 2 from 255U to get -3)
+	 -4 = 11111111111111111111111111111100	(...)
+--1 << 1  (Shift by one position)
+  0001 << 1 = 0010 (multiply by magnitude of 2)
+  0X0012 << 1 = 0X0024
+  v << k ≡ v × 2^k
+--1 >> 1 (Shift right by one position)
+  0001 >> 1 = 0000 (shift bits)
+  0X0012 >> 1 = 0X0005
+  v >> k = floor(v/2^k)
+--(-1 >> 1) = -1 (copies last bit to itself)
+  --Freed bit (most significant bit) gets saved and copied to itself
