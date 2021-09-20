@@ -62,9 +62,11 @@ C programming shit:
       --"int main(int argc, char **argv){}"
       --"argc" = integer, how many words on command line
       --"argv" = array of pointers to char arrays (array of strings)
+----C booleans (0 is false, anything else is true)
 
 
 CS 367 Graphics office hours: MWF 10:20-11:20 in Bodine 301
+Alain office hours Bodine 302A
 
 
 Functions and Parameter Passing in C: (2 September, 2021 Jeff)
@@ -143,9 +145,13 @@ Bitwise and Signed/Unsigned shit:
 --| operator
   1111 1011 | 1011 0011 == 1111 1011
 --~ operator
-  !1101 1111 == 0010 0000
---^ operator
-  1111 1101 ^ 1001 1001 == 1001 1011
+  ~1101 1111 == 0010 0000
+--^ operator (XOR operator)
+  1111 1101 ^ 1001 1001 == 0110 0100
+--! operator
+  0 == 1
+  anything else == 0
+  
 
 
 DeMorgan's Law (look up)
