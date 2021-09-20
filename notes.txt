@@ -116,17 +116,56 @@ CS367 poly_perimetersS Lab:
 
 Bitwise and Signed/Unsigned shit:
 --When evaluating, if you have one unsigned and one signed, they are evaluated as unsigned
---signed -1 = 11111111111111111111111111111111	(255U = -1)
-         -2 = 11111111111111111111111111111110	(You subtract 1 from 255U to get -2)
-	 -3 = 11111111111111111111111111111101  (You subtract 2 from 255U to get -3)
-	 -4 = 11111111111111111111111111111100	(...)
+--signed -1 = 1111 1111 1111 1111	(255U = -1)
+         -2 = 1111 1111 1111 1110	(You subtract 1 from 255U to get -2)
+	 -3 = 1111 1111 1111 1101  (You subtract 2 from 255U to get -3)
+	 -4 = 1111 1111 1111 1100	(...)
 --1 << 1  (Shift by one position)
   0001 << 1 = 0010 (multiply by magnitude of 2)
   0X0012 << 1 = 0X0024
   v << k ≡ v × 2^k
 --1 >> 1 (Shift right by one position)
   0001 >> 1 = 0000 (shift bits)
+  1111 1111 (-1)>> 1 == 1111 1111 (-1)
+  1111 1110 (-2)>> 1 == 1111 1111 (-1)
+  1111 1100 (-4)>> 2 == 1111 1111 (-1)
   0X0012 >> 1 = 0X0005
   v >> k = floor(v/2^k)
---(-1 >> 1) = -1 (copies last bit to itself)
-  --Freed bit (most significant bit) gets saved and copied to itself
+  Fills in all positions vacated with the most significant bit (for signed values) (arithmetic shift)
+  Fills in all positions vacated with zeroes (for unsigned values) (logical shift)
+  --Example:
+    char c = -4;
+    c >> 2 == -1; //true (any vacated bit positions have been backfilled with most significant bit)
+    unsigned char cc = (unsigned char) -4; cc == 1111 1100 (252 unsigned (-4 signed))
+    cc >> 2 == 63 //true (any vacated bit positions have been backfilled with zeroes)
+--& operator
+  1111 1011 & 1011 0011 == 1011 0011
+--| operator
+  1111 1011 | 1011 0011 == 1111 1011
+--~ operator
+  !1101 1111 == 0010 0000
+--^ operator
+  1111 1101 ^ 1001 1001 == 1001 1011
+
+
+DeMorgan's Law (look up)
+  
+
+Floats in bits:
+
+--What does 1011.101 represent?
+  11.625 (11.5/8)
+  (first four bits normal, next four 3 bits are 1/2 1/4 1/8)
+
+--More generally our representation is b(subj) ... b(sub2) b(sub1) b(sub0) . b(sub-1) b(sub-2) ... b(sub-k)
+  Result is sum from -k to j of b(subi)*2^i
+
+  5 3/4 (5.75) to binary == 101.11
+  2 7/8 (2.875) to binary == 10.111    (NOTICE: after the decimal point is the numerator in binary with leading zeroes
+  1 7/16 (1.4375) to binary == 1.0111   if numerator is under 1/2)
+
+--limitations to this form:
+  --Cannot encode really small numbers or really big numbers
+
+IEEE floating point form:
+(-1)^s x M x 2^E
