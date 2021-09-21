@@ -7,7 +7,7 @@
  * Max. # of operators: 8
  */
 int bitwise_nor(int x, int y) {
-    return 0;
+  return (~x) & (~y);
 }
 
 
@@ -18,7 +18,7 @@ int bitwise_nor(int x, int y) {
  * Max. # of operators: 14
  */
 int bitwise_xor(int x, int y) {
-    return 0;
+  return ~(~x & ~y) & ~(x & y);
 }
 
 
@@ -30,7 +30,8 @@ int bitwise_xor(int x, int y) {
  * Max. # of operators: 6
  */
 int eval_not_equal(int x, int y) {
-    return 0;
+  
+  return !!(x ^ y);
 }
 
 
@@ -43,7 +44,8 @@ int eval_not_equal(int x, int y) {
  * Max. # of operators: 6
  */
 int get_byte(int x, int n) {
-    return 0;
+  unsigned int y = x >> (n << 3); //make desired byte least significant
+  return y;
 }
 
 
