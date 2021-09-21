@@ -128,6 +128,21 @@ void rotate_object(int objNumber, double rotation){
   
 }
 
+/*int dot_product(double m1[][], double m2[][][], int m1Length, int m2Length){
+
+  double result;
+  for(int i = 0; i < m1Length; i++){
+    result = 0;
+    for(int j = 0; j < m2Length; j++){
+
+
+
+    }
+
+  }
+
+}*/
+
 void draw_object(int input)
 {
   G_rgb(0,0,0);
