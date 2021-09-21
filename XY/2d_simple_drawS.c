@@ -14,6 +14,8 @@ double red[MAXOBJECTS][MAXPOLYS];
 double grn[MAXOBJECTS][MAXPOLYS];
 double blu[MAXOBJECTS][MAXPOLYS];
 
+int scrnsize = 1000;
+
 void center_object(int objNumber){
 
   double xMax = x[objNumber][0];
@@ -33,15 +35,16 @@ void center_object(int objNumber){
   
   double xLen = xMax - xMin;
   double yLen = yMax - yMin;
+  
   if(xLen > yLen){
-    double magnifier = 500 / xLen;
+    double magnifier = (scrnsize * 0.625) / xLen;
     for(int i = 0; i < numpoints[objNumber]; i++){
       x[objNumber][i] *= magnifier;
       y[objNumber][i] *= magnifier;
     }
   }
   else{
-    double magnifier = 500 / yLen;
+    double magnifier = (scrnsize * 0.625) / yLen;
     for(int i = 0; i < numpoints[objNumber]; i++){
       x[objNumber][i] *= magnifier;
       y[objNumber][i] *= magnifier;
@@ -57,8 +60,8 @@ void center_object(int objNumber){
   xCOM = xCOM / numpoints[objNumber];
   yCOM = yCOM / numpoints[objNumber];
   
-  double xTRANS = 400 - xCOM;
-  double yTRANS = 400 - yCOM;
+  double xTRANS = (scrnsize / 2) - xCOM;
+  double yTRANS = (scrnsize / 2) - yCOM;
   
   for(int i = 0; i < numpoints[objNumber]; i++){
     x[objNumber][i] += xTRANS;
@@ -107,33 +110,20 @@ void load_files(int numFiles, char** fileNames){
 }
 
 
-
-
 void rotate_object(int objNumber, double rotation){
-
-  printf("Rotating Object %d, with numpoints %d\n",objNumber, numpoints[objNumber]);
-  double xCOM = 0;
-  double yCOM = 0;
   
-  //find COM
-  for(int i = 0; i < numpoints[objNumber]; i++){
-    xCOM += x[objNumber][i];
-    yCOM += y[objNumber][i];    
-  }
-
-  xCOM = xCOM / numpoints[objNumber];
-  yCOM = yCOM / numpoints[objNumber];
-
-  //rotate points
-  //new x = xcos(0.1) - ysin(0.1)
-  //new y = xsin(0.1) + ycos(0.1)
+  //xNew = xOld*cos(rot) - yOld*sin(rotation)
+  //yNew = xOld*sin(rot) + yOld*cos(rotation)
+  
+  double xZero;
+  double yZero;
   
   for(int i = 0; i < numpoints[objNumber]; i++)
   {
-    double xZero = x[objNumber][i] - xCOM;
-    double yZero = y[objNumber][i] - yCOM;
-    x[objNumber][i] = (xZero*cos(rotation)) - (yZero*sin(rotation)) + xCOM;
-    y[objNumber][i] = (xZero*sin(rotation)) + (yZero*cos(rotation)) + yCOM;
+    xZero = x[objNumber][i] - (scrnsize / 2);
+    yZero = y[objNumber][i] - (scrnsize / 2);
+    x[objNumber][i] = (xZero*cos(rotation)) - (yZero*sin(rotation)) + (scrnsize / 2);
+    y[objNumber][i] = (xZero*sin(rotation)) + (yZero*cos(rotation)) + (scrnsize / 2);
   }
   
 }
@@ -168,7 +158,7 @@ int main(int argc, char **argv){
 
   char input = 48;
   int previousObj = 0;
-  G_init_graphics(800,800);
+  G_init_graphics(scrnsize,scrnsize);
   G_rgb(0,0,0);
   G_clear();
 
