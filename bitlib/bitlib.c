@@ -30,7 +30,6 @@ int bitwise_xor(int x, int y) {
  * Max. # of operators: 6
  */
 int eval_not_equal(int x, int y) {
-  
   return !!(x ^ y);
 }
 
@@ -44,8 +43,9 @@ int eval_not_equal(int x, int y) {
  * Max. # of operators: 6
  */
 int get_byte(int x, int n) {
-  unsigned int y = x >> (n << 3); //make desired byte least significant
-  return y;
+  //make desired byte least significant and then & 0x000000FF
+  return 0xFF & (x >> (n << 3));
+  //make most significant and then signed make least significant
 }
 
 
@@ -57,7 +57,9 @@ int get_byte(int x, int n) {
  * Max. # of operators: 5
  */
 int copy_lsbit(int x) {
-    return 0;
+  //make most significant and then unsigned make least significant
+  return (x << 31) >> 31;
+    
 }
 
 
@@ -69,5 +71,9 @@ int copy_lsbit(int x) {
  * Max. # of operators: 40
  */
 int bit_count(int x) {
-    return 0;
+  return (0xF & (x >> 28)) + (0xF & (x >> 24)) + (0xF & (x >> 20))
+    + (0xF & (x >> 16)) + (0xF & (x >> 12)) + (0xF & (x >> 8))
+    + (0xF & (x >> 4)) + (0xF & x); //22
+  /*return (0xFF & (x >> 24)) + (0xFF & (x >> 16)) + (0xFF & (x >> 8))
+    + (0xFF & x)*/
 }
