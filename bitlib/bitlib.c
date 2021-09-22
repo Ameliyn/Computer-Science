@@ -76,4 +76,5 @@ int bit_count(int x) {
     + (0xF & (x >> 4)) + (0xF & x); //22
   /*return (0xFF & (x >> 24)) + (0xFF & (x >> 16)) + (0xFF & (x >> 8))
     + (0xFF & x)*/
+  //parrallelism do things that change x
 }

@@ -19,6 +19,9 @@
 
 
 C programming shit:
+----Four stages: Preprocessing, C-Compiler creates an assembly, Assembler encodes, Linker
+    CC -c takes source files and goes through first three steps (preprocess, compiles, assembles)
+    linker links .o files plus libraries and makes executable file (cc can do this and does it smartly)
 ----"#define" makes constant GLOBAL variables for the program
 ----"#include" includes something, libraries are in <> and files are just names
 ----C passes everything EXCEPT ARRAYS by value (as copies)
@@ -111,8 +114,8 @@ CS367 poly_perimetersS Lab:
 --Count triangles twice, count non-triangles once
   --triangles are poitive slope then negative slope or negative slope then positive slope
     when vertex is in between xouters
-    --perhaps worry about if a line is drawn twice on a polygon or not (two horizontal overlapping lines with
-      vertex in the middle)
+    --perhaps worry about if a line is drawn twice on a polygon or not (two horizontal overlapping
+      lines with vertex in the middle)
 
 
 
@@ -151,7 +154,25 @@ Bitwise and Signed/Unsigned shit:
 --! operator
   0 == 1
   anything else == 0
+
+
+MakeFile:
+  CC=cc                     ("Symbol=something" : essentially definitions)
+  EXEC=bitfun
+  OBJS=driver.o bitlib.o
+  OPTS=-std=c99 -Wall
+  SOURCES=*.c
+
+  all: $(EXEC)					 (automatically takes first recipe as target)
   
+  $(EXEC): $(OBJS)                               (Dependencies "EXEC(target) depends on OBJS")
+  	   $(CC) $(OPTS) $(OBJS) -o ($EXEC)      (Actual steps based on dependancies to create target)
+
+  .c.o:	   	 	 	    		 (any file that has .c produces a .o through the following
+	$(CC) $(OPTS) -c *.c			  line)
+
+  clean:					 (here is what you do to undo actions)
+        rm -f *.o $(EXEC) a.out
 
 
 DeMorgan's Law (look up)
@@ -167,11 +188,45 @@ Floats in bits:
   Result is sum from -k to j of b(subi)*2^i
 
   5 3/4 (5.75) to binary == 101.11
-  2 7/8 (2.875) to binary == 10.111    (NOTICE: after the decimal point is the numerator in binary with leading zeroes
-  1 7/16 (1.4375) to binary == 1.0111   if numerator is under 1/2)
+  2 7/8 (2.875) to binary == 10.111    (NOTICE: after the decimal point is the numerator in
+  1 7/16 (1.4375) to binary == 1.0111    binary with leading zeroes if numerator is under 1/2)
 
 --limitations to this form:
   --Cannot encode really small numbers or really big numbers
 
 IEEE floating point form:
-(-1)^s x M x 2^E
+--(-1)^s x M x 2^E
+  sign s = sign bit (pos or neg)
+  significand M = fractional binary number (always begins with 1)
+  exponent E = weights a value a power of 2
+  E = x - 127 => E + 127 = x
+
+--Examples:
+  +1 (binary 1) = (-1)^0 + 1.0 + 2^0 == 0  01111111  00000000000000000000000
+  +23 (binary 10111) = (-1)^0 + 1.0111 * 2^4 = 0 10000011 01110000000000000000000
+
+--d.m * 2^p (d must be 1, so it doesn't need to be stored)
+
+--float (32-bit/4 byte)
+  0    00000000        00000000000000000000000
+  31  30     23       22                     0
+  s   8 bit exponent       23 bit fraction
+
+--Normalized Values:
+
+  E = exp-BIAS
+  BIAS = 2^7-1 = 127
+  M = 1 + f
+  f = 0.frac(sub22) ... frac(sub1)frac(sub0)
+
+--Denormalized Values: exp = 0
+
+  E = 1-BIAS
+  BIAS = 2^7-1 = 127
+  M = f
+  f = 0.frac(sub22) ... frac(sub1)frac(sub0)
+
+--Special Values: exp = 255
+
+  If frac == 0, value is +infinity if s = 0 and -infinity if s = 1
+  If frac != 0, value is NaN (not a number)
