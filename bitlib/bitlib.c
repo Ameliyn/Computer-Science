@@ -71,10 +71,27 @@ int copy_lsbit(int x) {
  * Max. # of operators: 40
  */
 int bit_count(int x) {
-  return (0xF & (x >> 28)) + (0xF & (x >> 24)) + (0xF & (x >> 20))
-    + (0xF & (x >> 16)) + (0xF & (x >> 12)) + (0xF & (x >> 8))
-    + (0xF & (x >> 4)) + (0xF & x); //22
-  /*return (0xFF & (x >> 24)) + (0xFF & (x >> 16)) + (0xFF & (x >> 8))
-    + (0xFF & x)*/
-  //parrallelism do things that change x
+  unsigned int result = x - (( x >> 1) & 0x55555555);
+  result = ((result >> 2) & 0x33333333) + (result & 0x33333333);
+  result = (((result >> 4) + result) & 0x0F0F0F0F);
+  result = (((result >> 8) + result) & 0x00FF00FF);
+  result = (((result >> 16) + result) & 0x0000FFFF);
+  return result;
+
+  //0x55555555 == 0x55 << 8 + 0x55 << 16 + 0x 55 << 24 + 0x55 << 32 + 0x55
+
+  //step 1 (add every two bits) (0+0 1+1 0+1 0+1 1+0 0+1 1+1 0+0)
+  // 0011 0101 1001 1100 - (0001 1010 1100 1110 & 0101 0101 0101 0101)
+  // 0011 0101 1001 1100 - 0001 0000 0100 0100
+  // 0010 0101 0101 1000  (0 2 1 1 1 1 2 0) (bits in each quarter byte)
+  //step 2 (add every set of two) (0+2 1+1 1+1 2+0)
+  // 0000 1001 0101 0110 & 0011 0011 0011 0011 + 0010 0101 0101 1000 & 0011 0011 0011 0011
+  // 0000 0001 0001 0010 + 0010 0001 0001 0000 = 0010 0010 0010 0010 (2 2 2 2)
+  //step 3 (add every set of four) (2+2 2+2)
+  //(0000 0010 0010 0010 + 0010 0010 0010 0010) & 0000 1111 0000 1111
+  // 0010 0100 0100 0100 & 0000 1111 0000 1111 = 0000 0100 0000 0100
+  //step 4 (add every set of eight) (4+4)
+  //(0000 0000 0000 0100 + 0000 0100 0000 0100) & 0000 0000 1111 1111
+  // 0000 0100 0000 1000 & 0000 0000 1111 1111 = 0000 0000 0000 1000 (8)
+  //End here because we're on a 16 bit number, but go one farther
 }

@@ -1,4 +1,5 @@
 #include "../FPToolkit.c"
+#include "M2d_matrix_toolsS.c"
 #define MAXOBJECTS 10
 #define MAXPTS 50000
 #define MAXPOLYS 30000
@@ -15,6 +16,21 @@ double grn[MAXOBJECTS][MAXPOLYS];
 double blu[MAXOBJECTS][MAXPOLYS];
 
 int scrnsize = 1000;
+
+
+void scale(int objNumber, double scalar){
+  for(int i = 0; i < numpoints[objNumber]; i++){
+      x[objNumber][i] *= scalar;
+      y[objNumber][i] *= scalar;
+    }
+}
+
+void transform(int objNumber, double xTRANS, double yTRANS){
+  for(int i = 0; i < numpoints[objNumber]; i++){
+    x[objNumber][i] += xTRANS;
+    y[objNumber][i] += yTRANS;
+  }
+}
 
 void center_object(int objNumber){
 
@@ -38,17 +54,11 @@ void center_object(int objNumber){
   
   if(xLen > yLen){
     double magnifier = (scrnsize * 0.625) / xLen;
-    for(int i = 0; i < numpoints[objNumber]; i++){
-      x[objNumber][i] *= magnifier;
-      y[objNumber][i] *= magnifier;
-    }
+    scale(objNumber, magnifier);
   }
   else{
     double magnifier = (scrnsize * 0.625) / yLen;
-    for(int i = 0; i < numpoints[objNumber]; i++){
-      x[objNumber][i] *= magnifier;
-      y[objNumber][i] *= magnifier;
-    }
+    scale(objNumber, magnifier);
   }
 
   //transform Object
@@ -63,12 +73,78 @@ void center_object(int objNumber){
   double xTRANS = (scrnsize / 2) - xCOM;
   double yTRANS = (scrnsize / 2) - yCOM;
   
-  for(int i = 0; i < numpoints[objNumber]; i++){
-    x[objNumber][i] += xTRANS;
-    y[objNumber][i] += yTRANS;
-  }
+  transform(objNumber, xTRANS, yTRANS);
   
 }
+
+void center_object_matrix(int objNumber){
+
+  double A[3][3];
+  double B[3][3];
+  M2d_make_identity(A);
+  M2d_make_identity(B);
+
+    
+  double xMax = x[objNumber][0];
+  double xMin = x[objNumber][0];
+  double yMax = y[objNumber][0];
+  double yMin = y[objNumber][0];
+  double xCOM = 0;
+  double yCOM = 0;
+
+  //transform Object
+  for(int i = 0; i < numpoints[objNumber]; i++){
+    xCOM += x[objNumber][i];
+    yCOM += y[objNumber][i];
+  }
+
+  xCOM = xCOM / numpoints[objNumber];
+  yCOM = yCOM / numpoints[objNumber];
+  
+  double xTRANS = -xCOM;
+  double yTRANS = -yCOM;
+  
+  M2d_make_translation(B,xTRANS,yTRANS);
+  M2d_mat_mult(A, B, A);
+
+  
+  //magnify object
+  for(int i = 1; i < numpoints[objNumber]; i++){
+    if(xMin > x[objNumber][i]) xMin = x[objNumber][i];
+    if(xMax < x[objNumber][i]) xMax = x[objNumber][i];
+    if(yMin > y[objNumber][i]) yMin = y[objNumber][i];
+    if(yMax < y[objNumber][i]) yMax = y[objNumber][i];
+  }
+  
+  double xLen = xMax - xMin;
+  double yLen = yMax - yMin;
+  double magnifier;
+  if(xLen > yLen){ magnifier = (scrnsize * 0.625) / xLen; }
+  else{ magnifier = (scrnsize * 0.625) / yLen; }
+  
+  M2d_make_scaling(B, magnifier, magnifier);
+  M2d_mat_mult(A, B, A);
+
+  //transform Object
+  for(int i = 0; i < numpoints[objNumber]; i++){
+    xCOM += x[objNumber][i];
+    yCOM += y[objNumber][i];
+  }
+
+  xCOM = xCOM / numpoints[objNumber];
+  yCOM = yCOM / numpoints[objNumber];
+  
+  xTRANS = (scrnsize / 2) - xCOM;
+  yTRANS = (scrnsize / 2) - yCOM;
+  
+  M2d_make_translation(B,xTRANS,yTRANS);
+  M2d_mat_mult(A, B, A);
+
+  M2d_mat_mult_points(x[objNumber], y[objNumber], A, x[objNumber], y[objNumber], numpoints[objNumber]); 
+}
+
+
+
 
 void load_files(int numFiles, char** fileNames){
 
@@ -104,6 +180,8 @@ void load_files(int numFiles, char** fileNames){
       
     }
     center_object(fileNumber);
+    //center_object_matrix(fileNumber);
+    
     fclose(f);
   }
   
@@ -125,23 +203,24 @@ void rotate_object(int objNumber, double rotation){
     x[objNumber][i] = (xZero*cos(rotation)) - (yZero*sin(rotation)) + (scrnsize / 2);
     y[objNumber][i] = (xZero*sin(rotation)) + (yZero*cos(rotation)) + (scrnsize / 2);
   }
-  
 }
 
-/*int dot_product(double m1[][], double m2[][][], int m1Length, int m2Length){
+//assumes object is centered to screen
+void rotate_object_matrix(int objNumber, double rotation){
 
-  double result;
-  for(int i = 0; i < m1Length; i++){
-    result = 0;
-    for(int j = 0; j < m2Length; j++){
+  double A[3][3];
+  double B[3][3];
+  M2d_make_identity(A);
+  M2d_make_translation(B, -scrnsize / 2, -scrnsize / 2);
+  M2d_mat_mult(A,B,A);
+  M2d_make_rotation(B, rotation);
+  M2d_mat_mult(A,B,A);
+  M2d_make_translation(B, scrnsize / 2, scrnsize / 2);
+  M2d_mat_mult(A,B,A);
+  M2d_mat_mult_points(x[objNumber], y[objNumber], A, x[objNumber],
+		      y[objNumber], numpoints[objNumber]);
 
-
-
-    }
-
-  }
-
-}*/
+}
 
 void draw_object(int input)
 {
@@ -160,7 +239,6 @@ void draw_object(int input)
 
     G_rgb(red[input][i],grn[input][i],blu[input][i]);
     G_fill_polygon(xp,yp,psize[input][i]);
-    
   }  
 
 }
@@ -184,12 +262,12 @@ int main(int argc, char **argv){
     }
     if(input == ',')
     {
-      rotate_object(previousObj, M_PI/32);
+      rotate_object_matrix(previousObj, M_PI/32);
       draw_object(previousObj);
     }
     else if(input == '.')
     {
-      rotate_object(previousObj, -M_PI/32);
+      rotate_object_matrix(previousObj, -M_PI/32);
       draw_object(previousObj);
     }
     
