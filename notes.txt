@@ -217,14 +217,14 @@ IEEE floating point form:
   E = exp-BIAS
   BIAS = 2^7-1 = 127
   M = 1 + f
-  f = 0.frac(sub22) ... frac(sub1)frac(sub0)
+  f = 0.frac(sub22)...frac(sub1)frac(sub0)(count from the right and put over 256) (or left and put to -1 power_
 
 --Denormalized Values: exp = 0
 
   E = 1-BIAS
   BIAS = 2^7-1 = 127
   M = f
-  f = 0.frac(sub22) ... frac(sub1)frac(sub0)
+  f = 0.frac(sub22)...frac(sub1)frac(sub0)(count from the right and put over 256) (or left and put to -1 power_
 
 --Special Values: exp = 255
 
