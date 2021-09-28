@@ -17,7 +17,7 @@ double blu[MAXOBJECTS][MAXPOLYS];
 
 int scrnsize = 1000;
 
-
+/*
 void scale(int objNumber, double scalar){
   for(int i = 0; i < numpoints[objNumber]; i++){
       x[objNumber][i] *= scalar;
@@ -75,7 +75,7 @@ void center_object(int objNumber){
   
   transform(objNumber, xTRANS, yTRANS);
   
-}
+  }*/
 
 void center_object_matrix(int objNumber){
 
@@ -126,25 +126,14 @@ void center_object_matrix(int objNumber){
   M2d_mat_mult(A, B, A);
 
   //transform Object
-  for(int i = 0; i < numpoints[objNumber]; i++){
-    xCOM += x[objNumber][i];
-    yCOM += y[objNumber][i];
-  }
-
-  xCOM = xCOM / numpoints[objNumber];
-  yCOM = yCOM / numpoints[objNumber];
-  
-  xTRANS = (scrnsize / 2) - xCOM;
-  yTRANS = (scrnsize / 2) - yCOM;
+  xTRANS = (scrnsize / 2);
+  yTRANS = (scrnsize / 2);
   
   M2d_make_translation(B,xTRANS,yTRANS);
   M2d_mat_mult(A, B, A);
 
   M2d_mat_mult_points(x[objNumber], y[objNumber], A, x[objNumber], y[objNumber], numpoints[objNumber]); 
 }
-
-
-
 
 void load_files(int numFiles, char** fileNames){
 
@@ -179,15 +168,15 @@ void load_files(int numFiles, char** fileNames){
       fscanf(f,"%lf %lf %lf",&red[fileNumber][i],&grn[fileNumber][i],&blu[fileNumber][i]);
       
     }
-    center_object(fileNumber);
-    //center_object_matrix(fileNumber);
+    //center_object(fileNumber);
+    center_object_matrix(fileNumber);
     
     fclose(f);
   }
   
 }
 
-
+/*
 void rotate_object(int objNumber, double rotation){
   
   //xNew = xOld*cos(rot) - yOld*sin(rotation)
@@ -203,7 +192,7 @@ void rotate_object(int objNumber, double rotation){
     x[objNumber][i] = (xZero*cos(rotation)) - (yZero*sin(rotation)) + (scrnsize / 2);
     y[objNumber][i] = (xZero*sin(rotation)) + (yZero*cos(rotation)) + (scrnsize / 2);
   }
-}
+  }*/
 
 //assumes object is centered to screen
 void rotate_object_matrix(int objNumber, double rotation){
