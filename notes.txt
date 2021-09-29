@@ -1,3 +1,4 @@
+Linux Shit:
 ---- ls -> list files
 ---- cd -> change directory
 ---- *command* & -> multithread (allow for use of console while in emacs)
@@ -241,5 +242,53 @@ IEEE floating point form:
   ===================
   (-1)^(s1^s2) * (M1 * M2) * 2^(E1+E2)
          XOR    If (M1*M2) > 2, add 1 to E1+E2
-	 
+
+
+Memory and Storage:
+--BigEndian (most significant bit first)
+--LittleEndian (least significant bit first) (intel architecture is this)
+--90-99% of the time the endian that your computer uses does NOT MATTER TO US
+
+
+Instructions Architecture and Specifications:
+--Processor State:
+  --Program Counter (PC | %rip)
+  --Register File (16 64 bit)
+  --Condition code
+    Z (branch)
+    S (set to 1 when result is negative)
+    C (carry) (signed)
+    O (overflow) (unsigned)
+  --instruction registers
+    |-------------(64bit)------------------|
+    	        |---------(32bits)---------|
+	                  |----(16 bits)---|
+    (64bit)     (32 bit)  (16 bits)  (8 bit)
+      %rax        %eax       %ax       %al
+      %rbx        %ebx	     %bl       %bl
+      %rcx        %ecx	     %cx       %cl     
+      %rdx        %edx	     %dx       %dl
+      %rsi        %esi	     %si       %sil
+      %rdi        %edi	     %di       %dil
+      %rvp        %evp	     %vp       %bpl
+      %rsp        %esp	     %sp       %spl
+      %r8	  %r8d	     %r8w      %r8b	   
+      %r9	  %r9d	     %r9w      %r9b
+      ...
+      %r15	  %r15d      %r15w     %r15b
+
+    Byte(b) word(w) double word(d) quad word(q)
+
+--Format of instructions
+  operation source2 source1/destination (op src2 src1/dest)
+  src1 = src1 op src2
   
+--Operand specifications that live inside instructions encoding
+
+  IMMEDIATE
+  REGISTER
+  MEMORY
+
+
+--intel architecture
+  Instructions can be between 1 and 15byte length
