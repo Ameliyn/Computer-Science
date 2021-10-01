@@ -198,18 +198,22 @@ int good(double lineOne[], double lineTwo[], double point[]){
   //find center
   
   if(center[1] > lineOne[1] && center[1] > lineTwo[1]){ //if line below
+    if(point[1] > lineOne[1] || point[1] > lineTwo[1]) return 1;
   }
   else if(center[1] < lineOne[1] && center[1] < lineTwo[1]){ //if line above
+    if(point[1] < lineOne[1] || point[1] < lineTwo[1]) return 1;
   }
   else if(center[0] > lineOne[0] && center[0] > lineTwo[0]){ //if line on left
+    if(point[0] > lineOne[0] || point[0] > lineTwo[0]) return 1;
   }
   else if(center[0] < lineOne[0] && center[0] < lineTwo[0]){ //if line on right
+    if(point[0] < lineOne[0] || point[0] < lineTwo[0]) return 1;
   }
-	
-  return 1;
+  //handle triangles
+  return 0;
 }
 
-void cut_poly(double xp[], double yp[], int numpoints, double newxp[], double newyp[]){
+int cut_poly(double xp[], double yp[], int numpoints, double newxp[], double newyp[]){
 
   double intOne[2], intTwo[2];
   double curOne[2], curTwo[2];
@@ -251,7 +255,7 @@ void cut_poly(double xp[], double yp[], int numpoints, double newxp[], double ne
       //g - b keep intersect
       //b - g keep intersect, keep g
       //b - b keep nothing
-      some logic
+      //some logic
 
       int goodOne = good(intOne, intTwo, curOne);
       int goodTwo = good(intOne, intTwo, curTwo);
@@ -262,14 +266,14 @@ void cut_poly(double xp[], double yp[], int numpoints, double newxp[], double ne
       }
       else if(goodOne && !goodTwo){ //if 1 good
 	double intersection[2];
-	intersect_2_lines(intOne, intTwo, curTwo, curOne, intersection[2]);
+	intersect_2_lines(intOne, intTwo, curTwo, curOne, intersection);
         newxp[newsize] = intersection[0];
         newyp[newsize] = intersection[1];
         newsize++;
       }
       else if(!goodOne && goodTwo){//if 2 good
         double intersection[2];
-	intersect_2_lines(intOne, intTwo, curTwo, curOne, intersection[2]);
+	intersect_2_lines(intOne, intTwo, curTwo, curOne, intersection);
         newxp[newsize] = intersection[0];
         newyp[newsize] = intersection[1];
         newsize++;
@@ -277,10 +281,12 @@ void cut_poly(double xp[], double yp[], int numpoints, double newxp[], double ne
         newyp[newsize] = yp[j];
         newsize++;
       }
-      else{//else both bad}
+      else{//else both bad
+      }
     }
-
+   
   }
+   return newsize;
 
 }
 
@@ -303,17 +309,18 @@ void draw_object(int input)
       yp[j] = y[input][cont[input][i][j]];
     }
 
-    //if(clipnumpoints > 0) newsize = cut_poly(xp, yp, psize[input][i], newxp, newyp);
+    if(clipnumpoints > 0)
+      newsize = cut_poly(xp, yp, psize[input][i], newxp, newyp);
     
     G_rgb(red[input][i],grn[input][i],blu[input][i]);
-    //G_fill_polygon(newxp,newyp,newsize);
+    G_fill_polygon(newxp,newyp,newsize);
     G_fill_polygon(xp,yp,psize[input][i]);
   }  
 
-  if(clipnumpoints > 0){
+  /*if(clipnumpoints > 0){
       G_rgb(0,0.3,0.4);
       G_fill_polygon(clipX,clipY, clipnumpoints);
-    }
+      }*/
 }
 
 //No grid, no snaps.
