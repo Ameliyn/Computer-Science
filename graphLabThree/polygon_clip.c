@@ -286,7 +286,7 @@ int cut_poly(double xp[], double yp[], int numpoints, double newxp[], double new
     }
    
   }
-   return newsize;
+  return newsize;
 
 }
 
@@ -309,12 +309,16 @@ void draw_object(int input)
       yp[j] = y[input][cont[input][i][j]];
     }
 
-    if(clipnumpoints > 0)
+    if(clipnumpoints > 0){
       newsize = cut_poly(xp, yp, psize[input][i], newxp, newyp);
-    
-    G_rgb(red[input][i],grn[input][i],blu[input][i]);
-    G_fill_polygon(newxp,newyp,newsize);
-    G_fill_polygon(xp,yp,psize[input][i]);
+      G_rgb(red[input][i],grn[input][i],blu[input][i]);
+      G_fill_polygon(newxp,newyp,newsize);
+    }
+    else
+    {
+      G_rgb(red[input][i],grn[input][i],blu[input][i]);
+      G_fill_polygon(xp,yp,psize[input][i]);
+    }
   }  
 
   /*if(clipnumpoints > 0){

@@ -17,6 +17,10 @@ Linux Shit:
 ----"|" takes the output of the previous command and pipes it through another command
 ----"man" brings us the manual for a command
 ----"tar xfz *filename*.tgz" untar file (similar to a zip file, but different?)
+----"od -t x1 mstore.o | less" takes binary file and makes it 'readable' in hex
+    od = object dump (a way to inspect and look at object files
+----"objdump -d mstore.o" inspect and deconstruct binary file (a bit)
+    53 = push | 48 89 = mov
 
 
 C programming shit:
