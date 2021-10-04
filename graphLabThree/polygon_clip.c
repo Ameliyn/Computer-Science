@@ -179,6 +179,13 @@ int intersect_2_lines (double A[2], double B[2],
   
 }
 
+double distance(double pointA[], double pointB[]){
+  //sqrt((x2-x1)^2 + (y2-y1)^2)
+  return sqrt((pointB[0] - pointA[0])*(pointB[0] - pointA[0]) +
+	      (pointB[1] - pointA[1])*(pointB[1] - pointA[1]));
+
+}
+
 //checks if point is inside of polygon
 int good(double lineOne[], double lineTwo[], double point[]){
   
@@ -196,7 +203,15 @@ int good(double lineOne[], double lineTwo[], double point[]){
   center[0] = (maxX + minX) / 2;
   center[1] = (maxY + minY) / 2;
   //find center
-  
+
+  //try distance method
+  double intersection[2];
+  intersect_2_lines(lineOne, lineTwo, center, point, intersection);
+  if(distance(center,point) < distance(center,intersection)) return 1;
+  else return 2;
+
+  //try above/below method
+  /*
   if(center[1] > lineOne[1] && center[1] > lineTwo[1]){ //if line below
     if(point[1] > lineOne[1] || point[1] > lineTwo[1]) return 1;
   }
@@ -210,7 +225,7 @@ int good(double lineOne[], double lineTwo[], double point[]){
     if(point[0] < lineOne[0] || point[0] < lineTwo[0]) return 1;
   }
   //handle triangles
-  return 0;
+  return 0;*/
 }
 
 int cut_poly(double xp[], double yp[], int numpoints, double newxp[], double newyp[]){
@@ -301,7 +316,7 @@ void draw_object(int input)
   double newxp[numpoints[input]*2];
   double newyp[numpoints[input]*2];
   int newsize;
-  
+
   for(int i = 0; i < numpolys[input]; i++){
 
     for(int j = 0; j < psize[input][i]; j++){
@@ -313,18 +328,15 @@ void draw_object(int input)
       newsize = cut_poly(xp, yp, psize[input][i], newxp, newyp);
       G_rgb(red[input][i],grn[input][i],blu[input][i]);
       G_fill_polygon(newxp,newyp,newsize);
+      G_rgb(1,0,0);
+      G_polygon(clipX,clipY,clipnumpoints);
     }
     else
     {
       G_rgb(red[input][i],grn[input][i],blu[input][i]);
       G_fill_polygon(xp,yp,psize[input][i]);
     }
-  }  
-
-  /*if(clipnumpoints > 0){
-      G_rgb(0,0.3,0.4);
-      G_fill_polygon(clipX,clipY, clipnumpoints);
-      }*/
+  }
 }
 
 //No grid, no snaps.
@@ -360,9 +372,6 @@ int click_and_save(double xp[], double yp[]){
 int clip_screen(){
 
   clipnumpoints = click_and_save(clipX, clipY);
-  G_rgb(0.2,0.4,0);
-  G_fill_polygon(clipX, clipY, clipnumpoints);
-
 }
 
 int main(int argc, char **argv){
@@ -395,7 +404,7 @@ int main(int argc, char **argv){
     
     input = G_wait_key();
     if(input == 'q' || input == 'Q'){break;}
-    if(input == 's' || input == 'S'){clip_screen();}
+    if(input == 's' || input == 'S'){clip_screen(); draw_object(previousObj);}
     
   }while(1);
 
