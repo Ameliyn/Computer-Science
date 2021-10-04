@@ -154,7 +154,7 @@ Bitwise and Signed/Unsigned shit:
   1111 1011 | 1011 0011 == 1111 1011
 --~ operator
   ~1101 1111 == 0010 0000
---^ operator (XOR operator)
+--^ operator (XOR operator) (XOR yourself sets register to 0)
   1111 1101 ^ 1001 1001 == 0110 0100
 --! operator
   0 == 1
@@ -283,6 +283,8 @@ Instructions Architecture and Specifications:
 
     Byte(b) word(w) double word(d) quad word(q)
 
+--The stack pointer (%rsp)
+
 --Format of instructions
   operation source2 source1/destination (op src2 src1/dest)
   src1 = src1 op src2
@@ -293,6 +295,67 @@ Instructions Architecture and Specifications:
   REGISTER
   MEMORY
 
-
 --intel architecture
   Instructions can be between 1 and 15byte length
+
+Assembly operand specifiers:
+"%rdi" register location
+"(%rdi)" value at register rdi
+"$0xf00d" immediate literal value
+"$20(%rdi)" value at literal offset of memory (M[$20+%rdi])
+"(%rdi,%rsi)" value at register offset of memory (M[%rdi + %rsi])
+"$20(%rdi,%rsi)" value at register and immediate offset of memory (M[$20 + %rdi + %rsi])
+"(,%rdi,s)" value at register scaled (M[%rdi * s])
+"$20(,%rdi,s)" value at register scaled plus immediate(M[$20 + %rdi * s])
+"(%rsi,%rdi,s)" value at register scaled plus register (M[%rsi + %rdi * s])
+"$20(%rsi,%rdi,s)" value at register scaled plus register and immediate(M[$20 + %rsi + %rdi * s])
+
+
+Tools CS Assembly will be using over the next few weeks:
+"Instruction set Architecture"
+Three types:
+--Computation, Accessing Memory, Changing control flow
+--Names:
+  "mov 1,2" "movq 1,2" (move 1 into 2) (q for move quad) 
+Acronyms Alain is saying:
+--RISC: Reduced instruction set computer
+--CISC: Complex instruction set computer
+--ARM:
+--MIPS:
+--SPARK:
+--SUN: (bought by ORACLE and developed JAVA)
+--KFC:
+
+Tools:
+| (pipe, take output of first command and feed it into second command)
+cc (c compiler)
+"-fcf-protection-none" (helps with some sort of cybersecurity threat, to be talked about)
+"-o name"
+"mstore.c main.c" (two c files as input)
+"-0g" (optimize my code please and thank you)
+"-g" (add more debugging symbols to the program) (helps with gnu(gdb))
+
+objdump (takes object/binary file and turns it back into assembly or understandable file)
+"-d" disassemble (object file and give me something usable)
+Does not try to give c code from object file
+Returns readable file:
+--location on left (in binary)
+--machine instructions in middle
+--keywords on right along with memory registers
+"-f" (give summary):
+--file format, architecture, some flags, start address
+--Flags:
+  DYNAMIC (some libraries linked, others not)
+  D_PAGED (includes some debugging stuffs to make it more readable (identifiers))
+"-c" (preprocess, compiler, assembler, but no linking)
+
+"gdb progName"(gnu debugger)
+"disassemble labelName" (gives addresses and instructions and registers)
+"x/14xb labelName" (gives byte code at given location)
+"break main" (add breakpoint(debugpoint) at main, if run program, stop at main)
+"list" (give some information about sourcecode)
+"where" (where are we running)
+"next" || "n" (step forward (run whole next line)) (shows line to be executed)
+"print d" (prints what is in variable d)
+"help" (all of what you can do)
+"step" (steps into line (if function call goes to top of function, etc))
