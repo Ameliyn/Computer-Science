@@ -187,120 +187,113 @@ double distance(double pointA[], double pointB[]){
 }
 
 //checks if point is inside of polygon
-int good(double lineOne[], double lineTwo[], double point[]){
+int good(double P[], double intOne[], double intTwo[]){
   
   double center[2];
-  double minX = clipX[0];
-  double minY = clipY[0];
   double maxX = clipX[0];
   double maxY = clipY[0];
   for(int i = 1; i < clipnumpoints; i++){
-    if(clipX[i] > maxX) maxX = clipX[i];
-    if(clipY[i] > maxY) maxY = clipY[i];
-    if(clipX[i] < minX) minX = clipX[i];
-    if(clipY[i] < minY) minY = clipY[i];  
+    maxX += clipX[i];
+    maxY += clipY[i];
   }
-  center[0] = (maxX + minX) / 2;
-  center[1] = (maxY + minY) / 2;
-  //find center
+  center[0] = maxX / clipnumpoints;
+  center[1] = maxY / clipnumpoints;
 
-  //try distance method
-  double intersection[2];
-  intersect_2_lines(lineOne, lineTwo, center, point, intersection);
-  if(distance(center,point) < distance(center,intersection)) return 1;
-  else return 2;
-
-  //try above/below method
-  /*
-  if(center[1] > lineOne[1] && center[1] > lineTwo[1]){ //if line below
-    if(point[1] > lineOne[1] || point[1] > lineTwo[1]) return 1;
+  double a, b, c, centerSign, pointSign;
+  int j = 0;
+  a = intTwo[1] - intOne[1];
+  b = intTwo[0] - intOne[0];
+  c = (a*intOne[0] - b*intOne[1]);
+  centerSign = center[0] * a - center[1] * b - c;
+  pointSign = P[0] * a - P[1] * b - c;
+  if(pointSign == 0) return 1;
+  if(((centerSign < 0 && pointSign < 0) || (centerSign > 0 && pointSign > 0))){
+    return 1;
   }
-  else if(center[1] < lineOne[1] && center[1] < lineTwo[1]){ //if line above
-    if(point[1] < lineOne[1] || point[1] < lineTwo[1]) return 1;
-  }
-  else if(center[0] > lineOne[0] && center[0] > lineTwo[0]){ //if line on left
-    if(point[0] > lineOne[0] || point[0] > lineTwo[0]) return 1;
-  }
-  else if(center[0] < lineOne[0] && center[0] < lineTwo[0]){ //if line on right
-    if(point[0] < lineOne[0] || point[0] < lineTwo[0]) return 1;
-  }
-  //handle triangles
-  return 0;*/
+  else return 0;
 }
 
 int cut_poly(double xp[], double yp[], int numpoints, double newxp[], double newyp[]){
 
   double intOne[2], intTwo[2];
   double curOne[2], curTwo[2];
-  int newsize = 0;
+  int goodArray[numpoints*2];
+  int newsize = numpoints;
+  
   for(int i = 0; i < clipnumpoints; i++){
 
     //find current intersection line
+    intOne[0] = clipX[i];
+    intOne[1] = clipY[i];
     if(i + 1 == clipnumpoints){
-      intOne[0] = clipX[i];
-      intOne[1] = clipY[i];
       intTwo[0] = clipX[0];
       intTwo[1] = clipY[0];
     }
     else{
-      intOne[0] = clipX[i];
-      intOne[1] = clipY[i];
       intTwo[0] = clipX[i+1];
       intTwo[1] = clipY[i+1];
     }
 
-    
     for(int j = 0; j < numpoints; j++){
-
-      //find current line
-      if(j + 1 == numpoints){
-	curOne[0] = xp[j];
-	curOne[1] = yp[j];
+      curOne[0] = xp[j];
+      curOne[1] = yp[j];
+      goodArray[j] = good(curOne, intOne, intTwo);
+    }
+    
+    int goodOne, goodTwo;
+    int k = 0;
+    for(int j = 0; j < numpoints; j++){
+      
+      curOne[0] = xp[j];
+      curOne[1] = yp[j];
+      if(j+1 == numpoints){
 	curTwo[0] = xp[0];
 	curTwo[1] = yp[0];
       }
       else{
-	curOne[0] = xp[j];
-	curOne[1] = yp[j];
 	curTwo[0] = xp[j+1];
 	curTwo[1] = yp[j+1];
       }
-
-      //g - g keep g
-      //g - b keep intersect
-      //b - g keep intersect, keep g
-      //b - b keep nothing
-      //some logic
-
-      int goodOne = good(intOne, intTwo, curOne);
-      int goodTwo = good(intOne, intTwo, curTwo);
+      
+      goodOne = goodArray[j];
+      if(j + 1 == numpoints)
+	goodTwo = goodArray[0];
+      else
+	goodTwo = goodArray[j+1];
+      
       if(goodOne && goodTwo){//if both good
-        newxp[newsize] = xp[j];
-        newyp[newsize] = yp[j];
-        newsize++;
+        newxp[k] = curTwo[0];
+	newyp[k] = curTwo[1];
+	k++;
       }
-      else if(goodOne && !goodTwo){ //if 1 good
+      else if(goodOne && !goodTwo){//if 1 good
 	double intersection[2];
-	intersect_2_lines(intOne, intTwo, curTwo, curOne, intersection);
-        newxp[newsize] = intersection[0];
-        newyp[newsize] = intersection[1];
-        newsize++;
+	intersect_2_lines(intOne, intTwo, curOne, curTwo, intersection);
+        newxp[k] = intersection[0];
+        newyp[k] = intersection[1];
+	k++;
       }
       else if(!goodOne && goodTwo){//if 2 good
         double intersection[2];
-	intersect_2_lines(intOne, intTwo, curTwo, curOne, intersection);
-        newxp[newsize] = intersection[0];
-        newyp[newsize] = intersection[1];
-        newsize++;
-	newxp[newsize] = xp[j];
-        newyp[newsize] = yp[j];
-        newsize++;
+	intersect_2_lines(intOne, intTwo, curOne, curTwo, intersection);
+        newxp[k] = intersection[0];
+        newyp[k] = intersection[1];
+        k++;
+	newxp[k] = curTwo[0];
+        newyp[k] = curTwo[1];
+        k++;
       }
-      else{//else both bad
-      }
+    }//end for j
+
+    newsize = k;
+    numpoints = k;
+    for(int j = 0; j < newsize; j++){
+      xp[j] = newxp[j];
+      yp[j] = newyp[j];
     }
-   
-  }
+    
+  }//end for i
+
   return newsize;
 
 }
@@ -311,14 +304,14 @@ void draw_object(int input)
   G_rgb(0,0,0);
   G_clear();
 
-  double xp[numpoints[input]];
-  double yp[numpoints[input]];
+  double xp[numpoints[input]*2];
+  double yp[numpoints[input]*2];
   double newxp[numpoints[input]*2];
   double newyp[numpoints[input]*2];
   int newsize;
 
   for(int i = 0; i < numpolys[input]; i++){
-
+    
     for(int j = 0; j < psize[input][i]; j++){
       xp[j] = x[input][cont[input][i][j]];
       yp[j] = y[input][cont[input][i][j]];
@@ -328,8 +321,6 @@ void draw_object(int input)
       newsize = cut_poly(xp, yp, psize[input][i], newxp, newyp);
       G_rgb(red[input][i],grn[input][i],blu[input][i]);
       G_fill_polygon(newxp,newyp,newsize);
-      G_rgb(1,0,0);
-      G_polygon(clipX,clipY,clipnumpoints);
     }
     else
     {
