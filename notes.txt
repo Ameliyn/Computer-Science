@@ -281,7 +281,7 @@ Instructions Architecture and Specifications:
       ...
       %r15	  %r15d      %r15w     %r15b
 
-    Byte(b) word(w) double word(d) quad word(q)
+    Byte(b) word(w) double word(d(l)) quad word(q)
 
 --The stack pointer (%rsp)
 
@@ -316,6 +316,22 @@ Tools CS Assembly will be using over the next few weeks:
 Three types:
 --Computation, Accessing Memory, Changing control flow
 --Names:
+  mov instruction:
+  %rax = 0xaaaaaaaaaaaaaaaa
+  %rdi = 0xbbbbccccddddeeff
+  movb,movw,movl,movq (8, 16, 32, 64)
+  mov src, dest
+  movz zero extend
+  --movzbw (change the word to 0s and move in the byte (keep the rest of the register the same))
+    movzbw %dil, %ax -->> %rax = aaaaaaaaaaaa00ff
+    movzwl %di, %eax -->> %rax = 000000000000eeff (different because moving into 32bit register)
+    movzbq == movzbl (movzbq doesnt exist because the quad is always zeroed when moving into 32bit register, BUT
+                      it can exist if moving into a 64bit register)
+  movs sign extend
+  --movsbw (sign extend the word from the byte (extend from bit 8 through bit 16))
+    movsbw %dil, %ax -->> %rax = aaaaaaaaaaaaffff (sign extend from bit 8 through bit 16)
+    movsbq %dil, %rax -->> %rax = ffffffffffffffff (sign extend from bit 8 through bit 64)
+    movswl %di, %eax -->> %rax = 00000000ffffeeff (sign extend from bit 16 through bit 32, but clear 64-32)
   "mov 1,2" "movq 1,2" (move 1 into 2) (q for move quad) 
 Acronyms Alain is saying:
 --RISC: Reduced instruction set computer
