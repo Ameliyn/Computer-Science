@@ -310,6 +310,11 @@ void draw_object(int input)
   double newyp[numpoints[input]*2];
   int newsize;
 
+  if(clipnumpoints > 0){
+  G_rgb(0.1,0.1,0.1);
+  G_fill_polygon(clipX,clipY,clipnumpoints);
+  }
+  
   for(int i = 0; i < numpolys[input]; i++){
     
     for(int j = 0; j < psize[input][i]; j++){
