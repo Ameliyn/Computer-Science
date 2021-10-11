@@ -281,7 +281,7 @@ Instructions Architecture and Specifications:
       ...
       %r15	  %r15d      %r15w     %r15b
 
-    Byte(b) word(w) double word(d(l)) quad word(q)
+    quad word(q) doubleWord(d(l)) word(w) byte (b)
 
 --The stack pointer (%rsp)
 
