@@ -268,12 +268,12 @@ Instructions Architecture and Specifications:
     	        |---------(32bits)---------|
 	                  |----(16 bits)---|
     (64bit)     (32 bit)  (16 bits)  (8 bit)
-      %rax        %eax       %ax       %al
+      %rax        %eax       %ax       %al    (return value)
       %rbx        %ebx	     %bl       %bl
       %rcx        %ecx	     %cx       %cl     
       %rdx        %edx	     %dx       %dl
       %rsi        %esi	     %si       %sil
-      %rdi        %edi	     %di       %dil
+      %rdi        %edi	     %di       %dil   (first argument)
       %rvp        %evp	     %vp       %bpl
       %rsp        %esp	     %sp       %spl
       %r8	  %r8d	     %r8w      %r8b	   
@@ -310,6 +310,23 @@ Assembly operand specifiers:
 "(%rsi,%rdi,s)" value at register scaled plus register (M[%rsi + %rdi * s])
 "$20(%rsi,%rdi,s)" value at register scaled plus register and immediate(M[$20 + %rsi + %rdi * s])
 
+The Stack(tm):
+"last in first out" paridigm
+Largely handles function calls
+"pushq S" (move the stack pointer to an empty spot and fill with S)
+  R[%rsp] <- R[%rsp] - 8
+  M[R[%rsp]] <- S
+"popq D" (Fill D with current latest stack pointer and move stack pointer back one slot (pop it))
+  D <- M[R[%rsp]]
+  R[%rsp] <- R[%rsp] + 8
+
+
+Assembly Code Specifications:
+Pointers in C are memory addresses
+--Derferencing a pointer
+  Copy pointer to register
+  Use register with inderect operand form ( "(%rdi)" )
+Local Variables are often kept in registers rather than memory (registers accessed quicker)
 
 Tools CS Assembly will be using over the next few weeks:
 "Instruction set Architecture"
@@ -317,6 +334,8 @@ Three types:
 --Computation, Accessing Memory, Changing control flow
 --Names:
   mov instruction:
+  Source can be immediate, register, or memory. Destination must be register or memory.
+  Memory is exclusive (both can't be memory).
   %rax = 0xaaaaaaaaaaaaaaaa
   %rdi = 0xbbbbccccddddeeff
   movb,movw,movl,movq (8, 16, 32, 64)
@@ -332,7 +351,34 @@ Three types:
     movsbw %dil, %ax -->> %rax = aaaaaaaaaaaaffff (sign extend from bit 8 through bit 16)
     movsbq %dil, %rax -->> %rax = ffffffffffffffff (sign extend from bit 8 through bit 64)
     movswl %di, %eax -->> %rax = 00000000ffffeeff (sign extend from bit 16 through bit 32, but clear 64-32)
-  "mov 1,2" "movq 1,2" (move 1 into 2) (q for move quad) 
+  "mov 1,2" "movq 1,2" (move 1 into 2) (q for move quad)
+
+  "pushq S" (move the stack pointer to an empty spot and fill with S)
+    R[%rsp] <- R[%rsp] - 8
+    M[R[%rsp]] <- S
+  "popq D" (Fill D with current latest stack pointer and move stack pointer back one slot (pop it))
+    D <- M[R[%rsp]]
+    R[%rsp] <- R[%rsp] + 8
+
+  Arithmetic Assembly Operators
+    Source can be immediate, register, or memory. Destination must be register or memory.
+    Memory is exclusive (both can't be memory).
+    "add S D" ==> D += S ("add S to D")
+    "sub S D" ==> D -= S (careful! Not commutative, D = D - S "subtract S from D")
+    "imul S D" ==> D *= S ("Multiply S to D")
+    "inc D" ==> D++
+    "dec D" ==> D--
+    "neg D" ==> D *= -1
+    "not D" ==> D = ~D
+    "and S D" ==> D = D & S
+    "or S D" ==> D = D | S
+    "xor S D" ==> D = D ^ s
+    Shift "k" can be an immediate or %cl
+    "sal k D" ==> D << k (arithmetic shift) (SPECIAL: DOES THE SAME AS "shl"; fill with 0s)
+    "shl k D" ==> D << k (logical shift) (fill with 0s)
+    "sar k D" ==> D >> k (arithmetic shift) (fill with 1s)
+    "slr k D" ==> D >> k (logical shift) (fill with 0s)
+
 Acronyms Alain is saying:
 --RISC: Reduced instruction set computer
 --CISC: Complex instruction set computer
@@ -375,3 +421,11 @@ Returns readable file:
 "print d" (prints what is in variable d)
 "help" (all of what you can do)
 "step" (steps into line (if function call goes to top of function, etc))
+
+
+
+Colors for Ross:
+There are two warring chess factions, white and black. Each color is aligned with one side.
+Red, Orange, Yellow are with White; Blue, Green, Purple are with Black
+GRAY ARE THE MEDIATORS LMAO They wish for pure balance xD
+The eternal conflict continues :) <3
