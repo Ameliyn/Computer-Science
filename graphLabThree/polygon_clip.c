@@ -1,5 +1,5 @@
 #include "../FPToolkit.c"
-#include "M2d_matrix_toolsS.c"
+#include "../M2d_matrix_toolsS.c"
 #define MAXOBJECTS 10
 #define MAXPTS 50000
 #define MAXPOLYS 30000
@@ -177,13 +177,6 @@ int intersect_2_lines (double A[2], double B[2],
     return 1;
   }
   
-}
-
-double distance(double pointA[], double pointB[]){
-  //sqrt((x2-x1)^2 + (y2-y1)^2)
-  return sqrt((pointB[0] - pointA[0])*(pointB[0] - pointA[0]) +
-	      (pointB[1] - pointA[1])*(pointB[1] - pointA[1]));
-
 }
 
 //checks if point is inside of polygon
@@ -365,11 +358,6 @@ int click_and_save(double xp[], double yp[]){
   
 }
 
-int clip_screen(){
-
-  clipnumpoints = click_and_save(clipX, clipY);
-}
-
 int main(int argc, char **argv){
 
   clipnumpoints = 0;
@@ -400,7 +388,10 @@ int main(int argc, char **argv){
     
     input = G_wait_key();
     if(input == 'q' || input == 'Q'){break;}
-    if(input == 's' || input == 'S'){clip_screen(); draw_object(previousObj);}
+    if(input == 's' || input == 'S'){
+      clipnumpoints = click_and_save(clipX, clipY);
+      draw_object(previousObj);
+    }
     
   }while(1);
 
