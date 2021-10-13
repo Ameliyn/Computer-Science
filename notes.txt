@@ -360,6 +360,8 @@ Three types:
     D <- M[R[%rsp]]
     R[%rsp] <- R[%rsp] + 8
 
+  "lea (%rdi, %rsi, 8), %rax" lea ==> load effective address loads the address, not the value (mov would load the value)
+
   Arithmetic Assembly Operators
     Source can be immediate, register, or memory. Destination must be register or memory.
     Memory is exclusive (both can't be memory).
@@ -423,9 +425,59 @@ Returns readable file:
 "step" (steps into line (if function call goes to top of function, etc))
 
 
+Creating Assembly Code:
+FIRST FUNCTION:
+long scale(long x, long y, long z){
+     long t = x + 4 * y + 12 * z;
+     return t;
+}
+This is unoptimized assembly gives:
+
+{
+	.globl scale
+scale:
+	xor %rax, %rax
+	add %rdi, %rax
+
+	mov %rsi, %r10
+	imul $0x4,%r10
+	add %r10, %rax
+
+	mov %rdx, %r11
+	imul $0xc, %r11
+	add %r11, %rax
+
+	ret
+}
+
+NEXT FUNCTION:
+long f(long a[10], int i){
+     return a[i];
+}
+
+{
+	.globl f
+f:
+	imul $8, %rsi
+	add %rsi, %rdi
+	mov (%rsi), %rax
+	ret
+}
+Optimizing the above returns:
+{
+	.globl f
+f:
+	mov (%rdi, %rsi, 8), %rax
+	ret
+}
+
+What if we wanted the address? Use lea instead of mov! (it's the same thing, but it stores the address not the value)
+
+RANDOM OTHER SHIT:
 
 Colors for Ross:
 There are two warring chess factions, white and black. Each color is aligned with one side.
 Red, Orange, Yellow are with White; Blue, Green, Purple are with Black
 GRAY ARE THE MEDIATORS LMAO They wish for pure balance xD
 The eternal conflict continues :) <3
+

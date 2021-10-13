@@ -1,0 +1,3 @@
+xor %rax, %rax
+imul $0xc, (%rdx)
+add %rax, (%rdx)
