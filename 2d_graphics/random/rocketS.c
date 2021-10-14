@@ -73,11 +73,11 @@ int main()
 
     G_wait_click(a);
     G_rgb(1,1,0);
-    G_point(a[0],a[1]);
+    G_fill_circle(a[0],a[1],2);
 
     G_wait_click(b);
     G_rgb(1,1,0);
-    G_point(b[0],b[1]);
+    G_fill_circle(b[0],b[1],2);
 
     
     //do centering and rotating
