@@ -1,0 +1,62 @@
+i noticed that you were talking about big endian / little endian in your
+notes.
+
+Turns out...
+
+
+
+
+
+
+
+<Dramatic Pause>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<More Dramatic Pause>
+
+
+
+
+
+
+
+
+
+<Yet More Dramatic Pause>
+
+
+
+
+
+
+
+
+There's a middle endian too...
+https://en.wikipedia.org/wiki/Endianness#Middle-endian
