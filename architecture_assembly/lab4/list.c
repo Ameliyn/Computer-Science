@@ -15,6 +15,8 @@ struct list *new() {
       panic("Out of memory! Cannot create new list.");
     }
     newlist->size = 0;
+    newlist->head = NULL;
+    newlist->tail = NULL;
     //deal with assertion
     return newlist;
 }
@@ -42,9 +44,18 @@ void add_tail(struct list *l, long val) {
     }
     //deal with assertion
     newNode->val = val;
-    l->tail->next = newNode;
-    newNode->prev = l->tail;
-    l->tail = newNode;
+    newNode->next = NULL;
+    if(l->tail != NULL){
+      l->tail->next = newNode;
+      newNode->prev = l->tail;
+      l->tail = newNode;
+    }
+    else{
+      newNode->prev = NULL;
+      l->tail = newNode;
+      l->head = newNode;
+    }
+    l->size++;
 }
 
 long remove_at(struct list *l, int index) {
