@@ -29,6 +29,7 @@ C programming shit:
     linker links .o files plus libraries and makes executable file (cc can do this and does it smartly)
 ----"#define" makes constant GLOBAL variables for the program
 ----"#include" includes something, libraries are in <> and files are just names
+----"#pragma once" process this header file only once (it is important if a header file references another header file)
 ----C passes everything EXCEPT ARRAYS by value (as copies)
     --can use pointers to pass things to pass actual things
       (arrays are always pointers so that makes sense)
