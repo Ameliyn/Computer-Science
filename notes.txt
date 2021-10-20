@@ -77,6 +77,8 @@ C programming shit:
 CS 367 Graphics office hours: MWF 10:20-11:20 in Bodine 301
 Alain office hours Bodine 302A
 
+Two's complement:
+  Take positive number, reverse bits and add 1 (-2 = ~2 + 1)
 
 Functions and Parameter Passing in C: (2 September, 2021 Jeff)
 --Functions pass copies of values inherently (as expected, methods cannot directly
@@ -382,6 +384,35 @@ Three types:
     "sar k D" ==> D >> k (arithmetic shift) (fill with 1s)
     "slr k D" ==> D >> k (logical shift) (fill with 0s)
 
+Condition Codes:
+--Set after most arithmetic operations have taken place
+  "ZF" 'zero flag' set to one if result of last arithmetic operation led to result where all bits set to 0
+  "SF" 'sign flag' if result of last operation produced negative value (doesnt matter if type in program is signed or
+        unsigned, computer will set flag to 1 if most significant bit is 1)
+  "CF" 'Carry flag' set to 1 if last operation produced carry (addition, multiplication, subtraction) (ex. 2 64 bit
+        numbers added and result is 65 bits long then this flag is 1) 
+  "OF" 'Overflow flag' (and underflow set to 1 when overflow happens with two's complement operation. Unsigned
+        and signed numbers behave differently. For signed numbers look at last two bits. For unsigned numbers look
+	at last bit. CF from second to last to last XOR CF last to off register (unsigned CF on last to off register)
+  Exceptions:
+    "lea" does not touch these flags (will do extra step if has to find condition of value generated)
+    "XOR" clears CF, OF and set ZF, SF normal
+    ">>" ZF, SF, OF normal
+    "<<" MSB into CF, ZF,SF normal
+    "inc/dec" clear OF; ZF,SF normal, do not touch CF
+    "mov" unchanged
+    "jmp" unchanged
+
+Jumps:
+  "jmp L" jumps to certain label
+  "jz L" jump if zero (if ZF 1, jump)
+  "je L" jump if equal (leave blank like "je L" is same as jz)
+  "jb L" jump if below (if CF 1, jump) (unsigned)
+  "jl L" jump if less (if SF ^ OF 1, jump) (signed)
+  "ja L" jump if above (CF ==0 && ZF == 0, jump) (unsigned)
+  "jg L" jump if greater (ZF == 0 && SF == 0, jump) (signed)
+  "js L" jump if sign (SF == 1, jump)
+
 Acronyms Alain is saying:
 --RISC: Reduced instruction set computer
 --CISC: Complex instruction set computer
@@ -389,7 +420,7 @@ Acronyms Alain is saying:
 --MIPS:
 --SPARK:
 --SUN: (bought by ORACLE and developed JAVA)
---KFC:
+--KFC: Kentucky Fried Chicken
 
 Tools:
 | (pipe, take output of first command and feed it into second command)
@@ -434,7 +465,7 @@ long scale(long x, long y, long z){
 }
 This is unoptimized assembly gives:
 
-{
+{ #assembly code
 	.globl scale
 scale:
 	xor %rax, %rax
@@ -456,7 +487,7 @@ long f(long a[10], int i){
      return a[i];
 }
 
-{
+{ #assembly code
 	.globl f
 f:
 	imul $8, %rsi
@@ -465,13 +496,35 @@ f:
 	ret
 }
 Optimizing the above returns:
-{
+{ #assembly code
 	.globl f
 f:
 	mov (%rdi, %rsi, 8), %rax
 	ret
 }
 
+MORE STUFF!
+long signum(long n){
+  if(n < 0) return -1;
+  if(n == 0) return 0;
+  return 1;
+}
+
+{ #assembly code
+	.globl signum
+signum:
+	add $0, %rdi
+	js case1
+	jz case2
+	mov $1, %rax
+	ret
+case1:
+	mov $-1, %rax
+	ret
+case2:
+	mov $0, %rax
+	ret
+}
 What if we wanted the address? Use lea instead of mov! (it's the same thing, but it stores the address not the value)
 
 RANDOM OTHER SHIT:
