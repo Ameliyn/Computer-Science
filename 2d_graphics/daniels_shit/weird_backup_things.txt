@@ -1,0 +1,17 @@
+have you checked under /home/ on these computers? There's a folder called "backups" on it:
+simpson1-2019-10-01.tgz
+simpson1-2019-11-01.tgz
+simpson1-2019-12-01.tgz
+simpson1-2020-01-01.tgz
+simpson1-2020-02-01.tgz
+simpson1-2020-03-01.tgz
+...
+simpson27-2021-10-01.tgz
+
+ Inside this folder are many tarballs, presumably backups. Strangely, they don't seem to be backups of *this* computer. Instead, there are only backups of simpson1 and simpson27. Just those two. I've checked on a couple computers, and this seems to be consistent for all of them.
+
+...
+Why are simpson1 and simpson27 backed up an EVERY SINGLE COMPUTER?
+
+
+
