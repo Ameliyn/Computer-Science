@@ -412,6 +412,13 @@ Jumps:
   "ja L" jump if above (CF ==0 && ZF == 0, jump) (unsigned)
   "jg L" jump if greater (ZF == 0 && SF == 0, jump) (signed)
   "js L" jump if sign (SF == 1, jump)
+  "call L" (jmp L + push %rsp)
+
+
+Others:
+  "test R1, R2" # and R1, R2 but does not modify register (updates condition codes)
+  "cmp R1, R2" # sub R1, R2 (R2 -= R1) without modifying register (updates condition codes)
+
 
 Acronyms Alain is saying:
 --RISC: Reduced instruction set computer
@@ -502,6 +509,7 @@ f:
 	mov (%rdi, %rsi, 8), %rax
 	ret
 }
+What if we wanted the address? Use lea instead of mov! (it's the same thing, but it stores the address not the value)
 
 MORE STUFF!
 long signum(long n){
@@ -525,7 +533,92 @@ case2:
 	mov $0, %rax
 	ret
 }
-What if we wanted the address? Use lea instead of mov! (it's the same thing, but it stores the address not the value)
+{ #assembly code (compiler's result)
+  	.globl signum
+signum:
+	test %rdi, %rdi
+	js case1
+	jz case2
+	mov $0x1, %eax
+	retq
+case1:
+	mov $0xffffffffffffffff, %rax
+	retq
+case2:
+	mov %rdi, %rax
+	retq
+}
+void comp2(long a, long *p){
+     if(a && *p < a)
+       *p = a;
+}
+
+{ #assembly code
+	.globl comp2
+comp2:
+	test %rdi, %rdi
+	jnz l2
+	retq
+l2:
+	cmp (%rsi), %rdi
+	jl end2
+	retq
+end2:
+	mov %rdi, (%rsi)
+	retq
+}
+{ #assembly code
+	.globl comp2
+comp2:
+	test %rdi, %rdi
+	jz leave
+	cmp (%rsi), %rdi
+	jl leave
+	mov %rdi, (%rsi)
+leave:
+	retq
+
+}
+unsigned long factorial(unsigned long n){
+  if(n == 0) return 1;
+  return n*factorial(n-1);
+}
+{ #assembly code non-optimized
+	   .globl factorial
+factorial:
+	endbr64
+	push %rbp
+	mov %rsp, %rbp
+	sub $0x10, %rsp
+	mov %rdi, -0x8(%rbp)
+	cmpq $0x0, -0x8(%rbp)
+	jne l1
+	mov $0x1, %eax
+	jmp end
+l1:	mov -0x8(%rbp), %rax
+	sub $0x1,%rax
+	mov %rax, %rdi
+	callq l2
+l2:	imul -0x8(%rbp), %rax
+end:	leaveq
+	retq
+}
+{ #assembly code optimized
+	   .globl factorial
+factorial:
+	endbr64
+	test %rdi, %rdi
+	jne l1
+	mov $0x1, %eax
+	retq
+l1:	push %rbx
+	mov %rdi, %rbx
+	lea -0x1(%rdi),%rdi
+	callq l2
+l2:	imul %rbx, %rax
+	pop %rbx
+	retq
+}
 
 RANDOM OTHER SHIT:
 
