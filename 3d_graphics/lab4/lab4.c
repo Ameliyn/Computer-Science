@@ -36,7 +36,14 @@ void load_files(int numFiles, char** fileNames){
     double zMax = 0.0;
     for(int i = 0; i < numpoints[fileNumber]; i++){
       fscanf(f,"%lf %lf %lf",&x[fileNumber][i],&y[fileNumber][i], &z[fileNumber][i]);
+      xMax += x[fileNumber][i];
+      yMax += y[fileNumber][i];
+      zMax += z[fileNumber][i];
     }
+
+    x[fileNumber][numpoints[fileNumber]] = xMax / numpoints[fileNumber];
+    y[fileNumber][numpoints[fileNumber]] = yMax / numpoints[fileNumber];
+    z[fileNumber][numpoints[fileNumber]] = zMax / numpoints[fileNumber];
 
     fscanf(f,"%d",&numpolys[fileNumber]);
 
@@ -88,19 +95,10 @@ void rotate_object(char direction, int sign, int objnum){
   double a[4][4];
   double b[4][4];
   double center[3];
-  double yMax = 0;
-  double xMax = 0;
-  double zMax = 0;
 
-  for(int i = 0; i < numpoints[objnum]; i++){
-      xMax += x[objnum][i];
-      yMax += y[objnum][i];
-      zMax += z[objnum][i];
-    }
-
-  center[0] = xMax / numpoints[objnum];
-  center[1] = yMax / numpoints[objnum];
-  center[2] = zMax / numpoints[objnum];
+  center[0] = x[objnum][numpoints[objnum]];
+  center[1] = y[objnum][numpoints[objnum]];
+  center[2] = z[objnum][numpoints[objnum]];
   
   M3d_make_translation(a, -center[0], -center[1], -center[2]);
   if(direction == 'x') M3d_make_x_rotation_cs(b, cos(sign*2*M_PI/180), sin(sign*2*M_PI/180));
@@ -109,7 +107,7 @@ void rotate_object(char direction, int sign, int objnum){
   M3d_mat_mult(a,b,a);
   M3d_make_translation(b, center[0], center[1], center[2]);
   M3d_mat_mult(a,b,a);
-  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]);
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
 
 }
 
@@ -121,7 +119,7 @@ void translate_object(char direction, int sign, int objnum){
   else if(direction == 'y') M3d_make_translation(a, 0, sign*2, 0);
   else if(direction == 'z') M3d_make_translation(a, 0, 0, sign*2);
 
-  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]);
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
 }
 
 int main(int argc, char **argv){
@@ -144,7 +142,7 @@ int main(int argc, char **argv){
     }
     else if(input == 't' || input == 'T') mode = 't';
     else if(input == 'r' || input == 'R') mode = 'r';
-    else if(input == 's' || input == 'S') sign = -sign;
+    else if(input == 'c' || input == 'C') sign = -sign;
     else if(input == 'z' || input == 'x' || input == 'y'){
 
       if(mode == 't'){
