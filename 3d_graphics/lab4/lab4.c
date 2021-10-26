@@ -101,13 +101,20 @@ void rotate_object(char direction, int sign, int objnum){
   else if(direction == 'z') M3d_make_z_rotation_cs(b, cos(sign*2*M_PI/180), sin(sign*2*M_PI/180));
   M3d_mat_mult(a,b,a);
   M3d_make_translation(b, center[0][objnum], center[1][objnum], center[2][objnum]);
+  M3d_mat_mult(a,b,a);
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]);
 
 }
 
-void translate_object(char direction, int sign){
+void translate_object(char direction, int sign, int objnum){
 
   double a[4][4];
-  double b[4][4];
+
+  if(direction == 'x') M3d_make_translation(a, 2, 0, 0);
+  else if(direction == 'y') M3d_make_translation(a, 0, 2, 0);
+  else if(direction == 'z') M3d_make_translation(a, 0, 0, 2);
+
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]);
 }
 
 int main(int argc, char **argv){
@@ -128,30 +135,20 @@ int main(int argc, char **argv){
       draw_object(input - 48);
       previousObj = input-48;
     }
-    if(input == 't' || input == 'T') mode = 't';
-    if(input == 'r' || input == 'R') mode = 'r';
-    if(input == 's' || input == 'S') sign = -sign;
-    if(input == 'z' || input == 'x' || input == 'y'){
+    else if(input == 't' || input == 'T') mode = 't';
+    else if(input == 'r' || input == 'R') mode = 'r';
+    else if(input == 's' || input == 'S') sign = -sign;
+    else if(input == 'z' || input == 'x' || input == 'y'){
 
       if(mode == 't'){
-
-
+	translate_object(input, sign, previousObj);
+	draw_object(previousObj);
       }
       else if(mode == 's'){
-
-
+	rotate_object(input, sign, previousObj);
+	draw_object(previousObj);
       }
     }
-    /*if(input == ',')
-    {
-      rotate_object_matrix(previousObj, M_PI/32);
-      draw_object(previousObj);
-    }
-    else if(input == '.')
-    {
-      rotate_object_matrix(previousObj, -M_PI/32);
-      draw_object(previousObj);
-      }*/
     
     input = G_wait_key();
     if(input == 'q' || input == 'Q'){break;}
