@@ -2,6 +2,7 @@
 #include <math.h>
 
 
+
 /*
 
  ( x')          (x)
@@ -216,14 +217,6 @@ int M3d_mat_mult_points (double *X, double *Y, double *Z,
 
 
 
-
-
-//===========================================================================
-// For Advanced Graphics :
-//===========================================================================
-
-
-
 int M3d_x_product (double res[3], double a[3], double b[3])
 // res = a x b  , cross product of two vectors
 // SAFE: it is ok to make a call such as
@@ -242,7 +235,7 @@ int M3d_x_product (double res[3], double a[3], double b[3])
     res[1] = r[1] ;
     res[2] = r[2] ;
 
-    if ((res[0] == 0 && (res[1] == 0) && (res[2] == 0)) {
+    if ((res[0] == 0) && (res[1] == 0) && (res[2] == 0)) {
 	v = 0 ;
     } else {
 	v = 1 ;
