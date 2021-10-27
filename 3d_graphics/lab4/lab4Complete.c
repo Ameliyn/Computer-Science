@@ -74,52 +74,20 @@ void draw_object(int input)
   G_rgb(0,0,0);
   G_clear();
 
-  double xp[numpolys[input]][10];
-  double yp[numpolys[input]][10];
-  double zCOM[2][numpolys[input]];
-  double zMax;
-  int temp1;
+  double xp[numpoints[input]];
+  double yp[numpoints[input]];
   
-  for(int i = 0; i < numpolys[input]; i++){
-    zMax = 0.0;
-    for(int j = 0; j < psize[input][i]; j++){
-      poly_convert(&xp[i][j], &yp[i][j], x[input][cont[input][i][j]],
-		   y[input][cont[input][i][j]], z[input][cont[input][i][j]]);
-
-      zMax += z[input][cont[input][i][j]];
-    }
-    zCOM[0][i] = zMax / psize[input][i];
-    zCOM[1][i] = i;
-
-    printf("Analyzing and converting polygon %d\n",i);
-    //G_rgb(1,0,0);
-    //G_polygon(xp,yp,psize[input][i]);
-  }
-
-  
-  int temp;
-  for (int i = 0; i < (numpolys[input] - 1); i++)
-  {
-    for (int j = 0; j < numpolys[input] - 1 - i; j++)
-    {
-      if (zCOM[0][j] < zCOM[0][j+1])
-      {
-	temp = zCOM[0][j+1];
-	zCOM[0][j+1] = zCOM[0][j];
-	zCOM[0][j] = temp;
-	temp = zCOM[1][j+1];
-	zCOM[1][j+1] = zCOM[1][j];
-	zCOM[1][j] = temp;
-      }
-    }
-  }
-
-  G_rgb(1,0,0);
   for(int i = 0; i < numpolys[input]; i++){
     
-    G_polygon(xp[(int)zCOM[1][i]],yp[(int)zCOM[1][i]],psize[input][(int)zCOM[1][i]]);
+    for(int j = 0; j < psize[input][i]; j++){
+      poly_convert(&xp[j], &yp[j], x[input][cont[input][i][j]],
+		   y[input][cont[input][i][j]], z[input][cont[input][i][j]]);
+    }
+
+    
+    G_rgb(1,0,0);
+    G_polygon(xp,yp,psize[input][i]);
   }
-  
 }
 
 void rotate_object(char direction, int sign, int objnum){

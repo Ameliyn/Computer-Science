@@ -606,7 +606,6 @@ end:	leaveq
 { #assembly code optimized
 	   .globl factorial
 factorial:
-	endbr64
 	test %rdi, %rdi
 	jne l1
 	mov $0x1, %eax
@@ -620,6 +619,28 @@ l2:	imul %rbx, %rax
 	retq
 }
 
+unsigned long factorial(unsigned long n){
+  long result = 1;
+  while(n > 1){
+    result *= n;
+    n = n - 1;
+  }
+  return result;
+}
+{#assembly shit
+
+	.globl factorial
+factorial:
+	mov $1, %rax
+while:	cmp $1, %rdi
+	jbe end
+	imul %rdi, %rax
+	sub $1, %rdi
+	jmp while
+end:    retq
+
+}
+
 RANDOM OTHER SHIT:
 
 Colors for Ross:
@@ -627,4 +648,3 @@ There are two warring chess factions, white and black. Each color is aligned wit
 Red, Orange, Yellow are with White; Blue, Green, Purple are with Black
 GRAY ARE THE MEDIATORS LMAO They wish for pure balance xD
 The eternal conflict continues :) <3
-
