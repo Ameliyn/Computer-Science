@@ -77,6 +77,32 @@ C programming shit:
 CS 367 Graphics office hours: MWF 10:20-11:20 in Bodine 301
 Alain office hours Bodine 302A
 
+Vector shit:
+A = <2,3,4>
+B = <5,6,7>
+Add => C = <2+5,3+6,4+7> = <7,9,11> (long side of a parallelogram from two vectors)
+Sub => C = <2-5,3-6,4-7> = <-3,-3,-3> (short side of a parrallelogram from two vectors
+Length => |A| = sqrt((deltax)^2 + (deltay)^2 + (deltaz)^2)
+Unit Vector (A sub U) => A / |A| = <2,3,4> * 1/sqrt(29) = <0.371,0.557,0.743> (length is 1)
+Dot Product => A Dot C = 2*5 + 3*6 + 4*7 = 70
+A Dot B = |A|*|B|*cos(angle between)
+A Dot B = B Dot A
+angle between = aCos((A Dot B)/|A|*|B|)
+angle Between A,B = arcCos(70/sqrt(29)*sqrt(110)) = something
+
+A cross B ==> C = <3*7 - 6*4, -(2*7 - 5*4), 2*6- 5*3> = <-3, 6, -3>
+A Cross B is a vector perpendicular to both vectors
+(A cross B) = -1* (B cross A)
+C Dot A = 0; C Dot B = 0
+
+Backface Elimination:
+Works for convex single objects
+Find normal vector (cross product) and if angle between cross and point is less than 90 then draw, otherwise dont
+p dot q ==> less than 90 is positive, more than 90 is negative
+
+foreach polygon, find cross of 0,1 and 0,2 (let be c);
+Then if c dot origin to 0 is greater than 0, draw polygon
+
 Two's complement:
   Take positive number, reverse bits and add 1 (-2 = ~2 + 1)
 
