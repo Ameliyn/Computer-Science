@@ -489,6 +489,7 @@ Returns readable file:
 "help" (all of what you can do)
 "step" (steps into line (if function call goes to top of function, etc))
 
+"Jump Table" a set of addresses that the code uses to go to the right point in the switch statement
 
 Creating Assembly Code:
 FIRST FUNCTION:
@@ -666,6 +667,35 @@ while:	cmp $1, %rdi
 end:    retq
 
 }
+
+{
+void g(long *){
+
+}
+
+long f (long n){
+  long l = 0;
+  g(&l);
+  return l;
+}
+}
+{#assembly code
+	.globl f
+f:
+	sub $0x18, %rsp
+	movq $0x0,0x8(%rsp)
+	lea 0x8(%rsp), %rdi
+	callq g
+g:	mov 0x8(%rsp), %rax
+	add $0x18, %rsp
+	retq
+}
+(Above) Passing a reference to a parameter as a variable, you push the stack, move the value to %rdi,
+call the function, do your work and then
+
+
+
+
 
 RANDOM OTHER SHIT:
 
