@@ -63,6 +63,7 @@ struct bignum *bignum_add(struct bignum *a, struct bignum *b) {
       if(i < bsz)
 	bval = get(b->bits, i);
       else bval = 0;
+      
       add(aval, bval, carry_in, &sum, &carry_out);
 
       if(i == 0) r = bignum_new(sum);
