@@ -11,9 +11,17 @@ double y[MAXOBJECTS][MAXPTS];
 double z[MAXOBJECTS][MAXPTS];
 int psize[MAXOBJECTS][MAXPOLYS];
 int cont[MAXOBJECTS][MAXPOLYS][20];
+double zCOM[MAXOBJECTS][2][MAXPOLYS];
+int invertObject;
 
 int scrnsize = 1000; 
 int halfangle = 45;
+
+typedef struct {
+  int objNum;
+  int polyNum;
+  double dist;
+} Thing;
 
 void load_files(int numFiles, char** fileNames){
 
@@ -53,7 +61,6 @@ void load_files(int numFiles, char** fileNames){
 	fscanf(f,"%d",&cont[fileNumber][i][j]);
       }
     }
-
     //center_object_matrix(fileNumber);
     
     fclose(f);
@@ -87,7 +94,9 @@ int vectorGood(int input, int polyNumber){
   double cdotorigin = x[input][cont[input][polyNumber][0]]*aThree +
     y[input][cont[input][polyNumber][0]]*bThree + z[input][cont[input][polyNumber][0]]*cThree;
 
-  return cdotorigin < 0;
+  if(invertObject == 1)
+    return cdotorigin < 0;
+  else return cdotorigin > 0;
   
 }
 
@@ -111,6 +120,119 @@ void draw_object(int input)
     if(vectorGood(input, i))
       G_polygon(xp,yp,psize[input][i]);
   }
+}
+
+void sort_things(Thing *Things, int length) 
+{
+  int i,s,j ;
+  Thing tmp;
+  int n = length;
+
+  for (i = 0 ; i < n ; i++) {
+    s = i ;
+    for (j = i+1 ; j < n ; j++) {
+      if (Things[j].dist < Things[i].dist) { s = j ; }
+    }
+    tmp = Things[i];
+    Things[i] = Things[s] ;
+    Things[s] = tmp ;
+  }
+
+}
+
+void draw_all_object(int numObjects)
+{
+  G_rgb(0,0,0);
+  G_clear();
+
+  //begin find totalNumPolys, largestPolySize
+  int totalNumPolys = 0;
+  int largestPolySize = psize[0][0];
+  int polyCounter[numObjects];
+  
+  for(int i = 0; i < numObjects; i++){
+    totalNumPolys += numpolys[i];
+
+    if(i == 0)
+      polyCounter[i] = 0;
+    else
+      polyCounter[i] = numpolys[i-1] + polyCounter[i-1];
+    
+    for(int k = 0; k < numpolys[i]; k++){
+      if(psize[i][k] > largestPolySize) largestPolySize = psize[i][k];
+    }
+  }
+
+  //end find totalNumPolys, largestPolySize
+
+  
+  //begin initialize Things
+  Thing things[totalNumPolys];
+
+  double xCOM;
+  double yCOM;
+  double zCOM;
+  double Dist;
+  for(int k = 0; k < numObjects; k++){
+
+    for(int i = 0; i < numpolys[k]; i++){
+
+      things[polyCounter[k] + i].objNum = k;
+      things[polyCounter[k] + i].polyNum = i;
+
+      xCOM = 0.0;
+      yCOM = 0.0;
+      zCOM = 0.0;
+      Dist = 0.0;
+      for(int j = 0; j < psize[k][i]; j++){
+        xCOM += x[k][cont[k][i][j]];
+	yCOM += y[k][cont[k][i][j]];
+	zCOM += z[k][cont[k][i][j]];
+      }
+      
+      xCOM /= psize[k][i];
+      yCOM /= psize[k][i];
+      zCOM /= psize[k][i];
+
+      Dist = sqrt(xCOM*xCOM + yCOM*yCOM + zCOM*zCOM);
+      
+      things[polyCounter[k] + i].dist = Dist;
+    }
+  }
+
+  
+  sort_things(things, totalNumPolys);
+  
+  //begin display polygons
+  G_rgb(0,0,0);
+  G_clear();
+  
+  double xp[largestPolySize];
+  double yp[largestPolySize];
+  
+  for(int i = 0; i < totalNumPolys; i++){
+
+    if(things[i].objNum % 5 == 0)
+      G_rgb(0,1,1);
+    else if(things[i].objNum % 5 == 1)
+      G_rgb(1,0,0);
+    else if(things[i].objNum % 5 == 2)
+      G_rgb(0,1,0);
+    else if(things[i].objNum % 5 == 3)
+      G_rgb(0,0,1);
+    else if(things[i].objNum % 5 == 4)
+      G_rgb(1,1,0);
+
+    for(int j = 0; j < psize[things[i].objNum][things[i].polyNum]; j++){
+      poly_convert(&xp[j], &yp[j],
+		   x[things[i].objNum][cont[things[i].objNum][things[i].polyNum][j]],
+		   y[things[i].objNum][cont[things[i].objNum][things[i].polyNum][j]],
+		   z[things[i].objNum][cont[things[i].objNum][things[i].polyNum][j]]);
+    }
+
+    G_fill_polygon(xp,yp,psize[things[i].objNum][things[i].polyNum]);
+  }
+  //end display polygons
 }
 
 void rotate_object(char direction, int sign, int objnum){
@@ -154,28 +276,59 @@ int main(int argc, char **argv){
   char mode = 't';
   int sign = 1;
   int previousObj = 0;
+  int topMode = 0;
   G_init_graphics(scrnsize,scrnsize);
   G_rgb(0,0,0);
   G_clear();
+  invertObject = 1;
 
   do{
-    if(input >= 48 && input < 48 + argc - 1){
-      draw_object(input - 48);
-      previousObj = input-48;
-    }
-    else if(input == 't' || input == 'T') mode = 't';
-    else if(input == 'r' || input == 'R') mode = 'r';
-    else if(input == 'c' || input == 'C') sign = -sign;
-    else if(input == 'z' || input == 'x' || input == 'y'){
+    if(topMode == 0){
+      if(input >= 48 && input < 48 + argc - 1){
+	draw_object(input - 48);
+	previousObj = input-48;
+      }
+      else if(input == 'o' || input == 'O') {
+	invertObject = -invertObject;
+	draw_object(previousObj);
+      }
+      else if(input == 't' || input == 'T') mode = 't';
+      else if(input == 'r' || input == 'R') mode = 'r';
+      else if(input == 'c' || input == 'C') sign = -sign;
+      else if(input == 'm' || input == 'M') {topMode = 1; draw_all_object(argc - 1);}
+      else if(input == 'z' || input == 'x' || input == 'y'){
 
-      if(mode == 't'){
-	translate_object(input, sign, previousObj);
-	draw_object(previousObj);
+	if(mode == 't'){
+	  translate_object(input, sign, previousObj);
+	  draw_object(previousObj);
+	}
+	else if(mode == 'r'){
+	  rotate_object(input, sign, previousObj);
+	  draw_object(previousObj);
+	}
       }
-      else if(mode == 'r'){
-	rotate_object(input, sign, previousObj);
-	draw_object(previousObj);
+    }
+    else if(topMode == 1){
+      draw_all_object(argc - 1);
+      if(input >= 48 && input < 48 + argc - 1){
+	previousObj = input-48;
       }
+      else if(input == 't' || input == 'T') mode = 't';
+      else if(input == 'r' || input == 'R') mode = 'r';
+      else if(input == 'c' || input == 'C') sign = -sign;
+      else if(input == 'm' || input == 'M') {topMode = 0; draw_object(previousObj);}
+      else if(input == 'z' || input == 'x' || input == 'y'){
+
+	if(mode == 't'){
+	  translate_object(input, sign, previousObj);
+	  draw_all_object(argc - 1);
+	}
+	else if(mode == 'r'){
+	  rotate_object(input, sign, previousObj);
+	  draw_all_object(argc - 1);
+	}
+      }
+
     }
     
     input = G_wait_key();

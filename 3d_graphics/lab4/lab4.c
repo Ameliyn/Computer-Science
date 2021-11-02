@@ -177,7 +177,7 @@ void draw_object(int input)
       G_rgb(1,0,0);
       G_polygon(xp[(int)zCOM[input][1][i]],yp[(int)zCOM[input][1][i]],psize[input][(int)zCOM[input][1][i]]);
     }
-    else if(vectorGood(input, i)){
+    else{
       G_rgb(0,1,0);
       G_polygon(xp[(int)zCOM[input][1][i]],yp[(int)zCOM[input][1][i]],psize[input][(int)zCOM[input][1][i]]);
     }
