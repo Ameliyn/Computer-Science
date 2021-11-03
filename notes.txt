@@ -339,6 +339,10 @@ Assembly operand specifiers:
 "(%rsi,%rdi,s)" value at register scaled plus register (M[%rsi + %rdi * s])
 "$20(%rsi,%rdi,s)" value at register scaled plus register and immediate(M[$20 + %rsi + %rdi * s])
 
+GENERAL D(R1, R2, S) ==> R1 + R2 * S + D
+	      	     	 Base of Array + index * size of element + displacement
+			 S must be 1,2,4,8 (NOTHING ELSE)
+
 The Stack(tm):
 "last in first out" paridigm
 Largely handles function calls
