@@ -131,7 +131,7 @@ void sort_things(Thing *Things, int length)
   for (i = 0 ; i < n ; i++) {
     s = i ;
     for (j = i+1 ; j < n ; j++) {
-      if (Things[j].dist < Things[i].dist) { s = j ; }
+      if (Things[j].dist > Things[i].dist) { s = j ; }
     }
     tmp = Things[i];
     Things[i] = Things[s] ;
