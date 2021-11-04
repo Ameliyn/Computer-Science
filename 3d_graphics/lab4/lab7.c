@@ -13,8 +13,10 @@ int psize[MAXOBJECTS][MAXPOLYS];
 int cont[MAXOBJECTS][MAXPOLYS][20];
 double zCOM[MAXOBJECTS][2][MAXPOLYS];
 int lightModel = -1;
+double lightAmount = 1.1;
+double lightLocation[3] = {0.0,0.0,0.0};
 
-int scrnsize = 1000; 
+int scrnsize = 1000;
 int halfangle = 45;
 
 typedef struct {
@@ -121,16 +123,36 @@ void decide_color(int objNum, int polyNum){
   }
 
   if(lightModel == 1){
+    double xCom = x[objNum][cont[objNum][polyNum][0]];
     double yCom = y[objNum][cont[objNum][polyNum][0]];
+    double zCom = z[objNum][cont[objNum][polyNum][0]];
     for(int i = 1; i < psize[objNum][polyNum]; i++){
+      xCom += x[objNum][cont[objNum][polyNum][i]];
       yCom += y[objNum][cont[objNum][polyNum][i]];
+      zCom += z[objNum][cont[objNum][polyNum][i]];
     }
+    xCom /= psize[objNum][polyNum];
     yCom /= psize[objNum][polyNum];
+    zCom /= psize[objNum][polyNum];
 
-    rgb[0] *= yCom / y[objNum][cont[objNum][polyNum][psize[objNum][polyNum]]];
-    rgb[1] *= yCom / y[objNum][cont[objNum][polyNum][psize[objNum][polyNum]]];
-    rgb[2] *= yCom / y[objNum][cont[objNum][polyNum][psize[objNum][polyNum]]];
+    double dist = sqrt((lightLocation[0] - xCom)*(lightLocation[0] - xCom)
+		       + (lightLocation[1] - yCom)*(lightLocation[1] - yCom)
+		       + (lightLocation[2] - zCom)*(lightLocation[2] - zCom));
+    
+    printf("Setting color to (%.2f, %.2f, %.2f)\n",rgb[0],rgb[1],rgb[2]);
+    if(rgb[0])
+      rgb[0] = (1.0 / (dist*dist)) * lightAmount;
+    if(rgb[1])
+      rgb[1] = (1.0 / (dist*dist)) * lightAmount;
+    if(rgb[2])
+      rgb[2] = (1.0 / (dist*dist)) * lightAmount;
+    printf("distance  = %.2f\n",dist);
+    printf("distance sqrd  = %.2f\n",dist*dist);
+    printf("light amount  = %.2f\n",lightAmount);
+    printf("1/distance*lightAmount  = %.8f\n",1/(dist) * lightAmount);
+    printf("Setting color to (%.2f, %.2f, %.2f)\n",rgb[0],rgb[1],rgb[2]);
   }
+  
   //printf("Setting color to (%.2f, %.2f, %.2f)\n",rgb[0],rgb[1],rgb[2]);
   G_rgb(rgb[0],rgb[1],rgb[2]);
 }
@@ -282,6 +304,28 @@ void rotate_object(char direction, int sign, int objnum){
 
 }
 
+void scale_object(int sign, int objnum){
+
+  double a[4][4];
+  double b[4][4];
+  double center[3];
+
+  center[0] = x[objnum][numpoints[objnum]];
+  center[1] = y[objnum][numpoints[objnum]];
+  center[2] = z[objnum][numpoints[objnum]];
+  
+  M3d_make_translation(a, -center[0], -center[1], -center[2]);
+  if(sign == 1)
+    M3d_make_scaling(b,1.1,1.1,1.1);
+  else
+    M3d_make_scaling(b,0.9,0.9,0.9);
+  M3d_mat_mult(a,b,a);
+  M3d_make_translation(b, center[0], center[1], center[2]);
+  M3d_mat_mult(a,b,a);
+  
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+}
+
 void translate_object(char direction, int sign, int objnum){
 
   double a[4][4];
@@ -326,64 +370,84 @@ int main(int argc, char **argv){
   G_clear();
 
   do{
-    if(topMode == 0){
-      if(input >= 48 && input < 48 + argc - 1){
-	draw_object(input - 48);
-	previousObj = input-48;
-      }
-      else if(input == 'o' || input == 'O') {
-	fixObject(previousObj);
+    if(input >= 48 && input < 48 + argc - 1){
+      previousObj = input-48;
+      if(topMode == 0)
+	draw_object(previousObj);
+      else
+	draw_all_object(argc - 1);
+    }
+    else if(input == 'o' || input == 'O') {
+      fixObject(previousObj);
+      if(topMode == 0)
+	draw_object(previousObj);
+      else
+	draw_all_object(argc - 1);
+    }
+    else if(input == 'k' || input == 'K'){
+      lightModel = -lightModel;
+      if(topMode == 0)
+	draw_object(previousObj);
+      else
+	draw_all_object(argc - 1);
+    }
+    else if(input == ']') {
+      lightAmount += sign*0.1;
+      if(lightAmount < 0) lightAmount = 0;
+      if(topMode == 0)
+	draw_object(previousObj);
+      else
+	draw_all_object(argc - 1);
+    }
+    else if(input == 'u' || input == 'U') {
+      scale_object(sign, previousObj);
+      if(topMode == 0)
+	draw_object(previousObj);
+      else
+	draw_all_object(argc - 1);
+    }
+    else if(input == 'l' || input == 'L') mode = 'l';
+    else if(input == 't' || input == 'T') mode = 't';
+    else if(input == 'r' || input == 'R') mode = 'r';
+    else if(input == 'c' || input == 'C') sign = -sign;
+    else if(input == 'm' || input == 'M') {
+      if(topMode == 1){
+	topMode = 0;
 	draw_object(previousObj);
       }
-      else if(input == 'l' || input == 'L') {
-        lightModel = -lightModel;
-	draw_object(previousObj);
-      }
-      else if(input == 't' || input == 'T') mode = 't';
-      else if(input == 'r' || input == 'R') mode = 'r';
-      else if(input == 'c' || input == 'C') sign = -sign;
-      else if(input == 'm' || input == 'M') {topMode = 1; draw_all_object(argc - 1);}
-      else if(input == 'z' || input == 'x' || input == 'y'){
-
-	if(mode == 't'){
-	  translate_object(input, sign, previousObj);
-	  draw_object(previousObj);
-	}
-	else if(mode == 'r'){
-	  rotate_object(input, sign, previousObj);
-	  draw_object(previousObj);
-	}
+      else{
+	topMode = 1;
+	draw_all_object(argc - 1);
       }
     }
-    else if(topMode == 1){
-      draw_all_object(argc - 1);
-      if(input >= 48 && input < 48 + argc - 1){
-	previousObj = input-48;
-      }
-      else if(input == 'o' || input == 'O') {
-	fixObject(previousObj);
-	draw_all_object(argc - 1);
-      }
-      else if(input == 'l' || input == 'L') {
-        lightModel = -lightModel;
-	draw_all_object(argc - 1);
-      }
-      else if(input == 't' || input == 'T') mode = 't';
-      else if(input == 'r' || input == 'R') mode = 'r';
-      else if(input == 'c' || input == 'C') sign = -sign;
-      else if(input == 'm' || input == 'M') {topMode = 0; draw_object(previousObj);}
-      else if(input == 'z' || input == 'x' || input == 'y'){
+    else if(input == 'z' || input == 'x' || input == 'y'){
 
-	if(mode == 't'){
-	  translate_object(input, sign, previousObj);
+      if(mode == 't'){
+	translate_object(input, sign, previousObj);
+	if(topMode == 0)
+	  draw_object(previousObj);
+	else
 	  draw_all_object(argc - 1);
-	}
-	else if(mode == 'r'){
-	  rotate_object(input, sign, previousObj);
-	  draw_all_object(argc - 1);
-	}
       }
-
+      else if(mode == 'r'){
+	rotate_object(input, sign, previousObj);
+	if(topMode == 0)
+	  draw_object(previousObj);
+	else
+	  draw_all_object(argc - 1);
+      }
+      else if(mode == 'l'){
+        if(input == 'z')
+	  lightLocation[2] += sign*2;
+	else if(input == 'y')
+	  lightLocation[1] += sign*2;
+	else if(input == 'x')
+	  lightLocation[0] += sign*2;
+	if(topMode == 0)
+	  draw_object(previousObj);
+	else
+	  draw_all_object(argc - 1);
+      }
     }
     
     input = G_wait_key();
