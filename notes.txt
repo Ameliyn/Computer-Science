@@ -72,6 +72,8 @@ C programming shit:
       --"argc" = integer, how many words on command line
       --"argv" = array of pointers to char arrays (array of strings)
 ----C booleans (0 is false, anything else is true)
+----T A[r][c] ==> Multidimensional array (2d array)
+----T *A[r] ==> Multilevel array (every row can have a different number of columns)
 
 
 CS 367 Graphics office hours: MWF 10:20-11:20 in Bodine 301
@@ -114,7 +116,6 @@ Functions and Parameter Passing in C: (2 September, 2021 Jeff)
     want to change them.
 --Arrays don't have a .length, that is why G_polygon needs the number of items.
 
-
 A look behind the curtain and pointers: (3 September, 2021 Alain)
 --fg shows us the steps the compiler goes throug, then call "cc hello.c"
   --First the cpp makes "hello.i" (DONT KNOW WHAT THIS IS LMAO GOOD LUCK)
@@ -141,8 +142,6 @@ A look behind the curtain and pointers: (3 September, 2021 Alain)
 --Each polygon ("number of verticies" "verticy number" "verticy number") (all ints)
 --Each polygon's color ("double r" "double g" "double b")
 
-
-
 CS367 poly_perimetersS Lab:
 
 --Count triangles twice, count non-triangles once
@@ -150,8 +149,6 @@ CS367 poly_perimetersS Lab:
     when vertex is in between xouters
     --perhaps worry about if a line is drawn twice on a polygon or not (two horizontal overlapping
       lines with vertex in the middle)
-
-
 
 Bitwise and Signed/Unsigned shit:
 --When evaluating, if you have one unsigned and one signed, they are evaluated as unsigned
@@ -699,8 +696,35 @@ g:	mov 0x8(%rsp), %rax
 (Above) Passing a reference to a parameter as a variable, you push the stack, move the value to %rdi,
 call the function, do your work and then
 
+PROCESSOR DESIGN:
 
+The halting problem
+A program takes a parameter other program and an input. P1 tells you whether P2 halts on an input. Aparrently this cannot exist.
 
+The turing machine is universal. A program is Turing Complete if something(unknown).
+
+This is a few and far between job (very few jobs in this area)
+
+Y86-64 programmer-visible state
+https://docs.google.com/presentation/d/1EmBaYHXNjgCWADF3ittNs_rCzn3HYK-nUWSut_YvBGU/edit#slide=id.g7163818321_0_54
+Registers:
+--Same registers and names as X86 except for %r15
+Condition Codes
+--ZF,SF,OF
+Program Counter: %rip
+Status Code: indicates whether program is running normally or some special event occured
+Memory: Normal
+Check the slideshow for Y86 instructions
+
+Everything is 64bit (8 byte)
+Smallest instruction is 1 bit
+Largest is 10 bytes
+4bits needed for specify register
+No %r15 because %r15 is used to ignore operand
+How many addressing modes supported: 5(3) immediate, register, absolute, indirect, base+displacement
+Jump and Call destinations are absolute addresses
+
+Stored in little endian format (least significant byte first) 0x1234567891011 => 01 91 78 56 34 12
 
 
 RANDOM OTHER SHIT:
