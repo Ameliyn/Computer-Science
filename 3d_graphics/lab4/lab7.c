@@ -139,18 +139,19 @@ void decide_color(int objNum, int polyNum){
 		       + (lightLocation[1] - yCom)*(lightLocation[1] - yCom)
 		       + (lightLocation[2] - zCom)*(lightLocation[2] - zCom));
     
-    printf("Setting color to (%.2f, %.2f, %.2f)\n",rgb[0],rgb[1],rgb[2]);
     if(rgb[0])
       rgb[0] = (1.0 / (dist*dist)) * lightAmount;
     if(rgb[1])
       rgb[1] = (1.0 / (dist*dist)) * lightAmount;
     if(rgb[2])
       rgb[2] = (1.0 / (dist*dist)) * lightAmount;
-    printf("distance  = %.2f\n",dist);
-    printf("distance sqrd  = %.2f\n",dist*dist);
-    printf("light amount  = %.2f\n",lightAmount);
-    printf("1/distance*lightAmount  = %.8f\n",1/(dist) * lightAmount);
-    printf("Setting color to (%.2f, %.2f, %.2f)\n",rgb[0],rgb[1],rgb[2]);
+
+    if(rgb[0] > 0 && rgb[0] < 0.05)
+      rgb[0] = 0.05;
+    if(rgb[1] > 0 && rgb[1] < 0.05)
+      rgb[1] = 0.05;
+    if(rgb[1] > 0 && rgb[1] < 0.05)
+      rgb[1] = 0.05;
   }
   
   //printf("Setting color to (%.2f, %.2f, %.2f)\n",rgb[0],rgb[1],rgb[2]);
