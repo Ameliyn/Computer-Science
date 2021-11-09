@@ -30,8 +30,8 @@ main:
 # void sort(long *data, long count)
 # data in %rdi, count in %rsi
 sort:
-	irmovq $8, %r8        #hold constant 8
-	irmovq $1, %r9        #hold constant 1
+	irmovq 0x8, %r8        #hold constant 8
+	irmovq 0x1, %r9        #hold constant 1
 	
 	#set up loop One
 	subq %r9, %rsi	      #%rsi holds last
@@ -68,7 +68,7 @@ loopTwo:
 
 endLoopTwo:
 	addq %r9, %r10        #i++
-	addq %r8, %rax	      #%rax holds data[i]
+	addq %r8, %rax	      #%rax holds *data[i]
 	
 	#set condition codes
 	mrmovq (%r10), %r11   #j = i
@@ -79,7 +79,7 @@ testTwo:
 	jge loopTwo            #if i < last continue loopTwo
 	subq %r9, %rsi         #last -= 1
 testOne:
-	jg loopOne	      #if last > 0 continue
+	jne loopOne	      #if last > 0 continue
 	ret                   #return
 
 # stack starts here and grows to lower addresses

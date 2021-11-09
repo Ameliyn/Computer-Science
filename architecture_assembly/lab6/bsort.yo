@@ -30,8 +30,8 @@
                             | # void sort(long *data, long count)
                             | # data in %rdi, count in %rsi
 0x098:                      | sort:
-0x098: 30f80800000000000000 | 	irmovq $8, %r8        #hold constant 8
-0x0a2: 30f90100000000000000 | 	irmovq $1, %r9        #hold constant 1
+0x098: 30f80800000000000000 | 	irmovq 0x8, %r8        #hold constant 8
+0x0a2: 30f90100000000000000 | 	irmovq 0x1, %r9        #hold constant 1
                             | 	
                             | 	#set up loop One
 0x0ac: 6196                 | 	subq %r9, %rsi	      #%rsi holds last
@@ -68,7 +68,7 @@
                             | 
 0x11f:                      | endLoopTwo:
 0x11f: 609a                 | 	addq %r9, %r10        #i++
-0x121: 6080                 | 	addq %r8, %rax	      #%rax holds data[i]
+0x121: 6080                 | 	addq %r8, %rax	      #%rax holds *data[i]
                             | 	
                             | 	#set condition codes
 0x123: 50ba0000000000000000 | 	mrmovq (%r10), %r11   #j = i
@@ -79,7 +79,7 @@
 0x12f: 75da00000000000000   | 	jge loopTwo            #if i < last continue loopTwo
 0x138: 6196                 | 	subq %r9, %rsi         #last -= 1
 0x13a:                      | testOne:
-0x13a: 76b900000000000000   | 	jg loopOne	      #if last > 0 continue
+0x13a: 74b900000000000000   | 	jne loopOne	      #if last > 0 continue
 0x143: 90                   | 	ret                   #return
                             | 
                             | # stack starts here and grows to lower addresses
