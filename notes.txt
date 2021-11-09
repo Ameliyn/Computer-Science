@@ -726,6 +726,59 @@ Jump and Call destinations are absolute addresses
 
 Stored in little endian format (least significant byte first) 0x1234567891011 => 01 91 78 56 34 12
 
+EXAMPLES
+{
+long sum(long *start, long count){
+  long sum = 0;
+  while(count) {
+    sum += *start;
+    start++;
+    count--;
+  }
+  return sum;
+}
+
+{ # y86 code
+  # %rdi = *start
+  # %rsi = count
+
+Top:
+	xorq %rax, %rax       #initialize sum to zero (sum = 0)
+	irmovq $8, %r8        #hold constant 8
+	irmovq $1, %r9        #hold constant 1
+Loop:
+	andq %rsi, %rsi       #check parameter
+	je End                #if count == 0, end
+	mrmovq (%rdi), %r10   #get *start
+	addq %r10, %rax       #add value of array to running sum (sum += *start)
+	addq %r8, %rdi        #move pointer down array (start++)
+	subq %r9, %rsi        #subtract count (count--)
+	jmp Loop              #return to top of loop
+End:
+	ret                #return
+
+}
+
+{ # y86 code
+  # %rdi = *start
+  # %rsi = count
+
+Top:
+	xorq %rax, %rax       #initialize sum to zero (sum = 0)
+	irmovq $8, %r8        #hold constant 8
+	irmovq $1, %r9        #hold constant 1
+	andq %rsi, %rsi       #check parameter
+	jmp test                #if count == 0, end
+loop:
+	mrmovq (%rdi), %r10   #get *start
+	addq %r10, %rax       #add value of array to running sum (sum += *start)
+	addq %r8, %rdi        #move pointer down array (start++)
+	subq %r9, %rsi        #subtract count (count--)
+test:
+	jne loop              #stop when 0
+	ret                   #return
+
+}
 
 RANDOM OTHER SHIT:
 
