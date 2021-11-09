@@ -12,9 +12,13 @@ double z[MAXOBJECTS][MAXPTS];
 int psize[MAXOBJECTS][MAXPOLYS];
 int cont[MAXOBJECTS][MAXPOLYS][20];
 double zCOM[MAXOBJECTS][2][MAXPOLYS];
-int lightModel = -1;
-double lightAmount = 1.1;
+double irgb[MAXOBJECTS][3];
+int lightModel = 0;
+double lightAmount = 0.5;
 double lightLocation[3] = {0.0,0.0,0.0};
+double ambient = 0.2;
+double diffuseMax = 0.5;
+int specularPower = 50;
 
 int scrnsize = 1000;
 int halfangle = 45;
@@ -64,6 +68,33 @@ void load_files(int numFiles, char** fileNames){
       }
     }
     //center_object_matrix(fileNumber);
+
+    if(fileNumber % 5 == 0){
+      irgb[fileNumber][0] = 1;
+      irgb[fileNumber][1] = 1;
+      irgb[fileNumber][2] = 1;
+    }
+    else if(fileNumber % 5 == 1){
+      irgb[fileNumber][0] = 0;
+      irgb[fileNumber][1] = 1;
+      irgb[fileNumber][2] = 0;
+    }
+    else if(fileNumber % 5 == 2){
+      irgb[fileNumber][0] = 0;
+      irgb[fileNumber][1] = 0;
+      irgb[fileNumber][2] = 1;
+    }
+    else if(fileNumber % 5 == 3){
+      irgb[fileNumber][0] = 1;
+      irgb[fileNumber][1] = 1;
+      irgb[fileNumber][2] = 0;
+    }
+    else if(fileNumber % 5 == 4){
+      irgb[fileNumber][0] = 0;
+      irgb[fileNumber][1] = 1;
+      irgb[fileNumber][2] = 1;
+    }
+    
     
     fclose(f);
   }
@@ -100,29 +131,95 @@ int vectorGood(int input, int polyNumber){
   
 }
 
+void makeUnit(double a[3]){
+
+  double magnitude = sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
+
+  a[0] /= magnitude;
+  a[1] /= magnitude;
+  a[2] /= magnitude;
+
+}
+
 //decide color decides the color of every polygon
 void decide_color(int objNum, int polyNum){
 
-  double rgb[3] = {0.0,0.0,0.0};
-  if(objNum % 5 == 0){
-    rgb[0] = 1;
-  }
-  else if(objNum % 5 == 1){
-    rgb[1] = 1;
-  }
-  else if(objNum % 5 == 2){
-    rgb[2] = 1;
-  }
-  else if(objNum % 5 == 3){
-    rgb[0] = 1;
-    rgb[1] = 1;
-  }
-  else if(objNum % 5 == 4){
-    rgb[1] = 1;
-    rgb[2] = 1;
-  }
+  double rgb[3] = {irgb[objNum][0],irgb[objNum][1],irgb[objNum][2]};
+  
 
   if(lightModel == 1){
+    double intensity;
+    double diffuse;
+    double specular;
+    double Eu[3], Ru[3], Lu[3], Nu[3];
+    double NuDotLu, NuDotEu, EuDotRu;
+
+    //find vectors
+    Eu[0] = -x[objNum][cont[objNum][polyNum][0]];
+    Eu[1] = -y[objNum][cont[objNum][polyNum][0]];
+    Eu[2] = -z[objNum][cont[objNum][polyNum][0]];
+
+    Lu[0] = lightLocation[0] - x[objNum][cont[objNum][polyNum][0]];
+    Lu[1] = lightLocation[1] - y[objNum][cont[objNum][polyNum][0]];
+    Lu[2] = lightLocation[2] - z[objNum][cont[objNum][polyNum][0]];
+
+    double avec[3], bvec[3];
+
+    avec[0] = x[objNum][cont[objNum][polyNum][1]] - x[objNum][cont[objNum][polyNum][0]];
+    avec[1] = y[objNum][cont[objNum][polyNum][1]] - y[objNum][cont[objNum][polyNum][0]];
+    avec[2] = z[objNum][cont[objNum][polyNum][1]] - z[objNum][cont[objNum][polyNum][0]];
+    bvec[0] = x[objNum][cont[objNum][polyNum][2]] - x[objNum][cont[objNum][polyNum][0]];
+    bvec[1] = y[objNum][cont[objNum][polyNum][2]] - y[objNum][cont[objNum][polyNum][0]];
+    bvec[2] = z[objNum][cont[objNum][polyNum][2]] - z[objNum][cont[objNum][polyNum][0]];
+
+    M3d_x_product(Nu, bvec, avec);
+
+    makeUnit(Eu);
+    makeUnit(Lu);
+    makeUnit(Nu);
+
+    //find diffuse/specular
+    NuDotLu = Nu[0] * Lu[0] + Nu[1] * Lu[1] + Nu[2] * Lu[2];
+    if(NuDotLu < 0){
+      Nu[0] = -Nu[0];
+      Nu[1] = -Nu[1];
+      Nu[2] = -Nu[2];
+    }
+    NuDotLu = Nu[0] * Lu[0] + Nu[1] * Lu[1] + Nu[2] * Lu[2];
+    
+    NuDotEu = Nu[0] * Eu[0] + Nu[1] * Eu[1] + Nu[2] * Eu[2];
+    if(NuDotEu < 0){ intensity = ambient;}
+    else{
+
+      //find Ru vector
+      Ru[0] = 2*NuDotLu*Nu[0] - Lu[0];
+      Ru[1] = 2*NuDotLu*Nu[1] - Lu[1];
+      Ru[2] = 2*NuDotLu*Nu[2] - Lu[2];
+      
+      EuDotRu = Eu[0] * Ru[0] + Eu[1] * Ru[1] + Eu[2] * Ru[2];
+      if(EuDotRu < 0) specular = 0;
+      else specular = (1.0 - ambient - diffuseMax) * pow((EuDotRu),specularPower);
+      diffuse = diffuseMax*(NuDotLu);
+      intensity = ambient + diffuse + specular;
+    }
+
+    double q = specular + diffuseMax;
+    if(intensity < q){
+      rgb[0] = irgb[objNum][0] * (intensity/q);
+      rgb[1] = irgb[objNum][1] * (intensity/q);
+      rgb[2] = irgb[objNum][2] * (intensity/q);
+    }
+    else{
+      double adder = (intensity - q);
+      rgb[0] = irgb[objNum][0] + adder;
+      rgb[1] = irgb[objNum][1] + adder;
+      rgb[2] = irgb[objNum][2] + adder;
+
+
+    }
+    
+  }
+  else if(lightModel == 2){
     double xCom = x[objNum][cont[objNum][polyNum][0]];
     double yCom = y[objNum][cont[objNum][polyNum][0]];
     double zCom = z[objNum][cont[objNum][polyNum][0]];
@@ -180,8 +277,24 @@ void draw_object(int input)
   }
 }
 
+int compare (const void *p, const void *q)
+{
+  Thing *a, *b ;
+
+  a = (Thing*)p ;
+  b = (Thing*)q ;
+
+  if  (((*a).dist) > ((*b).dist)) return -1 ;
+  else if (((*a).dist) < ((*b).dist)) return 1 ;
+  else return 0 ;
+}
+
 void sort_things(Thing *Things, int length) 
 {
+
+  qsort (Things, length, sizeof(Thing), compare ) ;
+
+  /*Begin Selection Sort
   int i,s,j ;
   Thing tmp;
   int n = length;
@@ -195,7 +308,7 @@ void sort_things(Thing *Things, int length)
     Things[i] = Things[s] ;
     Things[s] = tmp ;
   }
-
+  */
 }
 
 void draw_all_object(int numObjects)
@@ -386,7 +499,8 @@ int main(int argc, char **argv){
 	draw_all_object(argc - 1);
     }
     else if(input == 'k' || input == 'K'){
-      lightModel = -lightModel;
+      if(lightModel == 0 || lightModel == 1) lightModel++;
+      else if(lightModel == 2) lightModel = 0;
       if(topMode == 0)
 	draw_object(previousObj);
       else
@@ -395,6 +509,11 @@ int main(int argc, char **argv){
     else if(input == ']') {
       lightAmount += sign*0.1;
       if(lightAmount < 0) lightAmount = 0;
+      else if(lightAmount > 1) lightAmount = 1;
+      ambient += sign*0.05;
+      if(lightAmount < 0) ambient = 0;
+      else if(lightAmount > 0.3) ambient = 0.3;
+
       if(topMode == 0)
 	draw_object(previousObj);
       else
@@ -449,6 +568,55 @@ int main(int argc, char **argv){
 	else
 	  draw_all_object(argc - 1);
       }
+    }
+    else if(input == 'i' || input == 'I'){
+      printf("Enter your command: ");
+      char stringCommand[50];
+      scanf("%s",stringCommand);
+
+      if(strcmp(stringCommand, "lightPosition") == 0){
+	double xp,yp,zp;
+	scanf("%lf %lf %lf",&xp,&yp,&zp);
+	printf("Translating light to (%.2f, %.2f, %.2f)\n",xp,yp,zp);
+	lightLocation[0] = xp;
+	lightLocation[1] = yp;
+	lightLocation[2] = zp;
+      }
+      else if(strcmp(stringCommand, "lightLevel") == 0){
+	double amt;
+	scanf("%lf",&amt);
+	printf("Setting ambient light to %.2f\n",amt);
+	ambient = amt;
+        lightAmount = amt;
+      }
+      else if(strcmp(stringCommand, "diffuseMax") == 0){
+	double amt;
+	scanf("%lf",&amt);
+	printf("Setting diffuseMax to %.2f\n",amt);
+	diffuseMax = amt;
+      }
+      else if(strcmp(stringCommand, "translate") == 0){
+	double xp,yp,zp;
+	int objnum;
+	scanf(" %d %lf %lf %lf",&objnum,&xp,&yp,&zp);
+	printf("Translating object %d to (%.2f, %.2f, %.2f)\n",objnum,xp,yp,zp);
+	xp -= x[objnum][numpoints[objnum]];
+	yp -= y[objnum][numpoints[objnum]];
+	zp -= z[objnum][numpoints[objnum]];
+	double a[4][4];
+
+        M3d_make_translation(a, xp, yp, zp);
+	M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,
+			    x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+      }
+      
+      
+      
+      if(topMode == 0)
+	  draw_object(previousObj);
+	else
+	  draw_all_object(argc - 1);
+      
     }
     
     input = G_wait_key();

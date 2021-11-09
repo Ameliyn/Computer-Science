@@ -243,7 +243,3 @@ int M3d_x_product (double res[3], double a[3], double b[3])
 
     return v ;
 }
-
-
-
-
