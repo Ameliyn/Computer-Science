@@ -43,7 +43,7 @@ loopOne:
 	rrmovq %rdi, %rax     #%rax holds *data[0]
 	
 	#set condition flags
-	mrmovq (%r10), %r11   #j = i
+	rrmovq %r10, %r11   #j = i
 	subq %rsi, %r11       #j -= last if j < 0 then j < last
 	#end set condition flags
 
@@ -53,15 +53,16 @@ loopTwo:
 	mrmovq (%rax), %r12	#%r12 holds long temp = data[i]
 	addq %r8, %rax 	   	#%rax is pointer to data[i+1]
 	mrmovq (%rax), %r13  	#%r13 holds long t = data[i+1]
+	subq %r8, %rax 		#return %rax to data[i]
 
 	#check if statement
-	subq %r13, %r12		#temp -= t if temp > 0 data[i] > data[i+1]
-	jle endLoopTwo 		#if data[i] < 0 skip if statement
+	subq %r12, %r13		#temp -= t if temp > 0 data[i] > data[i+1]
+	jge endLoopTwo		#if data[i] < 0 skip if statement
 	
 	#execute if statement
-	subq %r8, %rax		#rax is pointer to data[i]
 	mrmovq (%rax), %r12 	#%r12 holds long temp = data[i]
 	addq %r8, %rax 		#%rax is pointer to data[i+1]
+	mrmovq (%rax), %r13  	#%r13 holds long t = data[i+1]
 	rmmovq %r12, (%rax) 	#data[i+1] = data[i]
 	subq %r8, %rax 		#rax is pointer to data[i]
 	rmmovq %r13, (%rax)  	#data[i] = t
@@ -71,17 +72,18 @@ endLoopTwo:
 	addq %r8, %rax	      #%rax holds *data[i]
 	
 	#set condition codes
-	mrmovq (%r10), %r11   #j = i
+	rrmovq %r10, %r11   #j = i
 	subq %rsi, %r11       #j -= last if j < 0 then i < last
 	#end condition codes
 	
 testTwo:
-	jge loopTwo            #if i < last continue loopTwo
+	jl loopTwo            #if i < last continue loopTwo
 	subq %r9, %rsi         #last -= 1
 testOne:
 	jne loopOne	      #if last > 0 continue
 	ret                   #return
 
+	
 # stack starts here and grows to lower addresses
         .pos    0xFF8
 stack:

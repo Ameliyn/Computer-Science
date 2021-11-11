@@ -36,52 +36,54 @@
                             | 	#set up loop One
 0x0ac: 6196                 | 	subq %r9, %rsi	      #%rsi holds last
 0x0ae: 6266                 | 	andq %rsi, %rsi       #check parameter
-0x0b0: 703a01000000000000   | 	jmp testOne           
+0x0b0: 703401000000000000   | 	jmp testOne           
 0x0b9:                      | loopOne:
                             | 	#set up loop two
 0x0b9: 30fa0000000000000000 | 	irmovq $0, %r10       #%r10 holds i = 0
 0x0c3: 2070                 | 	rrmovq %rdi, %rax     #%rax holds *data[0]
                             | 	
                             | 	#set condition flags
-0x0c5: 50ba0000000000000000 | 	mrmovq (%r10), %r11   #j = i
-0x0cf: 616b                 | 	subq %rsi, %r11       #j -= last if j < 0 then j < last
+0x0c5: 20ab                 | 	rrmovq %r10, %r11   #j = i
+0x0c7: 616b                 | 	subq %rsi, %r11       #j -= last if j < 0 then j < last
                             | 	#end set condition flags
                             | 
-0x0d1: 702f01000000000000   | 	jmp testTwo
-0x0da:                      | loopTwo:
+0x0c9: 702901000000000000   | 	jmp testTwo
+0x0d2:                      | loopTwo:
                             | 	#if(data[i+1] < data[i])
-0x0da: 50c00000000000000000 | 	mrmovq (%rax), %r12	#%r12 holds long temp = data[i]
-0x0e4: 6080                 | 	addq %r8, %rax 	   	#%rax is pointer to data[i+1]
-0x0e6: 50d00000000000000000 | 	mrmovq (%rax), %r13  	#%r13 holds long t = data[i+1]
+0x0d2: 50c00000000000000000 | 	mrmovq (%rax), %r12	#%r12 holds long temp = data[i]
+0x0dc: 6080                 | 	addq %r8, %rax 	   	#%rax is pointer to data[i+1]
+0x0de: 50d00000000000000000 | 	mrmovq (%rax), %r13  	#%r13 holds long t = data[i+1]
+0x0e8: 6180                 | 	subq %r8, %rax 		#return %rax to data[i]
                             | 
                             | 	#check if statement
-0x0f0: 61dc                 | 	subq %r13, %r12		#temp -= t if temp > 0 data[i] > data[i+1]
-0x0f2: 711f01000000000000   | 	jle endLoopTwo 		#if data[i] < 0 skip if statement
+0x0ea: 61cd                 | 	subq %r12, %r13		#temp -= t if temp > 0 data[i] > data[i+1]
+0x0ec: 752101000000000000   | 	jge endLoopTwo		#if data[i] < 0 skip if statement
                             | 	
                             | 	#execute if statement
-0x0fb: 6180                 | 	subq %r8, %rax		#rax is pointer to data[i]
-0x0fd: 50c00000000000000000 | 	mrmovq (%rax), %r12 	#%r12 holds long temp = data[i]
-0x107: 6080                 | 	addq %r8, %rax 		#%rax is pointer to data[i+1]
-0x109: 40c00000000000000000 | 	rmmovq %r12, (%rax) 	#data[i+1] = data[i]
-0x113: 6180                 | 	subq %r8, %rax 		#rax is pointer to data[i]
-0x115: 40d00000000000000000 | 	rmmovq %r13, (%rax)  	#data[i] = t
+0x0f5: 50c00000000000000000 | 	mrmovq (%rax), %r12 	#%r12 holds long temp = data[i]
+0x0ff: 6080                 | 	addq %r8, %rax 		#%rax is pointer to data[i+1]
+0x101: 50d00000000000000000 | 	mrmovq (%rax), %r13  	#%r13 holds long t = data[i+1]
+0x10b: 40c00000000000000000 | 	rmmovq %r12, (%rax) 	#data[i+1] = data[i]
+0x115: 6180                 | 	subq %r8, %rax 		#rax is pointer to data[i]
+0x117: 40d00000000000000000 | 	rmmovq %r13, (%rax)  	#data[i] = t
                             | 
-0x11f:                      | endLoopTwo:
-0x11f: 609a                 | 	addq %r9, %r10        #i++
-0x121: 6080                 | 	addq %r8, %rax	      #%rax holds *data[i]
+0x121:                      | endLoopTwo:
+0x121: 609a                 | 	addq %r9, %r10        #i++
+0x123: 6080                 | 	addq %r8, %rax	      #%rax holds *data[i]
                             | 	
                             | 	#set condition codes
-0x123: 50ba0000000000000000 | 	mrmovq (%r10), %r11   #j = i
-0x12d: 616b                 | 	subq %rsi, %r11       #j -= last if j < 0 then i < last
+0x125: 20ab                 | 	rrmovq %r10, %r11   #j = i
+0x127: 616b                 | 	subq %rsi, %r11       #j -= last if j < 0 then i < last
                             | 	#end condition codes
                             | 	
-0x12f:                      | testTwo:
-0x12f: 75da00000000000000   | 	jge loopTwo            #if i < last continue loopTwo
-0x138: 6196                 | 	subq %r9, %rsi         #last -= 1
-0x13a:                      | testOne:
-0x13a: 74b900000000000000   | 	jne loopOne	      #if last > 0 continue
-0x143: 90                   | 	ret                   #return
+0x129:                      | testTwo:
+0x129: 72d200000000000000   | 	jl loopTwo            #if i < last continue loopTwo
+0x132: 6196                 | 	subq %r9, %rsi         #last -= 1
+0x134:                      | testOne:
+0x134: 74b900000000000000   | 	jne loopOne	      #if last > 0 continue
+0x13d: 90                   | 	ret                   #return
                             | 
+                            | 	
                             | # stack starts here and grows to lower addresses
 0xff8:                      |         .pos    0xFF8
 0xff8:                      | stack:

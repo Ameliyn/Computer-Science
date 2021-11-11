@@ -780,6 +780,125 @@ test:
 
 }
 
+
+Circuits:
+-  => horizontal wire
+|  => vertical wire
+\  => Transistor (switch)
++  => junction
+>  => vertical wire passthrough (no cross connection)
+^  => horizontal wire passthrough (no cross connection)
+
+NOT GATE:
+	5v
+         |
+         |
+      +--\
+      |  |
+IN----|  +-----Out
+      |  |
+      +--\
+         |
+         |
+    	 0V(ground)
+A | Out
+0 | 1
+1 | 0
+
+NAND Gate:
+--A universal gate, can build everything from this
+           5v  5v
+           |    |
+A--+------->----\
+   |       |    |
+B-->---+---\    |
+   |   |   +----------Out
+   |   |     |
+   +--->-----\
+       |     |
+       +-----\
+             0V
+A B | Out
+0 0 | 1
+1 0 | 1
+0 1 | 1
+1 1 | 0
+
+AND(A,B) ==> NAND(NAND(A,B),NAND(A,B))
+OR(A,B)  ==> NAND(Not(A), Not(B))
+
+andq => feeds 64bits into and gates and takes the result
+--and(a0,b0)
+--and(a1,b1)
+--...
+--and(a63,b63)
+
+XOR Gate:
+NAND(NAND(A,NAND(A,B)),NAND(B,NAND(A,B)))
+
+A B | Out
+0 0 | 0
+0 1 | 1
+1 0 | 1
+1 1 | 0
+
+Half Adder (can only do the one bit with no carry in):
+-- parrallel A^B, A&B
+-- two outputs (sum,carry)
+
+A B A^B A&B
+0 0  0   0   =>0 + 0 = 0 with 0 carry
+0 1  1   0   =>0 + 1 = 1 with 0 carry
+1 0  1   0   =>1 + 0 = 1 with 0 carry
+1 1  0   1   =>1 + 1 = 0 with 1 carry
+
+
+Full Adder:
+-- 3 input, 2 output
+-- halfadd(halfadd(a,b) + carryin)
+-- carryout => (carryout1 | carryout2)
+-- two outputs (sum, carryout)
+
+64-bit adder
+-- string of full adders
+-- carryin0 = 0
+-- next carry in = result of add1
+-- result = 64bit number with cf as final carry out
+
+Equal: Not(XOR(A,B))
+
+64Bit Equal:
+--64 equal gates into one and gate
+
+Selection Gate (MUX):
+--OR(AND(NotS, A),And(S,B))
+--0 selects A, 1 selects B, Out = whichever selected
+--Inputs A,B,Selection
+--64bit is 64 MUXs with one Selection line
+
+A B S | Out
+0 0 0 |  0
+0 1 0 |  0
+1 0 0 |  1
+0 0 1 |  0
+0 1 1 |  1
+1 0 1 |  0
+1 1 1 |  1
+
+MUX4:
+--selects between 4 lines
+--Inputs: A,B,C,D,S1,S2
+--Binary selection 0,0=A 0,1=B 1,0=C 1,1=D
+--Can be built with three MUXs
+
+Put it all together (arithmetic and logic unit (ALU))!:
+--Input X,Y,S1,S2
+--addq = 0, subq = 1, andq = 2, xorq = 3
+--Have adder, subber, ander, and xor at all times computed and then pick which to display based on selection line
+--Generates extra heat and uses energy pointlessly, but gives us speeeed
+--This is why y86 has add,sub,and,xor as 60,61,62,63 codes (6 tells to route the next number to the arithmetic
+  operators
+
 RANDOM OTHER SHIT:
 
 Colors for Ross:

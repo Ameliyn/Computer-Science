@@ -13,6 +13,7 @@ int psize[MAXOBJECTS][MAXPOLYS];
 int cont[MAXOBJECTS][MAXPOLYS][20];
 double zCOM[MAXOBJECTS][2][MAXPOLYS];
 double irgb[MAXOBJECTS][3];
+int customColors = 0;
 int lightModel = 0;
 double lightAmount = 0.5;
 double lightLocation[3] = {0.0,0.0,0.0};
@@ -69,30 +70,32 @@ void load_files(int numFiles, char** fileNames){
     }
     //center_object_matrix(fileNumber);
 
-    if(fileNumber % 5 == 0){
-      irgb[fileNumber][0] = 1;
-      irgb[fileNumber][1] = 1;
-      irgb[fileNumber][2] = 1;
-    }
-    else if(fileNumber % 5 == 1){
-      irgb[fileNumber][0] = 0;
-      irgb[fileNumber][1] = 1;
-      irgb[fileNumber][2] = 0;
-    }
-    else if(fileNumber % 5 == 2){
-      irgb[fileNumber][0] = 0;
-      irgb[fileNumber][1] = 0;
-      irgb[fileNumber][2] = 1;
-    }
-    else if(fileNumber % 5 == 3){
-      irgb[fileNumber][0] = 1;
-      irgb[fileNumber][1] = 1;
-      irgb[fileNumber][2] = 0;
-    }
-    else if(fileNumber % 5 == 4){
-      irgb[fileNumber][0] = 0;
-      irgb[fileNumber][1] = 1;
-      irgb[fileNumber][2] = 1;
+    if(customColors == 0){
+      if(fileNumber % 5 == 0){
+	irgb[fileNumber][0] = 1;
+	irgb[fileNumber][1] = 0;
+	irgb[fileNumber][2] = 0;
+      }
+      else if(fileNumber % 5 == 1){
+	irgb[fileNumber][0] = 0;
+	irgb[fileNumber][1] = 1;
+	irgb[fileNumber][2] = 0;
+      }
+      else if(fileNumber % 5 == 2){
+	irgb[fileNumber][0] = 0;
+	irgb[fileNumber][1] = 0;
+	irgb[fileNumber][2] = 1;
+      }
+      else if(fileNumber % 5 == 3){
+	irgb[fileNumber][0] = 1;
+	irgb[fileNumber][1] = 1;
+	irgb[fileNumber][2] = 0;
+      }
+      else if(fileNumber % 5 == 4){
+	irgb[fileNumber][0] = 0;
+	irgb[fileNumber][1] = 1;
+	irgb[fileNumber][2] = 1;
+      }
     }
     
     
@@ -188,7 +191,7 @@ void decide_color(int objNum, int polyNum){
     NuDotLu = Nu[0] * Lu[0] + Nu[1] * Lu[1] + Nu[2] * Lu[2];
     
     NuDotEu = Nu[0] * Eu[0] + Nu[1] * Eu[1] + Nu[2] * Eu[2];
-    if(NuDotEu < 0){ intensity = ambient;}
+    if(NuDotEu < 0){ intensity = ambient; specular = 0;}
     else{
 
       //find Ru vector
@@ -198,24 +201,36 @@ void decide_color(int objNum, int polyNum){
       
       EuDotRu = Eu[0] * Ru[0] + Eu[1] * Ru[1] + Eu[2] * Ru[2];
       if(EuDotRu < 0) specular = 0;
-      else specular = (1.0 - ambient - diffuseMax) * pow((EuDotRu),specularPower);
+      else specular = (1.0 - ambient - diffuseMax) * pow(EuDotRu,specularPower);
       diffuse = diffuseMax*(NuDotLu);
       intensity = ambient + diffuse + specular;
     }
 
-    double q = specular + diffuseMax;
+    double q = ambient + diffuseMax;
+    
     if(intensity < q){
-      rgb[0] = irgb[objNum][0] * (intensity/q);
-      rgb[1] = irgb[objNum][1] * (intensity/q);
-      rgb[2] = irgb[objNum][2] * (intensity/q);
+
+      rgb[0] = intensity * irgb[objNum][0]/q;
+      rgb[1] = intensity * irgb[objNum][1]/q;
+      rgb[2] = intensity * irgb[objNum][2]/q;
+      //rgb[0] = irgb[objNum][0] * (intensity/q);
+      //rgb[1] = irgb[objNum][1] * (intensity/q);
+      //rgb[2] = irgb[objNum][2] * (intensity/q);
     }
     else{
-      double adder = (intensity - q);
-      rgb[0] = irgb[objNum][0] + adder;
-      rgb[1] = irgb[objNum][1] + adder;
-      rgb[2] = irgb[objNum][2] + adder;
-
-
+      /*
+      if(intensity > rgb[0]) rgb[0] = intensity;
+      else rgb[0] = irgb[objNum][0] * (intensity/q);
+      if(intensity > rgb[1]) rgb[1] = intensity;
+      else rgb[1] = irgb[objNum][1] * (intensity/q);
+      if(intensity > rgb[2]) rgb[2] = intensity;
+      else rgb[2] = irgb[objNum][2] * (intensity/q);
+      */
+      
+      //add to inherent the %along the line * distance of line
+      rgb[0] = irgb[objNum][0] + (((intensity - q) / (1 - q))*(1-irgb[objNum][0]));
+      rgb[1] = irgb[objNum][1] + (((intensity - q) / (1 - q))*(1-irgb[objNum][1]));
+      rgb[2] = irgb[objNum][2] + (((intensity - q) / (1 - q))*(1-irgb[objNum][2]));
     }
     
   }
@@ -274,6 +289,13 @@ void draw_object(int input)
     decide_color(input, i);
     if(vectorGood(input, i))
       G_polygon(xp,yp,psize[input][i]);
+  }
+  if(lightModel != 0){
+    printf("\nDrawing polygons with given settings:\n");
+    printf("Diffuse Max: %.3f\n",diffuseMax);
+    printf("Ambient: %.3f\n",ambient);
+    printf("Specular Power: %d\n",specularPower);
+    printf("Light Location: %.3f, %.3f, %.3f\n",lightLocation[0],lightLocation[1],lightLocation[2]);
   }
 }
 
@@ -394,7 +416,15 @@ void draw_all_object(int numObjects)
     G_rgb(0,0,0);
     G_polygon(xp,yp,psize[things[i].objNum][things[i].polyNum]);
   }
-  //end display polygons
+
+  if(lightModel != 0){
+    printf("\nDrawing polygons with given settings:\n");
+    printf("Diffuse Max: %.3f\n",diffuseMax);
+    printf("Ambient: %.3f\n",ambient);
+    printf("Specular Power: %d\n",specularPower);
+    printf("Light Location: %.3f, %.3f, %.3f\n",lightLocation[0],lightLocation[1],lightLocation[2]);
+    //end display polygons
+  }
 }
 
 void rotate_object(char direction, int sign, int objnum){
@@ -471,8 +501,30 @@ void fixObject(int objNum){
 
 int main(int argc, char **argv){
 
-  if(argc < 2) {printf("Usage: 2d_poly polygon.xy\n"); exit(0);}
-  load_files(argc - 1, argv);
+  
+  if(argc < 8 && argc >= 2)
+    load_files(argc - 1, argv);
+  else if(argc >= 8 && argc %4 == 0) {
+    customColors = 1;
+    char ** fileNames;
+    lightLocation[0] = atof(argv[1]);
+    lightLocation[1] = atof(argv[2]);
+    lightLocation[2] = atof(argv[3]);
+    int j = 0;
+    for(int i = 4; i < argc; i+=4){
+      fileNames[j] = argv[i];
+      irgb[j][0] = atof(argv[i+1]);
+      irgb[j][1] = atof(argv[i+2]);
+      irgb[j][2] = atof(argv[i+3]);
+      j++;
+    }
+    load_files(j+1,fileNames);
+
+  }else if(argc < 2) {
+    printf("Usage: ./thisFile polygon.xyz\n");
+    printf("OR Usage: xLight yLight zLight polgon.xyz ir ib ig polgon2.xyz ir ib ig ...\n");
+    exit(0);
+  }
 
   char input = 48;
   char mode = 't';
@@ -507,12 +559,9 @@ int main(int argc, char **argv){
 	draw_all_object(argc - 1);
     }
     else if(input == ']') {
-      lightAmount += sign*0.1;
-      if(lightAmount < 0) lightAmount = 0;
-      else if(lightAmount > 1) lightAmount = 1;
-      ambient += sign*0.05;
-      if(lightAmount < 0) ambient = 0;
-      else if(lightAmount > 0.3) ambient = 0.3;
+      ambient += sign*0.01;
+      if(ambient < 0) ambient = 0;
+      else if(ambient > 0.3) ambient = 0.3;
 
       if(topMode == 0)
 	draw_object(previousObj);
@@ -570,46 +619,79 @@ int main(int argc, char **argv){
       }
     }
     else if(input == 'i' || input == 'I'){
+      int n = 1;
       printf("Enter your command: ");
       char stringCommand[50];
-      scanf("%s",stringCommand);
+      while(n != 0){
+	
+	scanf(" %s",stringCommand);
 
-      if(strcmp(stringCommand, "lightPosition") == 0){
-	double xp,yp,zp;
-	scanf("%lf %lf %lf",&xp,&yp,&zp);
-	printf("Translating light to (%.2f, %.2f, %.2f)\n",xp,yp,zp);
-	lightLocation[0] = xp;
-	lightLocation[1] = yp;
-	lightLocation[2] = zp;
-      }
-      else if(strcmp(stringCommand, "lightLevel") == 0){
-	double amt;
-	scanf("%lf",&amt);
-	printf("Setting ambient light to %.2f\n",amt);
-	ambient = amt;
-        lightAmount = amt;
-      }
-      else if(strcmp(stringCommand, "diffuseMax") == 0){
-	double amt;
-	scanf("%lf",&amt);
-	printf("Setting diffuseMax to %.2f\n",amt);
-	diffuseMax = amt;
-      }
-      else if(strcmp(stringCommand, "translate") == 0){
-	double xp,yp,zp;
-	int objnum;
-	scanf(" %d %lf %lf %lf",&objnum,&xp,&yp,&zp);
-	printf("Translating object %d to (%.2f, %.2f, %.2f)\n",objnum,xp,yp,zp);
-	xp -= x[objnum][numpoints[objnum]];
-	yp -= y[objnum][numpoints[objnum]];
-	zp -= z[objnum][numpoints[objnum]];
-	double a[4][4];
+	if(strcmp(stringCommand, "lightPosition") == 0 ||
+	   strcmp(stringCommand, "lightLocation") == 0){
+	  double xp,yp,zp;
+	  scanf("%lf %lf %lf",&xp,&yp,&zp);
+	  printf("Translating light to (%.2f, %.2f, %.2f)\n",xp,yp,zp);
+	  lightLocation[0] = xp;
+	  lightLocation[1] = yp;
+	  lightLocation[2] = zp;
+	  n = 0;
+	}
+	else if(strcmp(stringCommand, "lightLevel") == 0){
+	  double amt;
+	  scanf("%lf",&amt);
+	  printf("Setting ambient light to %.2f\n",amt);
+	  ambient = amt;
+	  lightAmount = amt;
+	  n = 0;
+	}
+	else if(strcmp(stringCommand, "color") == 0 ||
+	   strcmp(stringCommand, "inherentColor") == 0){
+	  int obj;
+	  double xp,yp,zp;
+	  scanf("%d %lf %lf %lf",&obj,&xp,&yp,&zp);
+	  printf("Coloring object %d to (%.3f, %.3f, %.3f)\n",obj,xp,yp,zp);
+	  irgb[obj][0] = xp;
+	  irgb[obj][1] = yp;
+	  irgb[obj][2] = zp;
+	  n = 0;
+	}
+	else if(strcmp(stringCommand, "diffuseMax") == 0 ||
+		strcmp(stringCommand, "diffuse") == 0){
+	  double amt;
+	  scanf("%lf",&amt);
+	  printf("Setting diffuseMax to %.2f\n",amt);
+	  diffuseMax = amt;
+	  n = 0;
+	}
+	else if(strcmp(stringCommand, "specularPower") == 0 ||
+		strcmp(stringCommand, "specular") == 0){
+	  int amt;
+	  scanf("%d",&amt);
+	  printf("Setting diffuseMax to %d\n",amt);
+	  specularPower = amt;
+	  n = 0;
+	}
+	else if(strcmp(stringCommand, "translate") == 0 ||
+		strcmp(stringCommand, "move") == 0){
+	  double xp,yp,zp;
+	  int objnum;
+	  scanf(" %d %lf %lf %lf",&objnum,&xp,&yp,&zp);
+	  printf("Translating object %d to (%.2f, %.2f, %.2f)\n",objnum,xp,yp,zp);
+	  xp -= x[objnum][numpoints[objnum]];
+	  yp -= y[objnum][numpoints[objnum]];
+	  zp -= z[objnum][numpoints[objnum]];
+	  double a[4][4];
 
-        M3d_make_translation(a, xp, yp, zp);
-	M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,
-			    x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+	  M3d_make_translation(a, xp, yp, zp);
+	  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,
+			      x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+	  n = 0;
+	}
+	else if(strcmp(stringCommand, "return") == 0){
+	  printf("Cancelling input\n");
+	  n = 0;
+	}
       }
-      
       
       
       if(topMode == 0)
