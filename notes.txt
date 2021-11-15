@@ -899,6 +899,49 @@ Put it all together (arithmetic and logic unit (ALU))!:
 --This is why y86 has add,sub,and,xor as 60,61,62,63 codes (6 tells to route the next number to the arithmetic
   operators
 
+SEQUENTIAL PROCESSING:
+Memory Elements:
+--PC
+  Contains program counter
+  (delivers 64bit instruction)
+--Reg File
+  Delivers 2 64bit values
+  Takes in code instruction (tells it what to do)
+--I Mem (instruction memory)
+  Takes in address
+  Delivers 4bit code (0 = halt, 1 = Not, 3 = IRmovq, 6 = arithmetic operation)
+    4bit fun(function) (indicates which arithmetic, which jump, etc),
+    4bit rA (register A) (numbered 0-14, 15 = no register),
+    4bit rB (register B) (numbered 0-14, 15 = no register),
+    64bit value C (immediate value interested in)
+--D Mem (Data Memory Element)
+  Takes in 64bit address, 64bit data
+  Delivers 64bit valueM
+PC Adder
+-Takes current Instruction counter and adds some constant that will be the theoretical next instruction
+-Returns valP (valP is correct for all instructions except for jmp, call, ret)
+
+Memory feeds into Combinational Circuit which feeds into memory (basic how computer works)
+Combinational Circuit is slow if it does everything, so make specialized circuits to do each part
+--roughly CPU vs GPU type of things
+--originally developed by Henry Ford (says Alain) (built cars this way)
+--Called "Pipelining"
+
+Pipelining:
+Break computation into stages:
+--Fetch - get the code
+--Decode - understand the code
+--Execute - do the work
+--Memory - change the values
+--Write Back - return the result
+
+Create 5 Pipeline registers
+--Allow for values to be remembered(and/or changed) across stages
+--Captures instruction state up to that point
+--allows for starting next instruction before first instruction has fully completed
+--Ideally, it allows for 5(could be more or less) instructions to be done at the same time; UNLESS some instruction
+  requires the results of a previous instruction
+
 RANDOM OTHER SHIT:
 
 Colors for Ross:
