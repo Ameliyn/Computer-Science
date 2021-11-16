@@ -287,7 +287,6 @@ void draw_object(int input)
 
     
     decide_color(input, i);
-    
     if(vectorGood(input, i))
       G_polygon(xp,yp,psize[input][i]);
   }
@@ -334,30 +333,53 @@ void sort_things(Thing *Things, int length)
   */
 }
 
+void clipObjects(double * newx, double * newy, double * newz, int numObjects, int largestNumPoints){
+
+  //set up clipping window
+  double clipx[8] = {-0.5,0.5,0.5,-0.5,-1,1,1,-1};
+  double clipy[8] = {0.5,0.5,-0.5,-0.5,1,1,-1,-1};
+  double clipz[8] = {0,0,0,0,1,1,1,1};
+  double clipPolys[5][4] = {{0,1,2,3},{5,0,3,4},{5,6,1,0},{2,7,4,3},{1,6,7,2}};
+
+}
+
 void draw_all_object(int numObjects)
 {
 
   //begin find totalNumPolys, largestPolySize
   int totalNumPolys = 0;
-  int totalNumPoints = 0;
+  int largestNumPoints = numpoints[0];
   int largestPolySize = psize[0][0];
   int polyCounter[numObjects];
   
   for(int i = 0; i < numObjects; i++){
     totalNumPolys += numpolys[i];
-    totalNumPoints += numpoints[i];
+    
 
     if(i == 0)
       polyCounter[i] = 0;
     else
       polyCounter[i] = numpolys[i-1] + polyCounter[i-1];
-    
+
+    if(numpoints[i] > largestNumPoints) largestNumPoints = numpoints[i];
     for(int k = 0; k < numpolys[i]; k++){
       if(psize[i][k] > largestPolySize) largestPolySize = psize[i][k];
     }
   }
 
   //end find totalNumPolys, largestPolySize
+
+  //clip 3d polygons with infinite cuts!
+
+  double newx[numObjects][largestNumPoints];
+  double newy[numObjects][largestNumPoints];
+  double newz[numObjects][largestNumPoints];
+
+  //create polygon for clipping (based on window)
+
+  clipObjects(newx,newy,newz,numObjects,largestNumPoints);
+
+  //end clip 3d polygons
 
   
   
