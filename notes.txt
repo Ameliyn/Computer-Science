@@ -900,6 +900,8 @@ Put it all together (arithmetic and logic unit (ALU))!:
   operators
 
 SEQUENTIAL PROCESSING:
+https://docs.google.com/presentation/d/1sdtiVOc-J6_9EaLMRp8pt2SkbE_mQY4DW8Le7V2tB2A/edit#slide=id.g101c50ca323_0_228
+
 Memory Elements:
 --PC
   Contains program counter
@@ -942,6 +944,23 @@ Create 5 Pipeline registers
 --Ideally, it allows for 5(could be more or less) instructions to be done at the same time; UNLESS some instruction
   requires the results of a previous instruction
 
+PIPELINING PRESENTATION:
+
+Sequential (unpipelined) computation => One line at a time
+Pipelining => Start new fetch as soon as previous fetch in place
+Clock cycle goes faster if more units can be done in 1 overall cycle time.
+Frequency of execution depends on length of longest instruction
+
+In pipelining, it doesnt make any one instruction faster, it rather allows for more instructions to be started faster.
+In fact, pipelining makes every one instruction slightly slower.
+If the parts are inequal, then the longest part is the one that governs the frequency.
+There are diminishing returns as each computational logic unit's length approaches the register length (see slide 13)
+
+What if there is a hazard?
+1. Bubble The machine introduces a bubble that allows existing instructions to continue, and delays future
+   instructions by duplicating a stage of the current instruction (slide 27).
+2. Forwarding: Having a value skip a pipeline and jump to where it needs to be. However, this is not always possible.
+3. The processor uses a combination of both bubbles and forwarding in order to work quickest.
 RANDOM OTHER SHIT:
 
 Colors for Ross:
