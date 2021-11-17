@@ -3,6 +3,7 @@
 #define MAXOBJECTS 10
 #define MAXPTS 50000
 #define MAXPOLYS 30000
+#define MAXSIDES 1000
 
 int numpoints[MAXOBJECTS];
 int numpolys[MAXOBJECTS];
@@ -10,7 +11,7 @@ double x[MAXOBJECTS][MAXPTS];
 double y[MAXOBJECTS][MAXPTS];
 double z[MAXOBJECTS][MAXPTS];
 int psize[MAXOBJECTS][MAXPOLYS];
-int cont[MAXOBJECTS][MAXPOLYS][20];
+int cont[MAXOBJECTS][MAXPOLYS][MAXSIDES];
 double zCOM[MAXOBJECTS][2][MAXPOLYS];
 double irgb[MAXOBJECTS][3];
 int customColors = 0;
@@ -19,6 +20,7 @@ double lightAmount = 0.5;
 double lightLocation[3] = {0.0,0.0,0.0};
 double ambient = 0.2;
 double diffuseMax = 0.5;
+int individualPoly = -1;
 int specularPower = 50;
 
 int scrnsize = 1000;
@@ -287,8 +289,23 @@ void draw_object(int input)
 
     
     decide_color(input, i);
-    if(vectorGood(input, i))
-      G_polygon(xp,yp,psize[input][i]);
+    
+    if(vectorGood(input, i)){
+      if(individualPoly == 1){
+	char key;
+	for(int k = 0; k < psize[input][i]; k++){
+	  if(k+1 < psize[input][i]) G_line(xp[k],yp[k],xp[k+1],yp[k+1]);
+	  else G_line(xp[k],yp[k],xp[0],yp[0]);
+	  if(k >= 30) G_rgb(0,1,0);
+	  key = G_wait_key();
+	  if(key == 'q') break;
+	}
+	if(key == 'q') break;
+	//G_polygon(xp,yp,psize[input][i]);
+      }
+      else
+	G_polygon(xp,yp,psize[input][i]);
+    }
   }
   if(lightModel != 0){
     printf("\nDrawing polygons with given settings:\n");
@@ -333,53 +350,30 @@ void sort_things(Thing *Things, int length)
   */
 }
 
-void clipObjects(double * newx, double * newy, double * newz, int numObjects, int largestNumPoints){
-
-  //set up clipping window
-  double clipx[8] = {-0.5,0.5,0.5,-0.5,-1,1,1,-1};
-  double clipy[8] = {0.5,0.5,-0.5,-0.5,1,1,-1,-1};
-  double clipz[8] = {0,0,0,0,1,1,1,1};
-  double clipPolys[5][4] = {{0,1,2,3},{5,0,3,4},{5,6,1,0},{2,7,4,3},{1,6,7,2}};
-
-}
-
 void draw_all_object(int numObjects)
 {
 
   //begin find totalNumPolys, largestPolySize
   int totalNumPolys = 0;
-  int largestNumPoints = numpoints[0];
+  int totalNumPoints = 0;
   int largestPolySize = psize[0][0];
   int polyCounter[numObjects];
   
   for(int i = 0; i < numObjects; i++){
     totalNumPolys += numpolys[i];
-    
+    totalNumPoints += numpoints[i];
 
     if(i == 0)
       polyCounter[i] = 0;
     else
       polyCounter[i] = numpolys[i-1] + polyCounter[i-1];
-
-    if(numpoints[i] > largestNumPoints) largestNumPoints = numpoints[i];
+    
     for(int k = 0; k < numpolys[i]; k++){
       if(psize[i][k] > largestPolySize) largestPolySize = psize[i][k];
     }
   }
 
   //end find totalNumPolys, largestPolySize
-
-  //clip 3d polygons with infinite cuts!
-
-  double newx[numObjects][largestNumPoints];
-  double newy[numObjects][largestNumPoints];
-  double newz[numObjects][largestNumPoints];
-
-  //create polygon for clipping (based on window)
-
-  clipObjects(newx,newy,newz,numObjects,largestNumPoints);
-
-  //end clip 3d polygons
 
   
   
@@ -596,6 +590,13 @@ int main(int argc, char **argv){
     }
     else if(input == 'u' || input == 'U') {
       scale_object(sign, previousObj);
+      if(topMode == 0)
+	draw_object(previousObj);
+      else
+	draw_all_object(argc - 1);
+    }
+    else if(input == '`') {
+      individualPoly *= -1;
       if(topMode == 0)
 	draw_object(previousObj);
       else

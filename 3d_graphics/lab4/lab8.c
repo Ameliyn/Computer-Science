@@ -51,7 +51,7 @@ int create_3d_object(double xp[], double yp[], int numpoints, int numRot, char *
   fprintf(f,"%d\n",numpolys + 2);
 
   //add bottom
-  fprintf(f,"%d ",numRot + 1);
+  fprintf(f,"%d ",numRot);
   for(int i = numRot - 1; i >= 0; i--)
   {
     if(i - 1 == -1)

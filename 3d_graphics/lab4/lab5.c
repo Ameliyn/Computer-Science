@@ -3,6 +3,7 @@
 #define MAXOBJECTS 10
 #define MAXPTS 50000
 #define MAXPOLYS 30000
+#define MAXSIDES 1000
 
 int numpoints[MAXOBJECTS];
 int numpolys[MAXOBJECTS];
@@ -10,7 +11,7 @@ double x[MAXOBJECTS][MAXPTS];
 double y[MAXOBJECTS][MAXPTS];
 double z[MAXOBJECTS][MAXPTS];
 int psize[MAXOBJECTS][MAXPOLYS];
-int cont[MAXOBJECTS][MAXPOLYS][20];
+int cont[MAXOBJECTS][MAXPOLYS][MAXSIDES];
 int invertObject;
 
 int scrnsize = 1000; 
