@@ -6,7 +6,7 @@
 #define MAXSIDES 1000
 /*
 
-  Lab7 Light Model
+  Lab9 3d Polygon Clipping
 
  */
 
@@ -19,22 +19,18 @@ int psize[MAXOBJECTS][MAXPOLYS];
 int cont[MAXOBJECTS][MAXPOLYS][MAXSIDES];
 double zCOM[MAXOBJECTS][2][MAXPOLYS];
 double irgb[MAXOBJECTS][3];
+int clipPolys = -1;
 int customColors = 0;
-int lightModel = 0;
+int lightModel = -1;
 double lightAmount = 0.5;
 double lightLocation[3] = {0.0,0.0,0.0};
 double ambient = 0.2;
 double diffuseMax = 0.5;
 int specularPower = 50;
-int scrnsize = 1000;
-int halfangle = 45;
 
-double hitherDistance = .1;
-double yonDistance = 200;
-double viewA[6];
-double viewB[6];
-double viewC[6];
-double viewD[6];
+int scrnsize = 1000;
+
+int halfangle = 45;
 
 typedef struct {
   int objNum;
@@ -44,39 +40,6 @@ typedef struct {
 
 void load_files(int numFiles, char** fileNames){
 
-  //set up view window
-
-  double tanhalf = tan(halfangle);
-  viewA[0] = 0;
-  viewB[0] = 0;
-  viewC[0] = hitherDistance;
-  viewD[0] = 0;
-
-  viewA[1] = 0;
-  viewB[1] = 1;
-  viewC[1] = tanhalf;
-  viewD[1] = 0;
-
-  viewA[2] = 1;
-  viewB[2] = 0;
-  viewC[2] = tanhalf;
-  viewD[2] = 0;
-
-  viewA[3] = 0;
-  viewB[3] = -1;
-  viewC[3] = tanhalf;
-  viewD[3] = 0;
-  
-  viewA[4] = -1;
-  viewB[4] = 0;
-  viewC[4] = tanhalf;
-  viewD[4] = 0;
-
-  viewA[5] = 0;
-  viewB[5] = 0;
-  viewC[5] = yonDistance;
-  viewD[5] = 0;
-  
   FILE *f;
 
   for(int fileNumber = 0; fileNumber < numFiles; fileNumber++){
@@ -149,6 +112,8 @@ void load_files(int numFiles, char** fileNames){
   
 }
 
+///BEGIN HELPER METHODS///
+
 void poly_convert(double *x, double *y, double xInit, double yInit, double zInit){
   //if point in window
   //x'' = (400/H) * (X/Z) + 400
@@ -188,21 +153,6 @@ void makeUnit(double a[3]){
   a[2] /= magnitude;
 
 }
-
-int compare (const void *p, const void *q)
-{
-  Thing *a, *b ;
-
-  a = (Thing*)p ;
-  b = (Thing*)q ;
-
-  if  (((*a).dist) > ((*b).dist)) return -1 ;
-  else if (((*a).dist) < ((*b).dist)) return 1 ;
-  else return 0 ;
-}
-
-void sort_things(Thing *Things, int length)
-{qsort (Things, length, sizeof(Thing), compare );}
 
 //decide color decides the color of every polygon
 void decide_color(int objNum, int polyNum){
@@ -275,6 +225,7 @@ void decide_color(int objNum, int polyNum){
       rgb[2] = intensity * irgb[objNum][2]/q;
     }
     else{
+      
       //add to inherent the %along the line * distance of line
       rgb[0] = irgb[objNum][0] + (((intensity - q) / (1 - q))*(1-irgb[objNum][0]));
       rgb[1] = irgb[objNum][1] + (((intensity - q) / (1 - q))*(1-irgb[objNum][1]));
@@ -282,46 +233,49 @@ void decide_color(int objNum, int polyNum){
     }
     
   }
-  else if(lightModel == 2){
-    double xCom = x[objNum][cont[objNum][polyNum][0]];
-    double yCom = y[objNum][cont[objNum][polyNum][0]];
-    double zCom = z[objNum][cont[objNum][polyNum][0]];
-    for(int i = 1; i < psize[objNum][polyNum]; i++){
-      xCom += x[objNum][cont[objNum][polyNum][i]];
-      yCom += y[objNum][cont[objNum][polyNum][i]];
-      zCom += z[objNum][cont[objNum][polyNum][i]];
-    }
-    xCom /= psize[objNum][polyNum];
-    yCom /= psize[objNum][polyNum];
-    zCom /= psize[objNum][polyNum];
-
-    double dist = sqrt((lightLocation[0] - xCom)*(lightLocation[0] - xCom)
-		       + (lightLocation[1] - yCom)*(lightLocation[1] - yCom)
-		       + (lightLocation[2] - zCom)*(lightLocation[2] - zCom));
-    
-    if(rgb[0])
-      rgb[0] = (1.0 / (dist*dist)) * lightAmount;
-    if(rgb[1])
-      rgb[1] = (1.0 / (dist*dist)) * lightAmount;
-    if(rgb[2])
-      rgb[2] = (1.0 / (dist*dist)) * lightAmount;
-
-    if(rgb[0] > 0 && rgb[0] < 0.05)
-      rgb[0] = 0.05;
-    if(rgb[1] > 0 && rgb[1] < 0.05)
-      rgb[1] = 0.05;
-    if(rgb[1] > 0 && rgb[1] < 0.05)
-      rgb[1] = 0.05;
-  }
   
   //printf("Setting color to (%.2f, %.2f, %.2f)\n",rgb[0],rgb[1],rgb[2]);
   G_rgb(rgb[0],rgb[1],rgb[2]);
 }
 
-int  Clip_Polygon_Against_Plane(
-		  double a, double b, double c, double d, 
-                  double polyx[], double polyy[], double polyz[],
-		  int size, double resx[], double resy[], double resz[])
+int compare (const void *p, const void *q)
+{
+  Thing *a, *b ;
+
+  a = (Thing*)p ;
+  b = (Thing*)q ;
+
+  if  (((*a).dist) > ((*b).dist)) return -1 ;
+  else if (((*a).dist) < ((*b).dist)) return 1 ;
+  else return 0 ;
+}
+
+void sort_things(Thing *Things, int length) 
+{
+
+  qsort (Things, length, sizeof(Thing), compare ) ;
+
+  /*Begin Selection Sort
+  int i,s,j ;
+  Thing tmp;
+  int n = length;
+
+  for (i = 0 ; i < n ; i++) {
+    s = i ;
+    for (j = i+1 ; j < n ; j++) {
+      if (Things[j].dist > Things[s].dist) { s = j ; }
+    }
+    tmp = Things[i];
+    Things[i] = Things[s] ;
+    Things[s] = tmp ;
+  }
+  */
+}
+
+int  Clip_Polygon_Against_Line(
+                  double a, double b, double c, 
+                  double polyx[], double polyy[], int size,
+                  double resx[], double resy[])
 
 // Clip polygon against the line ax + by + c = 0,
 // where ax + by + c < 0 is considered IN.
@@ -331,7 +285,7 @@ int  Clip_Polygon_Against_Plane(
 
 {
   int num,i,j ;
-  double x1,y1,z1,x2,y2,z2,x21,y21,z21,den,t,xintsct,yintsct,zintsct;
+  double x1,y1,x2,y2,x21,y21,den,t,xintsct,yintsct ;
   double s1,s2 ;
 
   num = 0 ;
@@ -339,57 +293,58 @@ int  Clip_Polygon_Against_Plane(
      j = (i + 1) % size ;
 
      // load up segment to be clipped
-     x1 = polyx[i] ; y1 = polyy[i] ; z1 = polyz[i];
-     x2 = polyx[j] ; y2 = polyy[j] ; z2 = polyz[j];
+     x1 = polyx[i] ; y1 = polyy[i] ;
+     x2 = polyx[j] ; y2 = polyy[j] ;
 
      // clip line segment (x1,y1)-(x2,y2) against line
-     s1 = (a*x1 + b*y1 + c*z1 + d) ;
-     s2 = (a*x2 + b*y2 + c*z2 + d) ;
+     s1 = (a*x1 + b*y1 + c) ;
+     s2 = (a*x2 + b*y2 + c) ;
 
      if ((s1 >= 0) && (s2 >= 0)) {
         // out to out, do nothing
      } else if ((s1 < 0) && (s2 < 0)) {
         // in to in
-       resx[num] = x2 ; resy[num] = y2 ; resz[num] = z2; num++ ;
+        resx[num] = x2 ; resy[num] = y2 ; num++ ;
      } else {
         // one is in, the other out, so find the intersection
 
-       x21 = x2 - x1 ; y21 = y2 - y1 ; z21 = z2 - z1;
-        den = a*x21 + b*y21 + c*z21;
+        x21 = x2 - x1 ; y21 = y2 - y1 ;
+        den = a*x21 + b*y21 ;
         if (den == 0) continue ; // do nothing-should never happen
-        t = -(a*x1 + b*y1 + c*z1 + d)/den ;
+        t = -(a*x1 + b*y1 + c)/den ;
         xintsct = x1 + t*x21 ;
         yintsct = y1 + t*y21 ;
-	zintsct = z1 + t*z21 ;
 
         if (s1 < 0) { 
           // in to out
-          resx[num] = xintsct ; resy[num] = yintsct ; resz[num] = zintsct; num++ ;
+          resx[num] = xintsct ; resy[num] = yintsct ; num++ ;
         } else  {
           // out to in
-          resx[num] = xintsct ; resy[num] = yintsct ; resz[num] = zintsct; num++ ;
-          resx[num] = x2      ; resy[num] = y2      ; rez[num] = z2; num++ ;
+          resx[num] = xintsct ; resy[num] = yintsct ; num++ ;
+          resx[num] = x2      ; resy[num] = y2      ; num++ ;
         }
-
      }
-
-
   } // end for i
 
   return num ;  // return size of the result poly
 }
 
-int  Clip_Polygon_Against_Trapezoidal_Window (
-	 double px[],  double py[], double pz[], int numpoints, int psize[], int cont[][],
-	 double wA[],  double wB[], double wC[], double wD[], int wsize)
+int  Clip_Polygon_Against_Convex_Window (
+      double px[],  double py[], int psize,
+      double wx[],  double wy[], int wsize)
 
 {
-  double nx[100],ny[100],nz[100], cwx,cwy,cwz ;
+   double nx[100],ny[100],  a,b,c,  cwx,cwy ;
    int i,k,m ;
 
 
    // find center of mass of window
-   cwx = 0.0; cwy = 0.0; cwz = (yonDistance + hitherDistance) / 2;
+   cwx = 0.0 ; cwy = 0.0 ;
+   for (k = 0 ; k < wsize ; k++) {
+     cwx += wx[k] ; cwy += wy[k] ;
+   }
+   cwx /= wsize ; cwy /= wsize ;
+
 
 
    // clip the polygon against each edge of the window
@@ -398,92 +353,38 @@ int  Clip_Polygon_Against_Trapezoidal_Window (
       m = k+1 ; if (m == wsize) { m = 0 ; }
 
       // ax + by + c = 0 is eqn of this window edge
+      a = wy[m] - wy[k] ;
+      b = wx[k] - wx[m] ;
+      c = -(a*wx[k] + b*wy[k]) ;
 
       // but we need for ax + by + c < 0 to reflect "inside"
-      if (mA[k]*cwx + mB[k]*cwy + mC[k]*cwz + mD[k] > 0) {
-	mA[k] = -mA[k] ; mB[k] = -mB[k] ; mC[k] = -mC[k] ;
+      if (a*cwx + b*cwy + c > 0) {
+	a = -a ; b = -b ; c = -c ;
       }
 
-      psize = Clip_Polygon_Against_Plane (mA[k],mB[k],mC[k],mD[k],
-                                         px,py,pz,psize,
-                                         nx,ny,nz) ;
+      psize = Clip_Polygon_Against_Line (a,b,c,
+                                         px,py,psize,
+                                         nx,ny) ;
 
 
      // copy back in preparation for next pass
      for (i = 0 ; i < psize ; i++) {
        //      printf("%d : %lf %lf\n",k, nx[i],ny[i]) ;
-       px[i] = nx[i] ;   py[i] = ny[i] ;  pz[i] = nz[i];
+       px[i] = nx[i] ;   py[i] = ny[i] ;  
      }
      //     printf("\n") ;
+
+     //G_rgb(drand48(), drand48(), drand48()) ;
+     //G_fill_polygon(px,py,psize) ;
+     //G_wait_key() ;
+
    } // end for k
+
+
    return psize ;
 }
 
-void draw_object(int input)
-{
-  G_rgb(0,0,0);
-  G_clear();
-
-  double xp[numpoints[input]];
-  double yp[numpoints[input]];
-
-  double newx[numpoints[input]];
-  double newy[numpoints[input]];
-  double newz[numpoints[input]];
-  double newpsize[numpolys[input]];
-  double newcont[numpolys[input]][MAXSIDES];
-  
-  if(clipPolys == 1){
-    for(int i = 0; i < numpoints[input]; i++){
-      newx[i] = x[input][i];
-      newy[i] = y[input][i];
-      newz[i] = z[input][i];
-    }
-    for(int i = 0; i < numpolys[input]; i++){
-      newpsize[i] = psize[input][i];
-      for(int j = 0; j < psize[input][i]; j++){
-	newcont[i][j] = cont[input][i][j];
-      }
-    }
-
-    int clipnumpoints = Clip_Polygon_Against_Trapezoidal_Window (
-			       newx,  newy, newz, numpoints[input][i], newpsize, newcont,
-			       viewA, viewB, viewC, viewD, 6);
-  }
-  
-  
-  
-  for(int i = 0; i < numpolys[input]; i++){
-
-    if(clipPolys == 1){
-      for(int j = 0; j < clipnumpoints; j++){
-	poly_convert(&xp[j], &yp[j], x[input][cont[input][i][j]],
-		     y[input][cont[input][i][j]], z[input][cont[input][i][j]]);
-      }
-    }
-    else{
-      for(int j = 0; j < psize[input][i]; j++){
-	poly_convert(&xp[j], &yp[j], x[input][cont[input][i][j]],
-		     y[input][cont[input][i][j]], z[input][cont[input][i][j]]);
-      }
-    }
-
-    
-    decide_color(input, i);
-    
-    if(vectorGood(input, i))
-      G_polygon(xp,yp,psize[input][i]);
-  }
-  if(lightModel != 0){
-    printf("\nDrawing polygons with given settings:\n");
-    printf("Diffuse Max: %.3f\n",diffuseMax);
-    printf("Ambient: %.3f\n",ambient);
-    printf("Specular Power: %d\n",specularPower);
-    printf("Light Location: %.3f, %.3f, %.3f\n",lightLocation[0],lightLocation[1],lightLocation[2]);
-  }
-}
-
-
+///BEGIN DRAWING METHODS///
 
 void draw_all_object(int numObjects)
 {
@@ -555,6 +456,11 @@ void draw_all_object(int numObjects)
   
   double xp[largestPolySize];
   double yp[largestPolySize];
+  int clipnumpoints;
+
+  double wx[4] = {0,scrnsize,scrnsize,0};
+  double wy[4] = {0,0,scrnsize,scrnsize};
+  int ws = 4;
   
   for(int i = 0; i < totalNumPolys; i++){
 
@@ -567,9 +473,19 @@ void draw_all_object(int numObjects)
 
     
     decide_color(things[i].objNum,things[i].polyNum);
-    G_fill_polygon(xp,yp,psize[things[i].objNum][things[i].polyNum]);
-    G_rgb(0,0,0);
-    G_polygon(xp,yp,psize[things[i].objNum][things[i].polyNum]);
+    
+    if(clipPolys == 1){
+      clipnumpoints = Clip_Polygon_Against_Convex_Window (xp, yp, psize[things[i].objNum][things[i].polyNum],
+							  wx, wy, ws) ; 
+      G_fill_polygon(xp,yp,clipnumpoints);
+      G_rgb(0,0,0);
+      G_polygon(xp,yp,clipnumpoints);
+    }
+    else{
+      G_fill_polygon(xp,yp,psize[things[i].objNum][things[i].polyNum]);
+      G_rgb(0,0,0);
+      G_polygon(xp,yp,psize[things[i].objNum][things[i].polyNum]);
+    }
   }
 
   if(lightModel != 0){
@@ -581,6 +497,51 @@ void draw_all_object(int numObjects)
     //end display polygons
   }
 }
+
+void draw_object(int input)
+{
+  G_rgb(0,0,0);
+  G_clear();
+
+  double xp[numpoints[input]];
+  double yp[numpoints[input]];
+  int clipnumpoints;
+  double wx[4] = {0,scrnsize,scrnsize,0};
+  double wy[4] = {0,0,scrnsize,scrnsize};
+  int ws = 4;
+  
+  for(int i = 0; i < numpolys[input]; i++){
+    
+    for(int j = 0; j < psize[input][i]; j++){
+      poly_convert(&xp[j], &yp[j], x[input][cont[input][i][j]],
+		   y[input][cont[input][i][j]], z[input][cont[input][i][j]]);
+    }
+
+    
+    decide_color(input, i);
+    
+    if(vectorGood(input, i)){
+      if(clipPolys == 1){
+	clipnumpoints = Clip_Polygon_Against_Convex_Window (xp, yp, psize[input][i],
+							    wx, wy, ws) ; 
+        G_polygon(xp,yp,clipnumpoints);
+      }
+      else{
+        G_polygon(xp,yp,psize[input][i]);
+      }
+      
+    }
+  }
+  if(lightModel != 0){
+    printf("\nDrawing polygons with given settings:\n");
+    printf("Diffuse Max: %.3f\n",diffuseMax);
+    printf("Ambient: %.3f\n",ambient);
+    printf("Specular Power: %d\n",specularPower);
+    printf("Light Location: %.3f, %.3f, %.3f\n",lightLocation[0],lightLocation[1],lightLocation[2]);
+  }
+}
+
+///BEGIN POLYGON TRANSFORM/ROTATION/SCALING METHODS///
 
 void rotate_object(char direction, int sign, int objnum){
 
@@ -706,8 +667,15 @@ int main(int argc, char **argv){
 	draw_all_object(argc - 1);
     }
     else if(input == 'k' || input == 'K'){
-      if(lightModel == 0 || lightModel == 1) lightModel++;
-      else if(lightModel == 2) lightModel = 0;
+      lightModel *= -1;
+      if(topMode == 0)
+	draw_object(previousObj);
+      else
+	draw_all_object(argc - 1);
+    }
+    else if(input == 'j' || input == 'J'){
+      clipPolys *= -1;
+      printf("ClipPolys: %d\n",clipPolys);
       if(topMode == 0)
 	draw_object(previousObj);
       else
