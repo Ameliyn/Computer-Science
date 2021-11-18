@@ -1,6 +1,11 @@
 #include "../FPToolkit.c"
 #include "../M3d_matrix_toolsS.c"
-int triangles = 1;
+/*
+
+  Lab8 Build object of revolution
+
+ */
+int triangles = 1; //1 to close ends with triangles, anything else for large polygons
 int scrnsize = 1000;
 
 int create_3d_object(double xp[], double yp[], int numpoints, int numRot, char * file)

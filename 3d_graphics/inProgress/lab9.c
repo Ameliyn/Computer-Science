@@ -4,6 +4,11 @@
 #define MAXPTS 50000
 #define MAXPOLYS 30000
 #define MAXSIDES 1000
+/*
+
+  Lab9 3d Polygon Clipping
+
+ */
 
 int numpoints[MAXOBJECTS];
 int numpolys[MAXOBJECTS];

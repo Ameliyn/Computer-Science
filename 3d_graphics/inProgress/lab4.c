@@ -3,7 +3,10 @@
 #define MAXOBJECTS 10
 #define MAXPTS 50000
 #define MAXPOLYS 30000
-#define MAXSIDES 1000
+/*
+
+Lab4: Wireframes in Perspective
+ */
 
 int numpoints[MAXOBJECTS];
 int numpolys[MAXOBJECTS];
@@ -11,11 +14,67 @@ double x[MAXOBJECTS][MAXPTS];
 double y[MAXOBJECTS][MAXPTS];
 double z[MAXOBJECTS][MAXPTS];
 int psize[MAXOBJECTS][MAXPOLYS];
-int cont[MAXOBJECTS][MAXPOLYS][MAXSIDES];
-int invertObject;
+int cont[MAXOBJECTS][MAXPOLYS][20];
+double zCOM[MAXOBJECTS][2][MAXPOLYS];
 
 int scrnsize = 1000; 
 int halfangle = 45;
+
+void find_ZCOM(int fileNumber){
+  double zMax;
+  for(int i = 0; i < numpolys[fileNumber]; i++){
+      zMax = 0.0;
+      for(int j = 0; j < psize[fileNumber][i]; j++){
+	zMax += z[fileNumber][cont[fileNumber][i][j]];
+      }
+      zCOM[fileNumber][0][i] = zMax / psize[fileNumber][i];
+      zCOM[fileNumber][1][i] = i;
+    }
+
+}
+
+void sort_ZCOM(int fileNumber) 
+{
+  int i,s,j ;
+  double tmp ;
+  int n = numpolys[fileNumber];
+
+  for (i = 0 ; i < n ; i++) {
+    s = i ;
+    for (j = i+1 ; j < n ; j++) {
+      if (zCOM[fileNumber][0][j] > zCOM[fileNumber][0][s]) { s = j ; }
+    }
+    tmp = zCOM[fileNumber][0][i] ;
+    zCOM[fileNumber][0][i] = zCOM[fileNumber][0][s] ;
+    zCOM[fileNumber][0][s] = tmp ;
+    //keep i value with the COM
+    tmp = zCOM[fileNumber][1][i] ;
+    zCOM[fileNumber][1][i] = zCOM[fileNumber][1][s] ;
+    zCOM[fileNumber][1][s] = tmp ;
+  }
+
+}
+
+void sort_ZCOM_bubble(int fileNumber){
+
+  int temp;
+  for (int i = 0; i < (numpolys[fileNumber] - 1); i++)
+  {
+    for (int j = 0; j < numpolys[fileNumber] - 1 - i; j++)
+    {
+      if (zCOM[fileNumber][0][j] < zCOM[fileNumber][0][j+1])
+      {
+	temp = zCOM[fileNumber][0][j+1];
+	zCOM[fileNumber][0][j+1] = zCOM[fileNumber][0][j];
+	zCOM[fileNumber][0][j] = temp;
+	temp = zCOM[fileNumber][1][j+1];
+	zCOM[fileNumber][1][j+1] = zCOM[fileNumber][1][j];
+	zCOM[fileNumber][1][j] = temp;
+      }
+    }
+  }
+
+}
 
 void load_files(int numFiles, char** fileNames){
 
@@ -56,12 +115,16 @@ void load_files(int numFiles, char** fileNames){
       }
     }
 
+    
+    find_ZCOM(fileNumber);
+    sort_ZCOM(fileNumber);
     //center_object_matrix(fileNumber);
     
     fclose(f);
   }
   
 }
+
 
 void poly_convert(double *x, double *y, double xInit, double yInit, double zInit){
   //if point in window
@@ -89,9 +152,7 @@ int vectorGood(int input, int polyNumber){
   double cdotorigin = x[input][cont[input][polyNumber][0]]*aThree +
     y[input][cont[input][polyNumber][0]]*bThree + z[input][cont[input][polyNumber][0]]*cThree;
 
-  if(invertObject == 1)
-    return cdotorigin < 0;
-  else return cdotorigin > 0;
+  return cdotorigin <= 0;
   
 }
 
@@ -100,22 +161,36 @@ void draw_object(int input)
   G_rgb(0,0,0);
   G_clear();
 
-  double xp[numpoints[input]];
-  double yp[numpoints[input]];
+  double xp[numpolys[input]][10];
+  double yp[numpolys[input]][10];
+  //double zMax;
+  int temp1;
   
   for(int i = 0; i < numpolys[input]; i++){
-    
+    //zMax = 0.0;
     for(int j = 0; j < psize[input][i]; j++){
-      poly_convert(&xp[j], &yp[j], x[input][cont[input][i][j]],
+      poly_convert(&xp[i][j], &yp[i][j], x[input][cont[input][i][j]],
 		   y[input][cont[input][i][j]], z[input][cont[input][i][j]]);
     }
-
-    
-    G_rgb(1,0,0);
-    if(vectorGood(input, i))
-      G_polygon(xp,yp,psize[input][i]);
   }
+  
+
+  G_rgb(1,0,0);
+  for(int i = 0; i < numpolys[input]; i++){
+    if(zCOM[input][0][i] <= z[input][numpoints[input]] && vectorGood(input, i)){
+      G_rgb(1,0,0);
+      G_polygon(xp[(int)zCOM[input][1][i]],yp[(int)zCOM[input][1][i]],psize[input][(int)zCOM[input][1][i]]);
+    }
+    else{
+      G_rgb(0,1,0);
+      G_polygon(xp[(int)zCOM[input][1][i]],yp[(int)zCOM[input][1][i]],psize[input][(int)zCOM[input][1][i]]);
+    }
+    
+  }
+  
 }
+
+
 
 void rotate_object(char direction, int sign, int objnum){
 
@@ -135,16 +210,17 @@ void rotate_object(char direction, int sign, int objnum){
   M3d_make_translation(b, center[0], center[1], center[2]);
   M3d_mat_mult(a,b,a);
   M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
-
+  find_ZCOM(objnum);
+  sort_ZCOM(objnum);
 }
 
 void translate_object(char direction, int sign, int objnum){
 
   double a[4][4];
 
-  if(direction == 'x') M3d_make_translation(a, sign, 0, 0);
-  else if(direction == 'y') M3d_make_translation(a, 0, sign, 0);
-  else if(direction == 'z') M3d_make_translation(a, 0, 0, sign);
+  if(direction == 'x') M3d_make_translation(a, sign*2, 0, 0);
+  else if(direction == 'y') M3d_make_translation(a, 0, sign*2, 0);
+  else if(direction == 'z') M3d_make_translation(a, 0, 0, sign*2);
 
   M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
 }
@@ -161,16 +237,11 @@ int main(int argc, char **argv){
   G_init_graphics(scrnsize,scrnsize);
   G_rgb(0,0,0);
   G_clear();
-  invertObject = 1;
 
   do{
     if(input >= 48 && input < 48 + argc - 1){
       draw_object(input - 48);
       previousObj = input-48;
-    }
-    else if(input == 'o' || input == 'O') {
-      invertObject = -invertObject;
-      draw_object(previousObj);
     }
     else if(input == 't' || input == 'T') mode = 't';
     else if(input == 'r' || input == 'R') mode = 'r';

@@ -3,6 +3,11 @@
 #define MAXOBJECTS 10
 #define MAXPTS 50000
 #define MAXPOLYS 30000
+/*
+
+Lab6 Painter's Algorithm
+
+ */
 
 int numpoints[MAXOBJECTS];
 int numpolys[MAXOBJECTS];
