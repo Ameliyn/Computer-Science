@@ -1,12 +1,16 @@
 #include "../FPToolkit.c"
 #include "../M3d_matrix_toolsS.c"
+int triangles = 1;
 int scrnsize = 1000;
 
 int create_3d_object(double xp[], double yp[], int numpoints, int numRot, char * file)
 {
   FILE *f = fopen(file, "w");
   if(f == NULL){printf("File could not be opened... Quiting\n"); exit(0);}
+
   int totalNumPoints = numpoints*numRot;
+  if(triangles == 1)
+    totalNumPoints += 2;  
 
   for(int i = 0; i < numpoints; i++){
     xp[i] /= 100;
@@ -14,7 +18,8 @@ int create_3d_object(double xp[], double yp[], int numpoints, int numRot, char *
   }
   
   fprintf(f,"%d\n",totalNumPoints);
-
+ 
+  
   double x[totalNumPoints];
   double y[totalNumPoints];
   double z[totalNumPoints];
@@ -46,20 +51,47 @@ int create_3d_object(double xp[], double yp[], int numpoints, int numRot, char *
     }
   }
 
-  //get polygons
-  int numpolys = numRot*(numpoints-1);
-  fprintf(f,"%d\n",numpolys + 2);
-
-  //add bottom
-  fprintf(f,"%d ",numRot);
-  for(int i = numRot - 1; i >= 0; i--)
-  {
-    if(i - 1 == -1)
-      fprintf(f,"%d\n",i);
-    else
-      fprintf(f,"%d ",i);
+  
+  if(triangles == 1){
+    //get two ending points for triangles
+    x[totalNumPoints-2] = xp[0];
+    y[totalNumPoints-2] = 0;
+    z[totalNumPoints-2] = 0;
+    fprintf(f,"%lf %lf %lf\n",x[totalNumPoints-2],y[totalNumPoints-2],z[totalNumPoints-2]);
+    x[totalNumPoints-1] = xp[numpoints-1];
+    y[totalNumPoints-1] = 0;
+    z[totalNumPoints-1] = 0;
+    fprintf(f,"%lf %lf %lf\n",x[totalNumPoints-1],y[totalNumPoints-1],z[totalNumPoints-1]);
   }
 
+  //get polygons
+  int numpolys = numRot*(numpoints-1);
+  if(triangles == 1)
+    numpolys += numRot*2;
+  
+  fprintf(f,"%d\n",numpolys + 2);
+
+  if(triangles == 1){
+    //add bottom
+    for(int i = 0; i < numRot; i++)
+    {
+      if(i + 1 == numRot)
+	fprintf(f,"3 %d %d %d\n",i, totalNumPoints-2, 0);
+      else
+	fprintf(f,"3 %d %d %d\n",i, totalNumPoints-2, i+1);
+    }
+  }
+  else{
+    //add bottom
+    fprintf(f,"%d ",numRot);
+    for(int i = numRot - 1; i >= 0; i--)
+      {
+	if(i - 1 == -1)
+	  fprintf(f,"%d\n",i);
+	else
+	  fprintf(f,"%d ",i);
+      }
+  }
   //add sides
   for(int i = 0; i < numpoints - 1; i++)
   {
@@ -75,14 +107,25 @@ int create_3d_object(double xp[], double yp[], int numpoints, int numRot, char *
 
   }
 
+  if(triangles == 1){
+    for(int i = totalNumPoints-3; i > totalNumPoints-numRot-3; i--)
+    {
+      if(i - 1 == totalNumPoints-numRot-3)
+	fprintf(f,"3 %d %d %d\n",i, totalNumPoints-1, totalNumPoints-3);
+      else
+	fprintf(f,"3 %d %d %d\n",i, totalNumPoints-1, i-1);
+    }
+  }
+  else{
   //add top
-  fprintf(f,"%d ",numRot);
-  for(int i = totalNumPoints-numRot; i < totalNumPoints; i++)
-  {
-    if(i + 1 == totalNumPoints)
-      fprintf(f,"%d\n",i);
-    else
-      fprintf(f,"%d ",i);
+    fprintf(f,"%d ",numRot);
+    for(int i = totalNumPoints-numRot; i < totalNumPoints; i++)
+    {
+      if(i + 1 == totalNumPoints)
+	fprintf(f,"%d\n",i);
+      else
+	fprintf(f,"%d ",i);
+    }
   }
 
   fclose(f);
