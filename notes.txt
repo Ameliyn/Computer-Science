@@ -961,6 +961,18 @@ What if there is a hazard?
    instructions by duplicating a stage of the current instruction (slide 27).
 2. Forwarding: Having a value skip a pipeline and jump to where it needs to be. However, this is not always possible.
 3. The processor uses a combination of both bubbles and forwarding in order to work quickest.
+
+Accessing memory is 3 orders of magnitude between the time a request by the cpu core before main memory can provide data.
+This is why we create intermediate memory stages that are smaller and quicker getting closer to the cpu (called caches).
+These caches allow us to store smaller amounts of data for quicker use by the cpu. Caches keep a duplicate copy of what exists
+in memory, but closer to where it may be needed.
+
+Works on the principle of Locality:
+--Two forms: Spatial and Temporal
+Temporal: If you've accessed item A recently, it leads to believe that you will reaccess item A soon.
+Spatial: If you accessed an item, you are likely to access a neighboring item as well.
+
+
 RANDOM OTHER SHIT:
 
 Colors for Ross:
