@@ -380,7 +380,7 @@ int  Clip_Polygon_Against_Plane(
 }
 
 int  Clip_Polygon_Against_Trapezoidal_Window (
-	 double px[],  double py[], double pz[], int numpoints, int psize[], int cont[][],
+	 double px[],  double py[], double pz[], int numpoints,
 	 double wA[],  double wB[], double wC[], double wD[], int wsize)
 
 {
@@ -427,28 +427,43 @@ void draw_object(int input)
   double xp[numpoints[input]];
   double yp[numpoints[input]];
 
-  double newx[numpoints[input]];
-  double newy[numpoints[input]];
-  double newz[numpoints[input]];
+  double newx[MAXSIDES*2];
+  double newy[MAXSIDES*2];
+  double newz[MAXSIDES*2];
+  double tempx[MAXSIDES*2];
+  double tempy[MAXSIDES*2];
+  double tempz[MAXSIDES*2];
+
   double newpsize[numpolys[input]];
   double newcont[numpolys[input]][MAXSIDES];
+  int clipnumpoints;
+  int j;
   
   if(clipPolys == 1){
-    for(int i = 0; i < numpoints[input]; i++){
-      newx[i] = x[input][i];
-      newy[i] = y[input][i];
-      newz[i] = z[input][i];
-    }
     for(int i = 0; i < numpolys[input]; i++){
-      newpsize[i] = psize[input][i];
       for(int j = 0; j < psize[input][i]; j++){
-	newcont[i][j] = cont[input][i][j];
+	tempx[j] = x[input][cont[input][i][j]];
+	tempy[j] = y[input][cont[input][i][j]];
+	tempz[j] = z[input][cont[input][i][j]];
       }
+      clipnumpoints = Clip_Polygon_Against_Trapezoidal_Window (
+				  tempx,  tempy, tempz, newpsize, newcont,
+				  viewA, viewB, viewC, viewD, 6);
+
+      newpsize[i] = clipnumpoints;
+      if(i == 0)
+	j = 0;
+      
+      for(int k = 0; k < clipnumpoints; k++){
+	newcont[i][k] = k+j;
+	newx[j] = tempx[k];
+	newy[j] = tempy[k];
+	newz[j] = tempz[k];
+	j++;
+      }
+
     }
 
-    int clipnumpoints = Clip_Polygon_Against_Trapezoidal_Window (
-			       newx,  newy, newz, numpoints[input][i], newpsize, newcont,
-			       viewA, viewB, viewC, viewD, 6);
   }
   
   
