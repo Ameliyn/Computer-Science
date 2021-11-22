@@ -962,6 +962,12 @@ What if there is a hazard?
 2. Forwarding: Having a value skip a pipeline and jump to where it needs to be. However, this is not always possible.
 3. The processor uses a combination of both bubbles and forwarding in order to work quickest.
 
+Caches:
+(Memory in this section refers to DRAM (dynamic ram))
+--Takes 1 transistor per bit for storage
+(Caches are made of SRAM (Static ram))
+--Needs 6 transistors per bit for storage
+
 Accessing memory is 3 orders of magnitude between the time a request by the cpu core before main memory can provide data.
 This is why we create intermediate memory stages that are smaller and quicker getting closer to the cpu (called caches).
 These caches allow us to store smaller amounts of data for quicker use by the cpu. Caches keep a duplicate copy of what exists
@@ -971,6 +977,66 @@ Works on the principle of Locality:
 --Two forms: Spatial and Temporal
 Temporal: If you've accessed item A recently, it leads to believe that you will reaccess item A soon.
 Spatial: If you accessed an item, you are likely to access a neighboring item as well.
+
+Tech has made a lot of progress in the density of memory (larger and larger DRam), but not much progress in the speed of memory.
+
+Memory works similarly to research papers.
+--Need articles/books to back up your essay
+A.
+--Go to library to get specific quote
+--Leave and continue writing
+--Go back and get second quote
+B.
+--Go to library, borrow book
+--Take sections
+--Return at the end
+----However there is finite room on your desk, so you can't bring all of the library books with you
+
+Performance curve is a negative parabola (with the best performance being at a midrange transfer size) because you can exploit locality
+for better performance.
+Intel picked the unit of transfer (block) as 64bytes (block size).
+
+In the cache you store the data as well as the address (the tag, duh)
+
+--If the cache looks up the block and the memory tag matches, this was a cache "hit"
+--If the cache looks up the block and the memory tag does not match, this was a cache "miss" and the cache updates the current tag with
+  the new data
+
+Direct Map Cache: Exactly one spot for each cache block to go.
+--(https://docs.google.com/document/d/1rYjnjcr5lnefLb6gGKcr23L0EgGxxEskZ85Y18s-9gI/edit)
+
+Fully associative Cache: Blocks can be put wherever (requires searching whole cache for data) (slower)
+
+Given:
+11-bit memory addresses
+Cache block size: 64 bytes
+Cache size: 512 bytes
+Mapping function
+cache block number = memory block number % number of blocks in cache
+
+Memory address    Memory block number    Cache block number
+408    		  	 6     		       6
+1012			 15		       7
+1416			 22		       6
+968			 15		       7
+1865			 29		       5
+
+Block 6 (the bolded bits):
+408   = 0x198 = 001.1001.1000
+1416  = 0x588 = 101.1000.1000
+
+Block 7 (bolded bits):
+1012  = 0x3F4 = 011.1111.0100
+918   = 0x3C8 = 011.1100.1000
+
+GENERAL
+
+XXX = 00 (Tag) 000 (Block ID) 000000 (Offset)
+The address stores the tag in the block ID space
+
+For the address, store first two bits to identify which memory is stored at this location. 
+(note 408 = 00; 1416 = 10 and therefore are different blocks)
+(note 1012 = 01; 918 = 01 and therefore are the same block at different offsets)
 
 
 RANDOM OTHER SHIT:

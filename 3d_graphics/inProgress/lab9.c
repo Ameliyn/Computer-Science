@@ -6,7 +6,7 @@
 #define MAXSIDES 1000
 /*
 
-  Lab7 Light Model
+  Lab9 3d Clipping
 
  */
 
