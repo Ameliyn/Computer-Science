@@ -7,8 +7,6 @@
 /*
 
   Lab9 3d Clipping
-  Large stack required for multi-object operation. Can be fixed by making large variables in drawObjects
-  and drawAllObjects global variables (so as to put them on the heap).
 
  */
 
