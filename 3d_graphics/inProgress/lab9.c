@@ -637,6 +637,9 @@ void draw_all_object(int numObjects)
       G_polygon(xp,yp,newpsize[i]);
     
     }
+
+    
+    
   }
   else{
     double xp[largestPolySize];
