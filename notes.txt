@@ -992,20 +992,33 @@ B.
 --Return at the end
 ----However there is finite room on your desk, so you can't bring all of the library books with you
 
-Performance curve is a negative parabola (with the best performance being at a midrange transfer size) because you can exploit locality
-for better performance.
+Performance curve is a negative parabola (with the best performance being at a midrange transfer size)
+because you can exploit locality for better performance.
 Intel picked the unit of transfer (block) as 64bytes (block size).
 
 In the cache you store the data as well as the address (the tag, duh)
 
 --If the cache looks up the block and the memory tag matches, this was a cache "hit"
---If the cache looks up the block and the memory tag does not match, this was a cache "miss" and the cache updates the current tag with
+--If the cache looks up the block and the memory tag does not match, this was a cache "miss" and
+  the cache updates the current tag with
   the new data
 
 Direct Map Cache: Exactly one spot for each cache block to go.
 --(https://docs.google.com/document/d/1rYjnjcr5lnefLb6gGKcr23L0EgGxxEskZ85Y18s-9gI/edit)
+--11 bit Address => 5 bit tag, 6 bit offset
 
 Fully associative Cache: Blocks can be put wherever (requires searching whole cache for data) (slower)
+
+Two-Way(four-way is extended two-way) set associative Cache:
+--(https://drive.google.com/file/d/1ldZ6psAJqXj-yz9yhISC6l2bABy_Irl4/view?usp=sharing) (board drawing)
+--(https://docs.google.com/document/d/1JzLMmT6oLcaBBFAMAFY10_jNjSNBEtfrzAaCOPZBbC8/edit) (activity)
+--Take Direct mapped cache and break it into subsets
+  --(slot 0,1 is set 1), (slot 2,3 is set 2), etc
+--Breaks address into three areas (11 bit address => 3 bit tag, 2 bit index, 6 bit offset)
+
+Cache Memory Activity: Basic Cache Lookups:
+--https://docs.google.com/document/d/179tmOubWLExav--gd7pgvlEZ0oXShHTgxMNKpwG0Xw4/edit
+
 
 Given:
 11-bit memory addresses
@@ -1021,11 +1034,11 @@ Memory address    Memory block number    Cache block number
 968			 15		       7
 1865			 29		       5
 
-Block 6 (the bolded bits):
+Block 6 (bits 2-4 (left justified)):
 408   = 0x198 = 001.1001.1000
 1416  = 0x588 = 101.1000.1000
 
-Block 7 (bolded bits):
+Block 7 (bits 2-4 (left justified)):
 1012  = 0x3F4 = 011.1111.0100
 918   = 0x3C8 = 011.1100.1000
 
@@ -1033,11 +1046,16 @@ GENERAL
 
 XXX = 00 (Tag) 000 (Block ID) 000000 (Offset)
 The address stores the tag in the block ID space
+Cache tag is most significant bits after block size (6 bit block size, 5 bit tag for an 11 bit section/6bit offset)
 
 For the address, store first two bits to identify which memory is stored at this location. 
 (note 408 = 00; 1416 = 10 and therefore are different blocks)
 (note 1012 = 01; 918 = 01 and therefore are the same block at different offsets)
 
+Each cache block has data, tag, and valid flag.
+--Data has memory data of block size
+--Tag has identifier for data in block size
+--valid flag shows if block has been filled or not
 
 RANDOM OTHER SHIT:
 
