@@ -7,8 +7,6 @@
 /*
 
   Lab9 3d Clipping
-  Large stack required for multi-object operation. Can be fixed by making large variables in drawObjects
-  and drawAllObjects global variables (so as to put them on the heap).
 
  */
 
@@ -38,6 +36,19 @@ double viewA[6];
 double viewB[6];
 double viewC[6];
 double viewD[6];
+
+
+double xp[MAXPTS];
+double yp[MAXPTS];
+double newx[MAXOBJECTS][MAXPTS];
+double newy[MAXOBJECTS][MAXPTS];
+double newz[MAXOBJECTS][MAXPTS];
+double tempx[MAXPTS];
+double tempy[MAXPTS];
+double tempz[MAXPTS];
+int newpsize[MAXPOLYS];
+int newcont[MAXPOLYS][MAXSIDES];
+
 
 typedef struct {
   int objNum;
@@ -414,18 +425,18 @@ void draw_object(int input)
   G_rgb(0,0,0);
   G_clear();
 
-  double xp[numpoints[input]];
-  double yp[numpoints[input]];
+  //double xp[numpoints[input]];
+  //double yp[numpoints[input]];
 
   double newx[MAXPTS];
   double newy[MAXPTS];
   double newz[MAXPTS];
-  double tempx[MAXPTS];
-  double tempy[MAXPTS];
-  double tempz[MAXPTS];
+  //double tempx[MAXPTS];
+  //double tempy[MAXPTS];
+  //double tempz[MAXPTS];
 
-  int newpsize[numpolys[input]];
-  int newcont[numpolys[input]][MAXSIDES];
+  //int newpsize[numpolys[input]];
+  //int newcont[numpolys[input]][MAXSIDES];
   int clipnumpoints;
   int j = 0;
   
@@ -486,13 +497,17 @@ void draw_object(int input)
 	G_polygon(xp,yp,psize[input][i]);
     }
   }
+  printf("\nDrawing polygon %d with given settings:\n",input);
+  if(clipPolys == 1) printf("  3d Clipping ON\n");
+  else printf("  3d Clipping OFF\n");
   if(lightModel != 0){
-    printf("\nDrawing polygons with given settings:\n");
-    printf("Diffuse Max: %.3f\n",diffuseMax);
-    printf("Ambient: %.3f\n",ambient);
-    printf("Specular Power: %d\n",specularPower);
-    printf("Light Location: %.3f, %.3f, %.3f\n",lightLocation[0],lightLocation[1],lightLocation[2]);
+    printf("  LightModel ON\n");
+    printf("  --Diffuse Max: %.3f\n",diffuseMax);
+    printf("  --Ambient: %.3f\n",ambient);
+    printf("  --Specular Power: %d\n",specularPower);
+    printf("  --Light Location: %.3f, %.3f, %.3f\n",lightLocation[0],lightLocation[1],lightLocation[2]);
   }
+  else printf("  LightModel OFF\n");
 }
 
 
@@ -569,28 +584,24 @@ void draw_all_object(int numObjects)
   G_clear();
   
   
-  fprintf(stderr,"Beginning Display. \n");
+  //fprintf(stderr,"Beginning Display. \n");
   
   if(clipPolys == 1){
-    
-    double xp[totalNumPoints];
-    double yp[totalNumPoints];
-    //fprintf(stderr,"xp initialized\n");
-    double newx[numObjects][MAXPTS];
-    double newy[numObjects][MAXPTS];
-    double newz[numObjects][MAXPTS];
-    //fprintf(stderr,"newx/y/z initialized\n");
-    double tempx[totalNumPoints*5];
-    double tempy[totalNumPoints*5];
-    double tempz[totalNumPoints*5];
-    //fprintf(stderr,"tempx/y/z initialized\n");
-    
-    int newpsize[totalNumPolys];
-    //fprintf(stderr,"newpsize initialized\n");
-    
-    int newcont[totalNumPolys][MAXSIDES];
 
-    //fprintf(stderr,"newcont initialized\n");
+
+    //the following is declared in global variables to save stack space
+    //double xp[MAXPTS];
+    //double yp[MAXPTS];
+    //double newx[MAXOBJECTS][MAXPTS];
+    //double newy[MAXOBJECTS][MAXPTS];
+    //double newz[MAXOBJECTS][MAXPTS];
+    //double tempx[MAXPTS];
+    //double tempy[MAXPTS];
+    //double tempz[MAXPTS];
+    //int newpsize[totalNumPolys];
+    //int newcont[totalNumPolys][MAXSIDES];
+
+    
     int clipnumpoints;
     int j = 0;
 
@@ -607,7 +618,7 @@ void draw_all_object(int numObjects)
 							       tempx,  tempy, tempz,
 							       psize[things[i].objNum][things[i].polyNum],
 							       viewA, viewB, viewC, viewD, 6);
-      fprintf(stderr,"Polygon %d clipped\n",i);
+      //fprintf(stderr,"Polygon %d clipped\n",i);
       newpsize[i] = clipnumpoints;
       
       for(int k = 0; k < clipnumpoints; k++){
@@ -624,7 +635,7 @@ void draw_all_object(int numObjects)
 	poly_convert(&xp[j], &yp[j], newx[things[i].objNum][newcont[i][j]],
 		     newy[things[i].objNum][newcont[i][j]], newz[things[i].objNum][newcont[i][j]]);
       }
-      fprintf(stderr,"Polygon %d converted\n",i);
+      //fprintf(stderr,"Polygon %d converted\n",i);
       double a[3] = {newx[things[i].objNum][newcont[i][0]],newy[things[i].objNum][newcont[i][0]],
 		     newz[things[i].objNum][newcont[i][0]]};
       double b[3] = {newx[things[i].objNum][newcont[i][1]],newy[things[i].objNum][newcont[i][1]],
@@ -642,8 +653,9 @@ void draw_all_object(int numObjects)
     
   }
   else{
-    double xp[largestPolySize];
-    double yp[largestPolySize];
+    //Declared globally to save stack space
+    //double xp[largestPolySize];
+    //double yp[largestPolySize];
     
     for(int i = 0; i < totalNumPolys; i++){
       for(int j = 0; j < psize[things[i].objNum][things[i].polyNum]; j++){
@@ -670,14 +682,17 @@ void draw_all_object(int numObjects)
     }
   }
 
+   printf("\nDrawing ALL polygons with given settings:\n");
+  if(clipPolys == 1) printf("  3d Clipping ON\n");
+  else printf("  3d Clipping OFF\n");
   if(lightModel != 0){
-    printf("\nDrawing polygons with given settings:\n");
-    printf("Diffuse Max: %.3f\n",diffuseMax);
-    printf("Ambient: %.3f\n",ambient);
-    printf("Specular Power: %d\n",specularPower);
-    printf("Light Location: %.3f, %.3f, %.3f\n",lightLocation[0],lightLocation[1],lightLocation[2]);
-    //end display polygons
+    printf("  LightModel ON\n");
+    printf("  --Diffuse Max: %.3f\n",diffuseMax);
+    printf("  --Ambient: %.3f\n",ambient);
+    printf("  --Specular Power: %d\n",specularPower);
+    printf("  --Light Location: %.3f, %.3f, %.3f\n",lightLocation[0],lightLocation[1],lightLocation[2]);
   }
+  else printf("  LightModel OFF\n");
 }
 
 void rotate_object(char direction, int sign, int objnum){
