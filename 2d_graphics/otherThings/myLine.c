@@ -114,11 +114,6 @@ int myLine(double x1d, double y1d, double x2d, double y2d){
       }
     }
   }
-
-  
-  
-  
-
 }
 
 int main(){
@@ -131,40 +126,21 @@ int main(){
   G_fill_rectangle(0,0,scrnsize,20);
 
   int halfscreen = scrnsize/2;
-
+  int random;
   double p[4] = {0,0,0,0};
   do{
-    G_rgb(1,0,0);
+    G_rgb(rand() % 100 / 100.0,rand() % 100 / 100.0,rand() % 100 / 100.0);
     G_wait_click(p);
     if(p[1] <= 20){break;}
-    G_point(p[0],p[1]);
+    G_fill_circle(p[0],p[1],2);
   
     G_wait_click(&p[2]);
     if(p[3] <= 20){break;}
-    G_point(p[2],p[3]);
+    G_fill_circle(p[2],p[3],2);
 
     myLine(p[0],p[1],p[2],p[3]);
   
   }while(True);
-  
-  /*
-  int a[2] = {halfscreen,halfscreen};
-  double p[2] = {0,0};
-
-  G_rgb(0,1,1);
-  G_fill_circle(halfscreen,halfscreen,2);
-  G_rgb(1,0,0);
-  
-  do{
-    G_wait_click(p);
-    if(p[1] <= 20){break;}
-
-    myLine(a[0],a[1],p[0],p[1]);
-    //G_line(a[0],a[1],p[0],p[1]);
-
-
-    }while(True);*/
-
   
 }
 
