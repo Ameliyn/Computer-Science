@@ -962,6 +962,14 @@ What if there is a hazard?
 2. Forwarding: Having a value skip a pipeline and jump to where it needs to be. However, this is not always possible.
 3. The processor uses a combination of both bubbles and forwarding in order to work quickest.
 
+HOMEWORK 10 Throughputs/Pipelining/Speedups/Handling Hazards:
+(https://docs.google.com/forms/d/e/1FAIpQLSeVzod7EEyF1M6Cnv85X83HP_x0ZXtDdTa5rEzjliaQ2mAdzQ/viewscore?viewscore=AE0zAgCqhdL7VtqY5pETuORCg0kr24gRGA66lyRG2mdzLfCdEFrMq_JF06YgRKVTiQ)
+GIPS (Giga-instructions per second) = 1000/Throughput*(#ofpipes) OR 1000/SlowestSection
+Throughput = Eachsection + eachPipe
+SlowestSection = thing+pipe
+Speedup = GIPS(A)/GIPS(B)
+
+
 Caches:
 (Memory in this section refers to DRAM (dynamic ram))
 --Takes 1 transistor per bit for storage
@@ -998,10 +1006,17 @@ Intel picked the unit of transfer (block) as 64bytes (block size).
 
 In the cache you store the data as well as the address (the tag, duh)
 
+HITS AND MISSES:
 --If the cache looks up the block and the memory tag matches, this was a cache "hit"
 --If the cache looks up the block and the memory tag does not match, this was a cache "miss" and
-  the cache updates the current tag with
-  the new data
+  the cache updates the current tag with the new data
+  --On a cache miss, the cache replaces the LRU (least recently used) data (or the empty space).
+  --Sometimes the cache replaces randomly (saves small amount of data space).
+  --Cold/Compulsory miss => first time (there will always be one miss)
+  --Capacity miss => missed in the past, but the data has been evicted because cache is not large enough
+    (whole cache is full in a fully-associative cache)
+  --Conflict Miss => Because other data in this data's seat, there was a miss. (there is enough space in the cache,
+    but the block where this data goes is full)
 
 Direct Map Cache: Exactly one spot for each cache block to go.
 --(https://docs.google.com/document/d/1rYjnjcr5lnefLb6gGKcr23L0EgGxxEskZ85Y18s-9gI/edit)
@@ -1056,6 +1071,19 @@ Each cache block has data, tag, and valid flag.
 --Data has memory data of block size
 --Tag has identifier for data in block size
 --valid flag shows if block has been filled or not
+
+Writing back to memory:
+--"Write Through" write to the cache and then propogate the value all the way to memory.
+  --"Every time you make an update, you immediately write through the update to memory."
+--"Write Back" Update memory at intervals from the cache data
+  --Mark any modified entries before overwriting with new cache data
+    (need a "journey bit"; the cache is not the same as memory)
+
+Graphics requires the memory to be updated (it cannot access the cache (most of the time) and therefore would be
+using old data).
+
+
+
 
 RANDOM OTHER SHIT:
 
