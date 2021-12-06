@@ -695,6 +695,40 @@ g:	mov 0x8(%rsp), %rax
 }
 (Above) Passing a reference to a parameter as a variable, you push the stack, move the value to %rdi,
 call the function, do your work and then
+{
+struct rec{
+       int a[4];          //offset 0  (16 byte long)
+       long i;            //offset 16 (8  byte long)
+       struct rec *next;  //offset 24 (8  byte long)
+}            %rdi           %esi
+void set_val(struct rec *r, int val){
+     while(r){
+	long i = r -> i;
+	r -> a[i] = val;
+	r = r -> next;
+     }
+}
+}
+{ x86 assembly code
+.globl
+set_val:
+	test %rdi, %rdi
+	je return
+	
+	movq 16(%rdi), %rax
+	movq %esi, (%rdi,%rax,4)
+	movq 24(%rdi), %rdi
+	jmp set_val
+return:
+	ret
+
+
+}
+
+
+
+
+
 
 PROCESSOR DESIGN:
 
@@ -1081,6 +1115,24 @@ Writing back to memory:
 
 Graphics requires the memory to be updated (it cannot access the cache (most of the time) and therefore would be
 using old data).
+
+BUFFERS:
+{
+struct s1 {
+       char c;   // offset 0
+       int i[2]; // offset 4  (gets bumped with 3 byte buffer between character)
+       double v; // offset 16 (gets bumped with 4 byte buffer between int)
+}
+
+}
+Compiler added a 7 byte buffer after "char c" in order to align variables properly.
+
+Alignment rule: (https://docs.google.com/document/d/1ckvcbGPtdFh6ByAnKOarzOW70ZrN_KlrHA98SAd6M_A/edit)
+--"Particular object must be on an address that is a multiple of it's size"
+  --integer must be aligned to a multiple of 4
+  --double must be aligned to a multiple of 8
+--Structure has alignment requirements such that it can be in an array (beginning access must be multiple of largest
+  instance variable with a requirement) (S1 above would have to be of a size multiple of 8 because double).
 
 
 
