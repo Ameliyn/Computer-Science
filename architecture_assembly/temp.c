@@ -12,3 +12,6 @@ unsigned long factorialWhile(unsigned long n){
   return result;
 }
 
+
+long inc_a(long a) {return a++;}
+long inc_b(long b) {return ++b;}
