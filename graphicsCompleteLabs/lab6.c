@@ -20,7 +20,7 @@ double zCOM[MAXOBJECTS][2][MAXPOLYS];
 int lightModel = -1;
 
 int scrnsize = 1000; 
-int halfangle = 45;
+double halfangle = 45*M_PI/180;
 
 typedef struct {
   int objNum;

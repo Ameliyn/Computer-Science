@@ -1,5 +1,5 @@
 #include "FPToolkit.c"
-#include "M3d_matrix_toolsS.c"
+#include "M3d_matrix_tools.c"
 #define MAXOBJECTS 10
 #define MAXPTS 50000
 #define MAXPOLYS 30000
@@ -22,15 +22,15 @@ double irgb[MAXOBJECTS][3];
 int customColors = 0;
 int lightModel = 0;
 double lightAmount = 0.5;
-double lightLocation[3] = {0.0,0.0,0.0};
+double lightLocation[3] = {0.0,10.0,10.0};
 double ambient = 0.2;
 double diffuseMax = 0.5;
 int specularPower = 50;
 int scrnsize = 1000;
-double halfangle = 45*M_PI/180;
+double halfangle = 17*M_PI/180;
 int clipPolys = -1;
 
-double hitherDistance = 1;
+double hitherDistance = 0.1;
 double yonDistance = 200;
 double viewA[6];
 double viewB[6];
@@ -56,7 +56,7 @@ typedef struct {
   double dist;
 } Thing;
 
-void load_files(int numFiles, char** fileNames){
+void load_files(int numFiles){
 
   //set up view window
 
@@ -95,11 +95,11 @@ void load_files(int numFiles, char** fileNames){
 
   for(int fileNumber = 0; fileNumber < numFiles; fileNumber++){
 
-    printf("Loading %s\n",fileNames[fileNumber+1]);
-    f = fopen(fileNames[fileNumber+1], "r");
+    printf("Loading %s\n","sphere.xyz");
+    f = fopen("sphere.xyz", "r");
     if(f == NULL)
     {
-       printf("Cannot open file %s... Skipping...\n",fileNames[fileNumber+1]);
+       printf("Cannot open file %s... Skipping...\n","sphere.xyz");
        continue;
     }
 
@@ -131,19 +131,19 @@ void load_files(int numFiles, char** fileNames){
 
     if(customColors == 0){
       if(fileNumber % 5 == 0){
-	irgb[fileNumber][0] = 1;
-	irgb[fileNumber][1] = 0;
+	irgb[fileNumber][0] = 0.8;
+	irgb[fileNumber][1] = 0.7;
 	irgb[fileNumber][2] = 0;
       }
       else if(fileNumber % 5 == 1){
 	irgb[fileNumber][0] = 0;
-	irgb[fileNumber][1] = 1;
-	irgb[fileNumber][2] = 0;
+	irgb[fileNumber][1] = 0.1;
+	irgb[fileNumber][2] = 0.8;
       }
       else if(fileNumber % 5 == 2){
-	irgb[fileNumber][0] = 0;
-	irgb[fileNumber][1] = 0;
-	irgb[fileNumber][2] = 1;
+	irgb[fileNumber][0] = 0.62;
+	irgb[fileNumber][1] = 0.62;
+	irgb[fileNumber][2] = 0.58;
       }
       else if(fileNumber % 5 == 3){
 	irgb[fileNumber][0] = 1;
@@ -419,19 +419,12 @@ void draw_object(int input)
 {
   G_rgb(0,0,0);
   G_clear();
-
-  //double xp[numpoints[input]];
-  //double yp[numpoints[input]];
-
+  
   double newx[MAXPTS];
   double newy[MAXPTS];
   double newz[MAXPTS];
-  //double tempx[MAXPTS];
-  //double tempy[MAXPTS];
-  //double tempz[MAXPTS];
 
-  //int newpsize[numpolys[input]];
-  //int newcont[numpolys[input]][MAXSIDES];
+
   int clipnumpoints;
   int j = 0;
   
@@ -711,7 +704,48 @@ void rotate_object(char direction, int sign, int objnum){
 
 }
 
-void scale_object(int sign, int objnum){
+void rotate_system(){
+  
+  double a[4][4];
+  double b[4][4];
+  double rot[4][4];
+  double center[3];
+  double centerEarth[3];
+
+  center[0] = x[0][numpoints[0]];
+  center[1] = y[0][numpoints[0]];
+  center[2] = z[0][numpoints[0]];
+
+  centerEarth[0] = x[1][numpoints[1]];
+  centerEarth[1] = y[1][numpoints[1]];
+  centerEarth[2] = z[1][numpoints[1]];
+
+  M3d_make_translation(a, -center[0], -center[1], -center[2]);
+  M3d_make_y_rotation_cs(rot, cos((360/300)*M_PI/180), sin((360/300)*M_PI/180));
+  M3d_mat_mult(a,rot,a);
+  M3d_make_translation(b, center[0], center[1], center[2]);
+  M3d_mat_mult(a,b,a);
+
+  int i = 0;
+  M3d_mat_mult_points(x[i],y[i],z[i],a,x[i],y[i],z[i],numpoints[i]+1);
+
+  i = 1;
+  M3d_mat_mult_points(x[i],y[i],z[i],a,x[i],y[i],z[i],numpoints[i]+1);
+
+  i = 2;
+  M3d_mat_mult_points(x[i],y[i],z[i],a,x[i],y[i],z[i],numpoints[i]+1);
+
+  M3d_make_translation(a, -centerEarth[0], -centerEarth[1], -centerEarth[2]);
+  M3d_make_y_rotation_cs(rot, cos((360/50)*M_PI/180), sin((360/50)*M_PI/180));
+  M3d_mat_mult(a,rot,a);
+  M3d_make_translation(b, centerEarth[0], centerEarth[1], centerEarth[2]);
+  M3d_mat_mult(a,b,a);
+
+  M3d_mat_mult_points(x[i],y[i],z[i],a,x[i],y[i],z[i],numpoints[i]+1);
+
+}
+
+void scale_object(int objnum, double scalar){
 
   double a[4][4];
   double b[4][4];
@@ -720,12 +754,9 @@ void scale_object(int sign, int objnum){
   center[0] = x[objnum][numpoints[objnum]];
   center[1] = y[objnum][numpoints[objnum]];
   center[2] = z[objnum][numpoints[objnum]];
-  
+ 
   M3d_make_translation(a, -center[0], -center[1], -center[2]);
-  if(sign == 1)
-    M3d_make_scaling(b,1.1,1.1,1.1);
-  else
-    M3d_make_scaling(b,0.9,0.9,0.9);
+  M3d_make_scaling(b,scalar,scalar,scalar);
   M3d_mat_mult(a,b,a);
   M3d_make_translation(b, center[0], center[1], center[2]);
   M3d_mat_mult(a,b,a);
@@ -733,245 +764,80 @@ void scale_object(int sign, int objnum){
   M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
 }
 
-void translate_object(char direction, int sign, int objnum){
-
-  double a[4][4];
-
-  if(direction == 'x') M3d_make_translation(a, sign, 0, 0);
-  else if(direction == 'y') M3d_make_translation(a, 0, sign, 0);
-  else if(direction == 'z') M3d_make_translation(a, 0, 0, sign);
-
-  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
-}
-
-void fixObject(int objNum){
-
-  int tempArray[MAXPOLYS][20];
-  for(int i = 0; i < numpolys[objNum];i++)
-  {
-    for(int j = 0; j < psize[objNum][i]; j++){
-      tempArray[i][j] = cont[objNum][i][j];
-    }
-
-    int k = psize[objNum][i] - 1;
-    for(int j = 0; j < psize[objNum][i]; j++){
-      cont[objNum][i][j] = tempArray[i][k];
-      k--;
-    }
-  }
-
-}
-
 int main(int argc, char **argv){
+  fprintf(stderr,"Filenames loaded\n");
 
   
-  if(argc < 8 && argc >= 2)
-    load_files(argc - 1, argv);
-  else if(argc >= 8 && argc %4 == 0) {
-    customColors = 1;
-    char ** fileNames;
-    lightLocation[0] = atof(argv[1]);
-    lightLocation[1] = atof(argv[2]);
-    lightLocation[2] = atof(argv[3]);
-    int j = 0;
-    for(int i = 4; i < argc; i+=4){
-      fileNames[j] = argv[i];
-      irgb[j][0] = atof(argv[i+1]);
-      irgb[j][1] = atof(argv[i+2]);
-      irgb[j][2] = atof(argv[i+3]);
-      j++;
-    }
-    load_files(j+1,fileNames);
+  load_files(3);
 
-  }else if(argc < 2) {
-    printf("Usage: ./thisFile polygon.xyz\n");
-    printf("OR Usage: xLight yLight zLight polgon.xyz ir ib ig polgon2.xyz ir ib ig ...\n");
-    exit(0);
-  }
+  //place objects correctly
+  //place sun
 
-  char input = 48;
-  char mode = 't';
-  int sign = 1;
-  int previousObj = 0;
-  int topMode = 0;
+  //scale_object(0,1);
+  double a[4][4];
+  int objnum = 0;
+
+  M3d_make_z_rotation_cs(a, cos(90*M_PI/180), sin(90*M_PI/180));
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+
+  printf("center %d to %.2f %.2f %.2f\n",objnum, x[objnum][numpoints[objnum]],
+	 y[objnum][numpoints[objnum]],z[objnum][numpoints[objnum]]);
+  double xp,yp,zp;
+  xp = 0;
+  yp = 0;
+  zp = 20;  
+
+  M3d_make_translation(a, xp, yp, zp);
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,
+		      x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+  
+  //place earth
+  scale_object(1,0.5);
+  objnum = 1;
+
+  M3d_make_z_rotation_cs(a, cos(90*M_PI/180), sin(90*M_PI/180));
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+  
+  printf("center %d to %.2f %.2f %.2f\n",objnum, x[objnum][numpoints[objnum]],
+	  y[objnum][numpoints[objnum]],z[objnum][numpoints[objnum]]);
+  xp = 0;
+  yp = 0;
+  zp = 16.5;
+
+  M3d_make_translation(a, xp, yp, zp);
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,
+		      x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+
+  
+  //place moon
+  scale_object(2, 0.25);
+  objnum = 2;
+
+  M3d_make_z_rotation_cs(a, cos(90*M_PI/180), sin(90*M_PI/180));
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+  
+  printf("center %d to %.2f %.2f %.2f\n",objnum, x[objnum][numpoints[objnum]],
+	  y[objnum][numpoints[objnum]],z[objnum][numpoints[objnum]]);
+  xp = 0;
+  yp = 0;
+  zp = 15.0;
+
+  M3d_make_translation(a, xp, yp, zp);
+  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,
+		      x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
+
+  lightModel = 1;
+  clipPolys = -1;
   G_init_graphics(scrnsize,scrnsize);
   G_rgb(0,0,0);
   G_clear();
+  char input;
 
   do{
-    if(input >= 48 && input < 48 + argc - 1){
-      previousObj = input-48;
-      if(topMode == 0)
-	draw_object(previousObj);
-      else
-	draw_all_object(argc - 1);
-    }
-    else if(input == 'o' || input == 'O') {
-      fixObject(previousObj);
-      if(topMode == 0)
-	draw_object(previousObj);
-      else
-	draw_all_object(argc - 1);
-    }
-    else if(input == 'k' || input == 'K'){
-      if(lightModel == 0 || lightModel == 1) lightModel++;
-      else if(lightModel == 2) lightModel = 0;
-      if(topMode == 0)
-	draw_object(previousObj);
-      else
-	draw_all_object(argc - 1);
-    }
-    else if(input == ']') {
-      ambient += sign*0.01;
-      if(ambient < 0) ambient = 0;
-      else if(ambient > 0.3) ambient = 0.3;
-
-      if(topMode == 0)
-	draw_object(previousObj);
-      else
-	draw_all_object(argc - 1);
-    }
-    else if(input == '-'){
-      clipPolys *= -1;
-      if(topMode == 0)
-	draw_object(previousObj);
-      else
-	draw_all_object(argc - 1);
-    }
-    else if(input == 'u' || input == 'U') {
-      scale_object(sign, previousObj);
-      if(topMode == 0)
-	draw_object(previousObj);
-      else
-	draw_all_object(argc - 1);
-    }
-    else if(input == 'l' || input == 'L') mode = 'l';
-    else if(input == 't' || input == 'T') mode = 't';
-    else if(input == 'r' || input == 'R') mode = 'r';
-    else if(input == 'c' || input == 'C') sign = -sign;
-    else if(input == 'm' || input == 'M') {
-      if(topMode == 1){
-	topMode = 0;
-	draw_object(previousObj);
-      }
-      else{
-	topMode = 1;
-	draw_all_object(argc - 1);
-      }
-    }
-    else if(input == 'z' || input == 'x' || input == 'y'){
-
-      if(mode == 't'){
-	translate_object(input, sign, previousObj);
-	if(topMode == 0)
-	  draw_object(previousObj);
-	else
-	  draw_all_object(argc - 1);
-      }
-      else if(mode == 'r'){
-	rotate_object(input, sign, previousObj);
-	if(topMode == 0)
-	  draw_object(previousObj);
-	else
-	  draw_all_object(argc - 1);
-      }
-      else if(mode == 'l'){
-        if(input == 'z')
-	  lightLocation[2] += sign*2;
-	else if(input == 'y')
-	  lightLocation[1] += sign*2;
-	else if(input == 'x')
-	  lightLocation[0] += sign*2;
-	if(topMode == 0)
-	  draw_object(previousObj);
-	else
-	  draw_all_object(argc - 1);
-      }
-    }
-    else if(input == 'i' || input == 'I'){
-      int n = 1;
-      printf("Enter your command: ");
-      char stringCommand[50];
-      while(n != 0){
-	
-	scanf(" %s",stringCommand);
-
-	if(strcmp(stringCommand, "lightPosition") == 0 ||
-	   strcmp(stringCommand, "lightLocation") == 0){
-	  double xp,yp,zp;
-	  scanf("%lf %lf %lf",&xp,&yp,&zp);
-	  printf("Translating light to (%.2f, %.2f, %.2f)\n",xp,yp,zp);
-	  lightLocation[0] = xp;
-	  lightLocation[1] = yp;
-	  lightLocation[2] = zp;
-	  n = 0;
-	}
-	else if(strcmp(stringCommand, "lightLevel") == 0){
-	  double amt;
-	  scanf("%lf",&amt);
-	  printf("Setting ambient light to %.2f\n",amt);
-	  ambient = amt;
-	  lightAmount = amt;
-	  n = 0;
-	}
-	else if(strcmp(stringCommand, "color") == 0 ||
-	   strcmp(stringCommand, "inherentColor") == 0){
-	  int obj;
-	  double xp,yp,zp;
-	  scanf("%d %lf %lf %lf",&obj,&xp,&yp,&zp);
-	  printf("Coloring object %d to (%.3f, %.3f, %.3f)\n",obj,xp,yp,zp);
-	  irgb[obj][0] = xp;
-	  irgb[obj][1] = yp;
-	  irgb[obj][2] = zp;
-	  n = 0;
-	}
-	else if(strcmp(stringCommand, "diffuseMax") == 0 ||
-		strcmp(stringCommand, "diffuse") == 0){
-	  double amt;
-	  scanf("%lf",&amt);
-	  printf("Setting diffuseMax to %.2f\n",amt);
-	  diffuseMax = amt;
-	  n = 0;
-	}
-	else if(strcmp(stringCommand, "specularPower") == 0 ||
-		strcmp(stringCommand, "specular") == 0){
-	  int amt;
-	  scanf("%d",&amt);
-	  printf("Setting diffuseMax to %d\n",amt);
-	  specularPower = amt;
-	  n = 0;
-	}
-	else if(strcmp(stringCommand, "translate") == 0 ||
-		strcmp(stringCommand, "move") == 0){
-	  double xp,yp,zp;
-	  int objnum;
-	  scanf(" %d %lf %lf %lf",&objnum,&xp,&yp,&zp);
-	  printf("Translating object %d to (%.2f, %.2f, %.2f)\n",objnum,xp,yp,zp);
-	  xp -= x[objnum][numpoints[objnum]];
-	  yp -= y[objnum][numpoints[objnum]];
-	  zp -= z[objnum][numpoints[objnum]];
-	  double a[4][4];
-
-	  M3d_make_translation(a, xp, yp, zp);
-	  M3d_mat_mult_points(x[objnum],y[objnum],z[objnum],a,
-			      x[objnum],y[objnum],z[objnum],numpoints[objnum]+1);
-	  n = 0;
-	}
-	else if(strcmp(stringCommand, "return") == 0){
-	  printf("Cancelling input\n");
-	  n = 0;
-	}
-      }
-      
-      
-      if(topMode == 0)
-	  draw_object(previousObj);
-	else
-	  draw_all_object(argc - 1);
-      
-    }
+    draw_all_object(3);
     
     input = G_wait_key();
+    rotate_system();
     if(input == 'q' || input == 'Q'){break;}
     
     

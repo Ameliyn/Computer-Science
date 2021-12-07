@@ -13,7 +13,7 @@ int psize[MAXOBJECTS][MAXPOLYS];
 int cont[MAXOBJECTS][MAXPOLYS][20];
 
 int scrnsize = 1000; 
-int halfangle = 45;
+double halfangle = 45*M_PI/180;
 
 void load_files(int numFiles, char** fileNames){
 
