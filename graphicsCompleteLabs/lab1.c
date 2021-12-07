@@ -1,5 +1,12 @@
 #include "FPToolkit.c"
 
+/*
+
+  Lab1 => MyFillPolygon (with cheat where y is offset at 0.1 so as to not
+          hit any verticies).
+
+ */
+
 int swidth, sheight ;
 
 
@@ -79,7 +86,7 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
   double xpositions[numpoints], intersection;
   int xpoints, hcounter;
   
-  for(int y = 0; y < sheight; y++)
+  for(double y = 0.1; y < sheight; y++)
   {
     xpoints = 0;
     hcounter = 0;
@@ -88,7 +95,7 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
       if(yp[i] == y) //if we are at a vertex
       {
 	hcounter = 1;
-	printf("VERTEX DETECTED AT (%.2f,%d)! \n",xp[i],y);
+	printf("VERTEX DETECTED AT (%.2f,%.2f)! \n",xp[i],y);
 	int flag = 0;
 	int flag2 = 0;
 	double slope1,slope2;
@@ -253,7 +260,7 @@ void my_fill_polygon(double xp[], double yp[], int numpoints){
     {
       if(i+1 < xpoints){
 	if(hcounter == 1)
-	  printf("Drawing line from %.2f,%d to %.2f,%d\n",xpositions[i],y,xpositions[i+1],y);
+	  printf("Drawing line from %.2f,%.2f to %.2f,%.2f\n",xpositions[i],y,xpositions[i+1],y);
 	G_line(xpositions[i],y,xpositions[i+1],y);
       }
       

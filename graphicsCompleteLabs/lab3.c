@@ -4,7 +4,12 @@
 #define MAXPTS 50000
 #define MAXPOLYS 30000
 
+/*
 
+  Lab 3 => 2d draw using matricies that automatically centers and resizes
+           object. Can rotate objects and switch between multiple objects.
+
+ */
 int numpoints[MAXOBJECTS];
 int numpolys[MAXOBJECTS];
 double x[MAXOBJECTS][MAXPTS];
