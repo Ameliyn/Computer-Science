@@ -1,5 +1,5 @@
-#include "../FPToolkit.c"
-#include "../M3d_matrix_toolsS.c"
+#include "FPToolkit.c"
+#include "M3d_matrix_toolsS.c"
 #define MAXOBJECTS 10
 #define MAXPTS 50000
 #define MAXPOLYS 30000
