@@ -1005,6 +1005,39 @@ Speedup = GIPS(A)/GIPS(B)
 
 
 Caches:
+--Access Time = hit latency + miss rate + miss penalty
+
+Four questions:
+Q1- Where?
+--Fully associative (minimize miss rate), direct map, two-way associative
+
+Q2- How find page (block) in memory
+--table indexed by page number
+
+Q3- Replacement
+--LRU (least recently used)
+
+Q4- Writes?
+--Write back/ Write through
+
+--If block size = 4096 bytes (4KB), offset = 12 bits, rest of address is tag (in fully associative)
+----Tag also referred to as "Virtual Page Number"
+
+"Page Table"
+An associative array of 4kb size that leads to page frames that have the actual program data.
+--Each spot on the array is aligned to the 4kb slot which leaves the last 12 bits 0.
+  --Those 12 bits are then used for the valid bit, and dirty bit (and other things)
+  --Hierarchy of tables
+  --Accessing each level takes a memory access (which is slow), so we have a cache for pages to speed it up.
+
+Translation Lookaside Buffer (TLB)
+--Takes virtual page number to lookup the TLB
+--fully associative cache
+  --Very short (16 entries)
+--stores tag (most significant 16 bits) and returns physical address (page frame number)
+  --page frame number is multiplexed and returned with an offset (offset the 12 bits from the address)
+--has valid bit (last bit)
+
 (Memory in this section refers to DRAM (dynamic ram))
 --Takes 1 transistor per bit for storage
 (Caches are made of SRAM (Static ram))
