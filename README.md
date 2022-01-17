@@ -1,3 +1,3 @@
-# CS367
+# Skye Russ Computer Science
 
-stuff things
+This is my Computer Science repository for university.
