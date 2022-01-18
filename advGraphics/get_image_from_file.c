@@ -11,7 +11,8 @@ int main ()
 
   printf("enter name of xwd file to be read ") ;
   scanf("%s",inputname) ;
-
+  
+  //G_choose_repl_display();
   G_init_graphics(width,height) ;
 
 
