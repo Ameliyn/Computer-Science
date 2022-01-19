@@ -1,3 +1,5 @@
+#Lubanovic 6-7: Loops, Tuples, and Lists
+
 def standard1(sentence):
     longestIndex = 0;
     i = 0;
@@ -38,8 +40,16 @@ def advanced1(sentence):
 
 def advanced2():
   #display roman numerals
-  for i in range(100):
-    print("I")
+  ones = ["","I","II","III","IV","V","VI","VII","VIII","IX"];
+  tens = ["","X","XX","XXX","XL","L","LX","LXX","LXXX","XC"];
+  hundreds = ["","C"];
+  for i in range(101):
+    result = hundreds[(i % 1000) // 100] + tens[(i % 100) // 10] + ones[i % 10];
+    print(result);
+
+def advanced3(nest):
+  #solve for nested lists
+  print(nest)
 
 #Test the functions!
 #standard1("Hello World!");
