@@ -49,7 +49,14 @@ def advanced2():
 
 def advanced3(nest):
   #solve for nested lists
-  print(nest)
+  result = ()
+  for i in nest:
+    if(isinstance(i,int)):
+      result += (i,)
+    else:
+      result += tuple(i)
+  result = list(result)
+  print(result)
 
 #Test the functions!
 #standard1("Hello World!");
@@ -59,5 +66,4 @@ def advanced3(nest):
 #standard2()
 
 #advanced1("B A totally random sentence with lots of words")
-
-advanced2()
+advanced3([0,[1,2,3],4])
