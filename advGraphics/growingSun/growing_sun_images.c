@@ -9,7 +9,7 @@ char *file_suffix = ".xwd";
 int main (int argc, char **argv)
 {
   if(argc < 4) {  
-    printf("Usage: ./a.out screen_width screen_height num_frames radius_inc");
+    printf("Usage: ./a.out screen_width screen_height num_frames radius_inc\n");
     exit(0); 
   }
   
@@ -20,9 +20,9 @@ int main (int argc, char **argv)
   char q;
   
   G_init_graphics(screen_width,screen_height) ;
-  char fileName[19];
+  char fileName[100];
   for(int i = 0; i < num_frames; i++){
-    sprintf(fileName,"growingSun%04d.xwd",i);
+    sprintf(fileName,"frames/growingSun%04d.xwd",i);
 
     G_rgb(0,0,0);
     G_clear();
