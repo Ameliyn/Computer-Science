@@ -1,1 +1,6 @@
-Here's the beginnin of my notes on AI+Machine Learning
+Here's the beginning of my notes on AI+Machine Learning
+
+Python Things
+- Import basically copy pastes the file imported into the line of the import statement
+- " if __name__ == "__main__": " basically ensures that those lines will only be run by the main.py function
+-- Whatever class you run, the __name__ is __main__. For all other classes, the __name__ is the file name.

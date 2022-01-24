@@ -1,5 +1,6 @@
-#Lubanovic 6-7: Loops, Tuples, and Lists
+#Skye Russ Lubanovic 6-7: Loops, Tuples, and Lists
 
+#Standard Problem 1
 def standard1(sentence):
     longestIndex = 0;
     i = 0;
@@ -12,6 +13,7 @@ def standard1(sentence):
     #print("Longest index is " + str(longestIndex));
     print(sentenceList[longestIndex]);
 
+#Standard Problem 2
 def standard2():
   i = 99;
   while i > 1:
@@ -23,6 +25,7 @@ def standard2():
   print("Take one down, pass it around")
   print("0 bottles of beer on the wall!\n")
 
+#Advanced Problem 1
 def advanced1(sentence):
   sentenceList = sentence.split();
   print("Inital sentence:")
@@ -38,6 +41,7 @@ def advanced1(sentence):
   print("Sorted List:")  
   print(sentenceList)
 
+#Advanced Problem 2
 def advanced2():
   #display roman numerals
   ones = ["","I","II","III","IV","V","VI","VII","VIII","IX"];
@@ -47,23 +51,32 @@ def advanced2():
     result = hundreds[(i % 1000) // 100] + tens[(i % 100) // 10] + ones[i % 10];
     print(result);
 
+#Advanced Problem 3
+#Helper returns a tuple version of the passed parameter
+def adv3Helper(change):
+  tempResult = ()
+  if(isinstance(change,int)):
+    return (change,)
+  else:
+    for i in change:
+      if(isinstance(i,int)):
+        tempResult += (i,)
+      else:
+        tempResult += adv3Helper(tuple(i))
+  return tempResult
+
+#"main" of advanced problem 3
 def advanced3(nest):
-  #solve for nested lists
-  result = ()
-  for i in nest:
-    if(isinstance(i,int)):
-      result += (i,)
-    else:
-      result += tuple(i)
-  result = list(result)
-  print(result)
+  print(list(adv3Helper(nest)))
+
 
 #Test the functions!
+
 #standard1("Hello World!");
 #standard1("A Be Seee Dee");
 #standard1("Here is a totally random sentence!")
-
 #standard2()
 
 #advanced1("B A totally random sentence with lots of words")
-advanced3([0,[1,2,3],4])
+#advanced2()
+advanced3([[-1,-2,-3],0,[1,2,3],4,[5,[6,[7,8,9]],10]])
