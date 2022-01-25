@@ -7,7 +7,7 @@ int sleeptime;
 int main(int argc, char **argv){
 
   //window width, window height, prefixname, starting number, ending number
-  if(argc < 6) {  
+  if(argc < 8) {  
     printf("Usage: ./a.out screen_width screen_height prefix_name starting_frame");
     printf(" ending_frame back_and_forth speed(ms)(40000)\n");
     exit(0); 
