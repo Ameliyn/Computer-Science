@@ -8,7 +8,8 @@ int main(int argc, char **argv){
 
   //window width, window height, prefixname, starting number, ending number
   if(argc < 6) {  
-    printf("Usage: ./a.out screen_width screen_height prefix_name starting_frame ending_frame back_and_forth speed(ms)(40000)\n");
+    printf("Usage: ./a.out screen_width screen_height prefix_name starting_frame");
+    printf(" ending_frame back_and_forth speed(ms)(40000)\n");
     exit(0); 
   }
   
@@ -36,15 +37,15 @@ int main(int argc, char **argv){
       if(backandforth){
 	if(inc) {
 	  i++;
-	  if(i == endfrm) inc = 0;
+	  if(i >= endfrm) inc = 0;
 	}
 	else {
 	  i--;
-	  if (i == 0) inc = 1;
+	  if (i <= 0) inc = 1;
 	} 
       }
       else{
-	if(i == endfrm) i = startfrm;
+	if(i >= endfrm) i = startfrm;
 	else i++;
       }
       
@@ -52,7 +53,9 @@ int main(int argc, char **argv){
       if(command == 'q' || command == 'Q') break;
       else if(command == 'p' || command == 'P') framebyframe = 0;
       else if(command == 'b' || command == 'B') {
-	if(backandforth) backandforth = 0; else backandforth = 1; i = 0;}
+	if(backandforth) backandforth = 0;
+	else backandforth = 1;
+      }
     }
     else{
       //automatic mode with speed "sleeptime"
@@ -61,15 +64,15 @@ int main(int argc, char **argv){
       if(backandforth){
 	if(inc) {
 	  i++;
-	  if(i == endfrm) inc = 0;
+	  if(i >= endfrm) inc = 0;
 	}
 	else {
 	  i--;
-	  if (i == 0) inc = 1;
+	  if (i <= 0) inc = 1;
 	} 
       }
       else{
-	if(i == endfrm) i = startfrm;
+	if(i >= endfrm) i = startfrm;
 	else i++;
       }
       G_display_image();
@@ -77,7 +80,9 @@ int main(int argc, char **argv){
       if(command == 'q' || command == 'Q') break;
       else if(command == 'p' || command == 'P') framebyframe = 1;
       else if(command == 'b' || command == 'B') {
-	if(backandforth) backandforth = 0; else backandforth = 1; i = 0;}
+	if(backandforth) backandforth = 0;
+	else backandforth = 1;
+      }
       usleep(sleeptime);
     }
   }while(True);
