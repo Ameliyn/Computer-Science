@@ -17,7 +17,7 @@ placements = [0, 0, 0, 0, 0]
 for i in range(6):
     placements = [0, 0, 0, 0, 0]
     guess = input("Your Guess: ")
-    if len(guess) != 5:
+    if len(guess) != 5 or guess not in legal_words:
         print("Invalid Guess. Try again")
         i -= 1
     elif guess == word:
@@ -36,7 +36,16 @@ for i in range(6):
                 placements[j] = 1
                 temp = temp.replace(guess[j], "", 1)
 
-        print(placements)
+        temp = ""
+        for j in range(5):
+            if placements[j] == 1:
+                temp += "?"
+            elif placements[j] == 2:
+                temp += "!"
+            else:
+                temp += "."
+
+        print(temp)
         print("Try again")
 
 
