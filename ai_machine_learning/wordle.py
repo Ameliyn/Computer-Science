@@ -25,4 +25,5 @@ for i in range(5):
         print(placements)
         print("Try again")
 
-print("You are out of guesses, you lose")
+if guess != word:
+    print("You lose")
