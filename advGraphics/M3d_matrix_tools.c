@@ -349,4 +349,26 @@ int M3d_make_movement_sequence_matrix(double v[4][4],double vi[4][4], int n, int
   return 1;
 
 }
+
+
+
+int M3d_view(double v[4][4], double vi[4][4], double eye[3], double coi[3], double up[3]){
+
+  double temp[4][4];
+  //Translate
+  M3d_make_identity(temp);
+
+  double mparam[100];
+  int mtype[100];
+  int n = 0;
   
+  mtype[n] = TX; mparam[n] = -eye[0]; n++;
+  mtype[n] = TY; mparam[n] = -eye[1]; n++;
+  mtype[n] = TZ; mparam[n] = -eye[2]; n++;
+  mtype[n] = RY; mparam[n] = -atan2(coi[1]-eye[1],up[1]-eye[1]) * (180 / M_PI); n++;
+  mtype[n] = RX; mparam[n] = -atan2(coi[0]-eye[0],up[0]-eye[0]) * (180 / M_PI); n++;
+  mtype[n] = RZ; mparam[n] = -atan2(coi[2]-eye[2],up[2]-eye[2]) * (180 / M_PI); n++;
+
+  M3d_make_movement_sequence_matrix(v,vi,n,mtype,mparam);
+  
+}

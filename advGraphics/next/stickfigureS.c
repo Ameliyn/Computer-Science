@@ -5,7 +5,7 @@
 // stickfigure initially designed as centered for a 400x400 window :
 double x[13] = {175,225,225,300,225,225,250,200,150,175,175,100,175} ;
 double y[13] = {300,300,250,225,225,200,100,175,100,200,225,225,250} ;
-double z[13] = {10,10,10,10,10,10,10,10,10,10,10,10,10} ;
+double z[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0} ;
        // z[] values unimportant but should NOT be left uninitialized
        // as nan values WILL propagate through
 int numpoints = 13 ;
@@ -41,13 +41,13 @@ int main(int argc, char **argv)
 
  mtype[n] = TX; mparam[n] =  -200        ; n++;
  mtype[n] = TY; mparam[n] =  -200        ; n++;
- mtype[n] = TZ; mparam[n] =  -200        ; n++;
+ //mtype[n] = TZ; mparam[n] =  -200        ; n++;
  mtype[n] = SX; mparam[n] =  winsize/400 ; n++;
  mtype[n] = SY; mparam[n] =  winsize/400 ; n++;
- mtype[n] = SZ; mparam[n] =  winsize/400 ; n++;
+ //mtype[n] = SZ; mparam[n] =  winsize/400 ; n++;
  mtype[n] = TX; mparam[n] =  winsize/2   ; n++;
  mtype[n] = TY; mparam[n] =  winsize/2   ; n++;
- mtype[n] = TZ; mparam[n] =  winsize/2   ; n++;
+ //mtype[n] = TZ; mparam[n] =  winsize/2   ; n++;
 
  M3d_make_movement_sequence_matrix(fix,fixi, n,mtype,mparam);
  M3d_mat_mult_points(x,y,z, fix, x,y,z, numpoints);
@@ -61,15 +61,15 @@ int main(int argc, char **argv)
 
  mtype[n] = TX; mparam[n] =  -winsize/2   ; n++;
  mtype[n] = TY; mparam[n] =  -winsize/2   ; n++;
- mtype[n] = TZ; mparam[n] =  -winsize/2   ; n++;
+ //mtype[n] = TZ; mparam[n] =  -winsize/2   ; n++;
  mtype[n] = SX; mparam[n] =  0.95 ; n++;
  mtype[n] = SY; mparam[n] =  0.95 ; n++;
- mtype[n] = SZ; mparam[n] =  0.95 ; n++;
+ //mtype[n] = SZ; mparam[n] =  0.95 ; n++;
  //mtype[n] = TZ; mparam[n] =  5   ; n++;
  mtype[n] = RZ; mparam[n] =  -5  ; n++;
  mtype[n] = TX; mparam[n] =  winsize/2   ; n++;
  mtype[n] = TY; mparam[n] =  winsize/2   ; n++;
- mtype[n] = TZ; mparam[n] =  winsize/2   ; n++;
+ //mtype[n] = TZ; mparam[n] =  winsize/2   ; n++;
 
  double v[4][4],vi[4][4];
 
