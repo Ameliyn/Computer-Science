@@ -365,10 +365,16 @@ int M3d_view(double v[4][4], double vi[4][4], double eye[3], double coi[3], doub
   mtype[n] = TX; mparam[n] = -eye[0]; n++;
   mtype[n] = TY; mparam[n] = -eye[1]; n++;
   mtype[n] = TZ; mparam[n] = -eye[2]; n++;
+
+
+  //find rotations
+  //TODO: Find dot product and use that to find the angle with the axis? IDK I'm pretty lost rn.
+  
   mtype[n] = RY; mparam[n] = -atan2(coi[1]-eye[1],up[1]-eye[1]) * (180 / M_PI); n++;
   mtype[n] = RX; mparam[n] = -atan2(coi[0]-eye[0],up[0]-eye[0]) * (180 / M_PI); n++;
   mtype[n] = RZ; mparam[n] = -atan2(coi[2]-eye[2],up[2]-eye[2]) * (180 / M_PI); n++;
 
+  
   M3d_make_movement_sequence_matrix(v,vi,n,mtype,mparam);
   
 }
