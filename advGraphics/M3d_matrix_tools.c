@@ -355,41 +355,49 @@ int M3d_make_movement_sequence_matrix(double v[4][4],double vi[4][4], int n, int
 int M3d_view(double v[4][4], double vi[4][4], double eye[3], double coi[3], double up[3]){
 
   double temp[4][4];
-  //Translate
-  M3d_make_identity(temp);
+  double tempb[4][4];
+  M3d_make_identity(v);
+  M3d_make_identity(vi);
 
-  double mparam[100];
-  int mtype[100];
-  int n = 0;
+  M3d_make_translation(v, -eye[0], -eye[1], -eye[2]);
+  M3d_make_translation(vi, eye[0], eye[1], eye[2]);
+
+  double a = coi[0] - eye[0];
+  double b = coi[1] - eye[1];
+  double c = coi[2] - eye[2];
+
+  double p = sqrt(a*a + c*c);
+  double r = sqrt(b*b + p*p);
+
+  double cs1 = c/p;
+  double s1 = -a/p;
+
+  double cs2 = p/r;
+  double s2 = b/r;
+
+  M3d_make_y_rotation_cs(temp,cs1,s1);
+  M3d_make_y_rotation_cs(tempb,cs1,-s1);
+  M3d_mat_mult(v,temp,v);
+  M3d_mat_mult(vi,vi,tempb);
+
+  M3d_make_x_rotation_cs(temp,cs2,s2);
+  M3d_make_x_rotation_cs(tempb,cs2,-s2);
+  M3d_mat_mult(v,temp,v);
+  M3d_mat_mult(vi,vi,tempb);
   
-  mtype[n] = TX; mparam[n] = -eye[0]; n++;
-  mtype[n] = TY; mparam[n] = -eye[1]; n++;
-  mtype[n] = TZ; mparam[n] = -eye[2]; n++;
+  double upbar[3];
+  upbar[0] = up[0];
+  upbar[1] = up[1];
+  upbar[2] = up[2];
 
+  M3d_mat_mult_pt(upbar,v,upbar);
 
-  //find rotations
-  //TODO: Find dot product and use that to find the angle with the axis
-  // arccos (Dot Product / magnitude(A) * Magnitude(B))
+  double q = sqrt((upbar[1]*upbar[1]) + (upbar[0]*upbar[0]));
 
-  //cos(theta) = a dot b / magA*magB
-  double magCoi = sqrt(((coi[0]-eye[0])*(coi[0]-eye[0])) + ((coi[1]-eye[1])*(coi[1]-eye[1]))
-		       + ((coi[2]-eye[2])*(coi[2]-eye[2])));
-
-  //x-axis = [1,0,0]
-  double xangle = (coi[0]-eye[0]) / magCoi;
-  //y-axis = [0,1,0]
-  double yangle = (coi[1]-eye[1]) / magCoi;
-  //z-axis = [0,0,1]
-  //double zangle = (up[1]-eye[1]) / sqrt(((up[0]-eye[0])*(up[0]-eye[0])) +
-  //                                        ((up[1]-eye[1])*(up[1]-eye[1])) + ((up[2]-eye[2])*(up[2]*eye[2])));
-  double zangle = (coi[2]-eye[2]) / magCoi;
+  M3d_make_z_rotation_cs(temp, upbar[1]/q, upbar[0]/q);
+  M3d_make_z_rotation_cs(tempb, upbar[1]/q, -upbar[0]/q);
   
-  mtype[n] = RY; mparam[n] = -acos(xangle) * 180 / M_PI; n++;
-  mtype[n] = RX; mparam[n] = -acos(zangle) * 180 / M_PI; n++;
-  mtype[n] = RZ; mparam[n] = -acos(yangle) * 180 / M_PI; n++;
+  M3d_mat_mult(v, temp, v);
+  M3d_mat_mult(vi, vi, tempb);
 
-  //deal with the up vector
-  
-  M3d_make_movement_sequence_matrix(v,vi,n,mtype,mparam);
-  
 }
