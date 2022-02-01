@@ -380,6 +380,8 @@ int M3d_view(double v[4][4], double vi[4][4], double eye[3], double coi[3], doub
   //y-axis = [0,1,0]
   double yangle = (coi[1]-eye[1]) / magCoi;
   //z-axis = [0,0,1]
+  //double zangle = (up[1]-eye[1]) / sqrt(((up[0]-eye[0])*(up[0]-eye[0])) +
+  //                                        ((up[1]-eye[1])*(up[1]-eye[1])) + ((up[2]-eye[2])*(up[2]*eye[2])));
   double zangle = (coi[2]-eye[2]) / magCoi;
   
   mtype[n] = RY; mparam[n] = -acos(xangle) * 180 / M_PI; n++;
