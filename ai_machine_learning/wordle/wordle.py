@@ -13,10 +13,10 @@ with open("wordle/mystery_words.txt") as f:
 
 word = random.choice(mystery_words)
 placements = [0, 0, 0, 0, 0]
-
-for i in range(6):
+i = 0
+while i < 6:
     placements = [0, 0, 0, 0, 0]
-    guess = input("Your Guess: ")
+    guess = input("Your Guess #%d: " % (i+1))
     if len(guess) != 5 or guess not in legal_words:
         print("Invalid Guess. Try again")
         i -= 1
@@ -47,6 +47,8 @@ for i in range(6):
 
         print(temp)
         print("Try again")
+    i += 1
+
 
 
 print("You lose. The word was", word)
