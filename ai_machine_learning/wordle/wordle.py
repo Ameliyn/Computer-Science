@@ -50,5 +50,4 @@ while i < 6:
     i += 1
 
 
-
 print("You lose. The word was", word)
