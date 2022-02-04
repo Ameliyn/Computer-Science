@@ -395,6 +395,71 @@ int main ()
 
   onum++ ;
 
+  //build tip sphere x
+  f = fopen("sphere.xyz","r") ;
+  if (f == NULL) { printf("Can't open file %s\n", "sphere.xyz") ;  exit(0) ;  }
+  inherent_rgb[onum][0] = 1.0 ;
+  inherent_rgb[onum][1] = 0.8 ;
+  inherent_rgb[onum][2] = 0.0 ;
+  read_xyz_file_into_data_structure (f, onum) ;
+  fclose(f) ;
+
+  nl = 0 ;
+  tlist[nl] = SX ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = SY ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = SZ ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = TX ; plist[nl] = 4 ; nl++ ;
+  M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
+
+  M3d_mat_mult_points (x[onum],y[onum],z[onum],
+		       V,  x[onum],y[onum],z[onum],numpoints[onum]) ;
+
+  onum++ ;
+
+  //build tip sphere y
+  f = fopen("sphere.xyz","r") ;
+  if (f == NULL) { printf("Can't open file %s\n", "sphere.xyz") ;  exit(0) ;  }
+  inherent_rgb[onum][0] = 1.0 ;
+  inherent_rgb[onum][1] = 0.8 ;
+  inherent_rgb[onum][2] = 0.0 ;
+  read_xyz_file_into_data_structure (f, onum) ;
+  fclose(f) ;
+
+  nl = 0 ;
+  tlist[nl] = SX ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = SY ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = SZ ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = TY ; plist[nl] = 4 ; nl++ ;
+  M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
+
+  M3d_mat_mult_points (x[onum],y[onum],z[onum],
+		       V,  x[onum],y[onum],z[onum],numpoints[onum]) ;
+
+  onum++ ;
+
+  //build tip sphere z
+  f = fopen("sphere.xyz","r") ;
+  if (f == NULL) { printf("Can't open file %s\n", "sphere.xyz") ;  exit(0) ;  }
+  inherent_rgb[onum][0] = 1.0 ;
+  inherent_rgb[onum][1] = 0.8 ;
+  inherent_rgb[onum][2] = 0.0 ;
+  read_xyz_file_into_data_structure (f, onum) ;
+  fclose(f) ;
+
+  nl = 0 ;
+  tlist[nl] = SX ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = SY ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = SZ ; plist[nl] = 0.25 ; nl++ ;
+  tlist[nl] = TZ ; plist[nl] = 4 ; nl++ ;
+  M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
+
+  M3d_mat_mult_points (x[onum],y[onum],z[onum],
+		       V,  x[onum],y[onum],z[onum],numpoints[onum]) ;
+
+  onum++ ;
+
+  
+
 
   // Build a +x axis with the cylinder file.
   f = fopen("cylinder.xyz","r") ;
@@ -457,7 +522,79 @@ int main ()
 
   onum++ ;
 
+  // Build a x-z axis with a cylinder.
+  
+  f = fopen("cylinder.xyz","r") ;
+  if (f == NULL) { printf("Can't open file %s\n", "cylinder.xyz") ;  exit(0) ;  }
+  inherent_rgb[onum][0] = 0.2 ;
+  inherent_rgb[onum][1] = 1 ;
+  inherent_rgb[onum][2] = 0.3 ;
+  read_xyz_file_into_data_structure (f, onum) ;
+  fclose(f) ;
 
+  nl = 0 ;
+  tlist[nl] = TX ; plist[nl] = 1 ; nl++ ;
+  tlist[nl] = SX ; plist[nl] = sqrt(8) ; nl++ ;
+  tlist[nl] = TX ; plist[nl] = -sqrt(8) ; nl++ ;
+  tlist[nl] = RY ; plist[nl] = 45 ; nl++ ;
+  tlist[nl] = TZ ; plist[nl] = 2 ; nl++ ;
+  tlist[nl] = TX ; plist[nl] = 2 ; nl++ ;
+  M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;  
+
+  M3d_mat_mult_points (x[onum],y[onum],z[onum],
+		       V,  x[onum],y[onum],z[onum],numpoints[onum]) ;
+
+  onum++ ;
+
+  // Build a x-y axis with a cylinder.
+  
+  f = fopen("cylinder.xyz","r") ;
+  if (f == NULL) { printf("Can't open file %s\n", "cylinder.xyz") ;  exit(0) ;  }
+  inherent_rgb[onum][0] = 0.2 ;
+  inherent_rgb[onum][1] = 1 ;
+  inherent_rgb[onum][2] = 0.3 ;
+  read_xyz_file_into_data_structure (f, onum) ;
+  fclose(f) ;
+
+  nl = 0 ;
+  tlist[nl] = TX ; plist[nl] = 1 ; nl++ ;
+  tlist[nl] = SX ; plist[nl] = sqrt(8) ; nl++ ;
+  tlist[nl] = TX ; plist[nl] = -sqrt(8) ; nl++ ;
+  tlist[nl] = RZ ; plist[nl] = -45 ; nl++ ;
+  tlist[nl] = TY ; plist[nl] = 2 ; nl++ ;
+  tlist[nl] = TX ; plist[nl] = 2 ; nl++ ;
+  M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;  
+
+  M3d_mat_mult_points (x[onum],y[onum],z[onum],
+		       V,  x[onum],y[onum],z[onum],numpoints[onum]) ;
+
+  onum++ ;
+
+  // Build a y-z axis with a cylinder.
+  
+  f = fopen("cylinder.xyz","r") ;
+  if (f == NULL) { printf("Can't open file %s\n", "cylinder.xyz") ;  exit(0) ;  }
+  inherent_rgb[onum][0] = 0.2 ;
+  inherent_rgb[onum][1] = 1 ;
+  inherent_rgb[onum][2] = 0.3 ;
+  read_xyz_file_into_data_structure (f, onum) ;
+  fclose(f) ;
+
+  nl = 0 ;
+  tlist[nl] = TX ; plist[nl] = 1 ; nl++ ;
+  tlist[nl] = SX ; plist[nl] = sqrt(8) ; nl++ ;
+  tlist[nl] = TX ; plist[nl] = -sqrt(8) ; nl++ ;
+  tlist[nl] = RY ; plist[nl] = 90 ; nl++ ;
+  tlist[nl] = RX ; plist[nl] = 45 ; nl++ ;
+  tlist[nl] = TZ ; plist[nl] = 2 ; nl++ ;
+  tlist[nl] = TY ; plist[nl] = 2 ; nl++ ;
+  M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;  
+
+  M3d_mat_mult_points (x[onum],y[onum],z[onum],
+		       V,  x[onum],y[onum],z[onum],numpoints[onum]) ;
+
+  onum++ ;
+  
 
   //---------------------------------------------------------------------
   numobjects = onum ;
