@@ -1,8 +1,8 @@
 
 // read the data from multiple xyz files and display all of the objects
 
-#include "FPToolkit.c"
-#include "M3d_matrix_tools.c"
+#include "../FPToolkit.c"
+#include "../M3d_matrix_tools.c"
 
 
 int window_width, window_height, window_square_size ;

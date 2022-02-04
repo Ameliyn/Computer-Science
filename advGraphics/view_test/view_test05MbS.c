@@ -1,8 +1,8 @@
 
 // read the data from multiple xyz files and display all of the objects
 
-#include "FPToolkit.c"
-#include "M3d_matrix_tools.c"
+#include "../FPToolkit.c"
+#include "../M3d_matrix_tools.c"
 
 
 int window_width, window_height, window_square_size ;
@@ -490,7 +490,20 @@ int main ()
 
     // put your code here!!!!!!!!!!!!
 
+    M3d_view (V, Vi,  eye,coi,up) ;
 
+
+    // move ALL objects from WORLD SPACE into EYE SPACE :
+    for (onum = 0 ; onum < numobjects ; onum++) {
+      M3d_mat_mult_points (x[onum],y[onum],z[onum],  V, 
+			   x[onum],y[onum],z[onum],numpoints[onum]) ;
+    }
+
+    G_rgb(0,0,0);
+    G_clear();
+    draw_all_objects();
+    q = G_wait_key() ;
+    if(q == 'q') break;
     fnum++ ;
   } // end while (1)
 
