@@ -62,7 +62,7 @@ def advanced2():
 def adv3_helper(change):
     temp_result = ()
     if isinstance(change, int):
-        return (change,)
+        return change,
     else:
         for i in change:
             if isinstance(i, int):
