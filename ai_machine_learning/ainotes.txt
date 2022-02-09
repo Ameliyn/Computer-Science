@@ -1,6 +1,34 @@
 Here's the beginning of my notes on AI+Machine Learning
 
 Python Things
-- Import basically copy pastes the file imported into the line of the import statement
+- Import basically copies and pastes the file imported into the line of the import statement
 - " if __name__ == "__main__": " basically ensures that those lines will only be run by the main.py function
 -- Whatever class you run, the __name__ is __main__. For all other classes, the __name__ is the file name.
+
+* Operator in Python:
+Wraps or unwraps a list (when used in a function call)
+--In a function definition, it wraps all values into a list (any length)
+--In a function call, unwraps a list into a number of arguments (any length)
+
+** Operator with Dictionaries in Python:
+Lines up the values of the dictionary with the arguments in a function call
+--NOTE: Dictionary key names need to exactly match the arguments for a function with exact arguments
+--For a function with parameter **kwargs, any dictionary is accepted and kwargs is a dictionary itself
+Ex. vals = {"a": "1", "b": "2", "c": "3"}
+def tricky(a,b,c): return;
+tricky(**vals)
+
+Function weirdness:
+def something(static, *extras, keyword, **kwargs):
+--The first parameter is standard where anything single variable is put into that spot
+--In here, the * means make a list of all the other parameters passed to this function.
+--After the generic (*extras), any parameters after that are keyword arguments (that must be named specifically)
+  --NOTE: Keywords after *extras are \required\ for a function call.
+--**kwargs is a dictionary of optional keyword arguments
+
+Example (because it is confusing)
+
+def tricky(a,*b,c):
+    return something
+
+Legal calls to this function are: tricky(x,[1,2,3,4],12,c=5)
