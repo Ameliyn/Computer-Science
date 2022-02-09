@@ -5,12 +5,16 @@ def tricky(a, *b, c):
     print(c)
 
 
-def something(a,b,c):
-    return a
+def something(a, b, c):
+    print(a)
+    print(b)
+    print(c)
 
 
-def osomething(a, b, *c, f, **kwargs):
+def other_something(a, b, *c, f, **kwargs):
+    print(a)
+    print(b)
+    print(c)
+    print(f)
     print(kwargs)
     print(kwargs["d"])
-
-
