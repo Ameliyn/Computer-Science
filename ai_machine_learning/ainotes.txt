@@ -19,6 +19,10 @@ def tricky(a,b,c): return;
 tricky(**vals)
 
 Function weirdness:
+--If first line (or multiple lines) is ''' SOMETHING ''' this is a docstring (which is the documentation for the function (like the java /** */ above function)
+--You can pass functions by putting their identifier without parentheses
+--Functions can return multiple things by separating them by commas (making a tuple) and then when calling the function, call it with commas (tuples auto create/destroy)
+EX: def mult(a,b): return a,b; c, d = mult(1,2);
 def something(static, *extras, keyword, **kwargs):
 --The first parameter is standard where anything single variable is put into that spot
 --In here, the * means make a list of all the other parameters passed to this function.
