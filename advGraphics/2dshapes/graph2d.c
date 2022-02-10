@@ -10,7 +10,7 @@ double z[M][10000]; // simply here to keep M3d Happy.
 double ir[M];
 double ig[M];
 double ib[M];
-double uinc = 0.001;
+double uinc = 0.01;
 double V[M][4][4];
 double Vi[M][4][4];
 double limit[M][2];
@@ -137,8 +137,10 @@ int create_objects(){
   //humps
   numpoints[numobjects] = 0;
   for(double u = 0; u <= 6*M_PI; u += uinc){
-    xx = cos(u + M_PI/2) + u;
-    yy = 1 - sin(u + M_PI/2);
+    //xx = cos(u + M_PI/2) + u;
+    //yy = 1 - sin(u + M_PI/2);
+    xx = u - sin(u);
+    yy = 1 - cos(u);
     x[numobjects][numpoints[numobjects]] = xx;
     y[numobjects][numpoints[numobjects]] = yy;
     z[numobjects][numpoints[numobjects]] = 1;
@@ -258,9 +260,9 @@ int main(){
   //char *object = argv[1];
 
   create_objects();
-  printf("Created Objects\n");
+  //printf("Created Objects\n");
   create_distortion();
-  printf("Created Distortions\n");
+  //printf("Created Distortions\n");
 
   G_init_graphics(scrnsize, scrnsize);
   G_rgb(0,0,0);
@@ -278,15 +280,9 @@ int main(){
   ir[i] = 0.8; ig[i] = 0.5; ib[i] = 0.8; i++;
   
   for(int i = 0; i < numobjects; i++){
-    printf("Displaying object %d\n",i);
+    //printf("Displaying object %d\n",i);
     display_object(i);
     G_wait_key();
   }
-  
-  
-  
-  
-  
 }
-
 

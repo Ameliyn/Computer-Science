@@ -2,3 +2,40 @@ Advanced Graphics
 Office Hours: 
 -M/W 11:20-12
 -T/TH 9-9:40
+
+
+Equations for 3d shapes (object space)
+All are within:
+double inc = 0.01;
+for(int u = ulo; u <= uhi; u +=inc){
+for(int v = vlo; v <= vhi; v +=inc){}
+}
+
+Cylinder
+u = [0,2*M_PI]
+v = [0,height]
+x(u,v) = cos(u);
+y(u,v) = v;
+z(u,v) = sin(u);
+
+Sphere
+//"Cylindrical Coordinates" - Works like taking tops and bottoms 
+//of cylinders and placing them without the innards
+//this one looks uniform
+u = [0,2*M_PI]
+v = [-1,1]
+r = sqrt(1-v*v); // radius percent
+x(u,v) = r * cos(u);
+y(u,v) = v;
+z(u,v) = r * sin(u);
+
+//Other way
+//this one favors the poles and looks less uniform
+u = [0,2*M_PI]
+v = [-M_PI/2, M_PI/2]
+u = longitude, v = latitude
+x = cos(v)*cos(u);
+y = sin(v);
+z = cos(v)*sin(u);
+
+
