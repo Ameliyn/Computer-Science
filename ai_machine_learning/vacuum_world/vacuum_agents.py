@@ -10,6 +10,7 @@ from vacuum import *
 
 world = [100][100]
 current_xy = {50, 50}
+move_queue = []
 
 
 def reflex_agent(space):
@@ -29,6 +30,16 @@ def random_agent(space):
 def state_agent(space):
     if space is False:
         return "clean"
+
+    """
+    Plan: 
+    0. Try to map out the four outer walls
+    1. Create a move queue, if it's empty try to move east, then north, then west, then south
+    2. If not empty, execute the move queue.
+    3. If tried to move east, and still on clean (hit wall), try to go over by the north, then try south.
+    3a. if still cant go east, go north one space and then go back west (repeat).
+    4a. after repeating, try to do south half of the board
+    """
     return "east"
 
 
