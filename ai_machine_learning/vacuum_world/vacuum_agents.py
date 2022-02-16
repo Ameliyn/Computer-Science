@@ -8,6 +8,8 @@ import random
 
 
 def reflex_action(space):
+    if space is True:
+        return "east"
     return "clean"
 
 
@@ -20,4 +22,6 @@ def random_agent(space):
 
 
 def state_agent(space):
-    return "clean"
+    if space is False:
+        return "clean"
+    return "east"
