@@ -51,7 +51,7 @@ def state_agent(space):
     if space is True:
         prev_action = "clean"
         clean_counter = 0
-        #basic_counter = 0
+        # basic_counter = 0
         return "clean"
 
     if len(action_queue) > 0:
@@ -108,9 +108,17 @@ def state_agent(space):
                 n_or_s = "north"
             else:
                 n_or_s = "south"
+        alt = 0
         for i in range(other_half + 2):
             action_queue.append(n_or_s)
-            action_queue.append(w_or_e)
+            if alt == 0:
+                alt = 1
+                action_queue.append("east")
+                action_queue.append("east")
+            else:
+                alt = 0
+                action_queue.append("west")
+                action_queue.append("west")
         other_half = 0
         basic_counter = 0
         return n_or_s
@@ -119,8 +127,12 @@ def state_agent(space):
     return w_or_e
 
 
-#run(20, 50000, state_agent)
-
-# print(many_runs(20, 50000, 10, random_agent))
-print("601163")
-print(many_runs(20, 50000, 10, state_agent))
+# run(20, 50000, state_agent)
+rand = many_runs(20, 50000, 10, random_agent)
+pr_rand = "{:.2f}".format(rand)
+print("Random: %s" % pr_rand)
+state = many_runs(20, 50000, 10, state_agent)
+pr_state = "{:.2f}".format(state)
+print("State: %s" % pr_state)
+pr_speed = "{:.2f}".format((1 - state / rand) * 100)
+print("State is %s%% faster" % pr_speed)
