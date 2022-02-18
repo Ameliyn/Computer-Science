@@ -7,10 +7,17 @@ Team 5: Simon Buan, Rosalee Hayes, Skye Russ, Anders Stall
 import random
 from vacuum import *
 
-
-world = [100][100]
-current_xy = {50, 50}
-move_queue = []
+prev_action = ""
+action_queue = []
+try_over = False
+try_under = False
+w_or_e = "east"
+clean_counter = 0
+switch_counter = 0
+basic_counter = 0
+n_or_s = "south"
+other_half = 0
+flag_s = 0
 
 
 def reflex_agent(space):
@@ -28,21 +35,92 @@ def random_agent(space):
 
 
 def state_agent(space):
-    if space is False:
+    global prev_action
+    global action_queue
+    global try_over
+    global try_under
+    global w_or_e
+    global clean_counter
+    global switch_counter
+    global basic_counter
+    global n_or_s
+    global other_half
+    global flag_s
+
+    # print(prev_action)
+    if space is True:
+        prev_action = "clean"
+        clean_counter = 0
+        #basic_counter = 0
         return "clean"
 
-    """
-    Plan: 
-    0. Try to map out the four outer walls
-    1. Create a move queue, if it's empty try to move east, then north, then west, then south
-    2. If not empty, execute the move queue.
-    3. If tried to move east, and still on clean (hit wall), try to go over by the north, then try south.
-    3a. if still cant go east, go north one space and then go back west (repeat).
-    4a. after repeating, try to do south half of the board
-    """
-    return "east"
+    if len(action_queue) > 0:
+        temp = action_queue[0]
+        action_queue.remove(action_queue[0])
+        if len(action_queue) == 0 and not try_over:
+            try_over = True
+        elif len(action_queue) == 0 and not try_under:
+            try_under = True
+        return temp
+
+    if clean_counter > 20 and prev_action == w_or_e and not try_over:
+        action_queue.append(w_or_e)
+        action_queue.append(w_or_e)
+        action_queue.append("south")
+        try_over = False
+        # print("try over")
+        prev_action = "north"
+        return "north"
+
+    if clean_counter > 20 and prev_action == w_or_e and not try_under:
+        action_queue.append(w_or_e)
+        action_queue.append(w_or_e)
+        action_queue.append("north")
+        try_under = False
+        # print("try under")
+        prev_action = "south"
+        return "south"
+
+    clean_counter += 1
+
+    if clean_counter > 30:
+        try_over = False
+        try_under = False
+        # print("switch!")
+        clean_counter = 0
+        if w_or_e == "east":
+            w_or_e = "west"
+        else:
+            w_or_e = "east"
+        action_queue.append(w_or_e)
+        other_half += 1
+        prev_action = n_or_s
+        return n_or_s
+
+    basic_counter += 1
+    if basic_counter > 40:
+        flag_s += 1
+
+        if flag_s > 3:
+            flag_s = 0
+
+            if n_or_s == "south":
+                n_or_s = "north"
+            else:
+                n_or_s = "south"
+        for i in range(other_half + 2):
+            action_queue.append(n_or_s)
+            action_queue.append(w_or_e)
+        other_half = 0
+        basic_counter = 0
+        return n_or_s
+
+    prev_action = w_or_e
+    return w_or_e
 
 
-run(20, 50000, random_agent)
+#run(20, 50000, state_agent)
 
 # print(many_runs(20, 50000, 10, random_agent))
+print("601163")
+print(many_runs(20, 50000, 10, state_agent))
