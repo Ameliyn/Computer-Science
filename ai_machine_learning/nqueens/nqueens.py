@@ -9,39 +9,34 @@ If no solution was found, return False
 
 
 def check_space(limit: int, r: int, c: int, board: tuple):
-    if r in board:
+    if r in board:  # if row already taken
         return False
-    if len(board) == 0:
-        return True
-    i = r - 1
-    while i >= 0:
-        if board[r - i] == c - i:
+    i = 1  # start at 1 less than the current row
+    while i <= c:
+        if c - i >= 0 and (board[c - i] == r - i or board[c - i] == r + i):  # check if column before available and if queen in diagonals
             return False
-        if board[r - i] == c + i:
-            return False
-        i -= 1
+        i += 1
     return True
 
 
-def copy_tup(tup: tuple, n: int):
-    cp = ()
-    for i in tup:
-        cp += i
-    return cp
-
-
 def find_solution(limit, c, queen_list):
-    if limit == c:
-        return queen_list
     for r in range(limit):
         if check_space(limit, r, c, queen_list):
-            temp = find_solution(limit, c + 1, copy_tup(queen_list, c))
-            if len(temp) <= 0 or temp[0] is False:
+            if limit == c+1:  # if on last row
+                temp = queen_list + (r,)
+            else:
+                temp = find_solution(limit, c + 1, (queen_list + (r,)))
+            if not temp:  # if recursive call comes back false, try the next row
                 continue
             else:
                 return temp
-    return False,
+    return False
 
 
 def nqueens(num):
-    return find_solution(num, 0, ())
+    temp = find_solution(num, 0, ())
+    if not temp:
+        # account for requiring a tuple list containing simply "false" for Peter's test file
+        return temp,
+    else:
+        return temp
