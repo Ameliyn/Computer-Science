@@ -185,26 +185,34 @@ void light_model (double irgb[3],
 }
 
 // creates a sphere multiplied by v with and irgb
-int create_sphere(double m[4][4], double ir, double ig, double ib){
+int create_sphere(double m[4][4], double ir, double ig, double ib, char * texture){
   tanhalfangle = tan(halfangle);
   double irgb[3] = {ir,ig,ib};
   double argb[3];
   double p[3], r[3], q[3];
 
   //load texture file
-  
-  //texture!
-  char nameA[100] = "clock.xwd";
+  int texFlag = 0;
+  char *nameA = texture;
   int idA;
   int widthA, heightA;
   int d[2], e,texx,texy;
   double urat,vrat;
+  //texture!
+  if(texture == "null"){
+    texFlag = 0;
+  }
+  else{
+    texFlag = 1;
+    
   
-  idA = init_xwd_map_from_file (nameA) ;// returns -1 on error, 1 if ok
-  if (idA == -1) { printf("failure\n") ;  exit(0) ; }
-  e = get_xwd_map_dimensions(idA, d) ;
-  if (e == -1) { printf("failure\n") ;  exit(0) ; }
-  widthA = d[0] ; heightA = d[1] ;
+    idA = init_xwd_map_from_file (nameA) ;// returns -1 on error, 1 if ok
+    if (idA == -1) { printf("failure\n") ;  exit(0) ; }
+    e = get_xwd_map_dimensions(idA, d) ;
+    if (e == -1) { printf("failure\n") ;  exit(0) ; }
+    widthA = d[0] ; heightA = d[1] ;
+  }
+  
 
 
   double ulo = 0;
@@ -233,16 +241,18 @@ int create_sphere(double m[4][4], double ir, double ig, double ib){
 
       //Texture!
       //if u in first half
-      if(u < (uhi-ulo) / 2){
-	urat = (u-ulo) / ((uhi/2)-ulo);
-	vrat = (v-vlo) / (vhi-vlo);
+      if(texFlag == 1){
+	if(u < (uhi-ulo) / 2){
+	  urat = (u-ulo) / ((uhi/2)-ulo);
+	  vrat = (v-vlo) / (vhi-vlo);
+	}
+	else{
+	  urat = (u - ((uhi-ulo)/2)) / (uhi-((uhi-ulo)/2));
+	  vrat = (v-vlo) / (vhi-vlo);
+	}
+	texx = widthA * urat;
+	texy = heightA * vrat;
       }
-      else{
-	urat = (u - ((uhi-ulo)/2)) / (uhi-((uhi-ulo)/2));
-	vrat = (v-vlo) / (vhi-vlo);
-      }
-      texx = widthA * urat;
-      texy = heightA * vrat;
       //calculate x,y on film
 
       //clip on z axis
@@ -257,11 +267,13 @@ int create_sphere(double m[4][4], double ir, double ig, double ib){
 	//save point
 	zbuff[xfilm][yfilm].zval = p[2];
 
-	e = get_xwd_map_color(idA, texx,texy,irgb) ; // returns -1 on error, 1 if ok
-        if (e == -1) { printf("Color invalid, defaulting to 1,1,1\n") ;
-	  irgb[0] = 1;
-	  irgb[1] = 1;
-	  irgb[2] = 1;}
+	if(texFlag == 1){
+	  e = get_xwd_map_color(idA, texx,texy,irgb) ; // returns -1 on error, 1 if ok
+	  if (e == -1) { printf("Color invalid, defaulting to irgb\n") ;
+	    irgb[0] = ir;
+	    irgb[1] = ig;
+	    irgb[2] = ib;}
+	}
 	
 	light_model(irgb,p,q,r,argb);
         zbuff[xfilm][yfilm].r = argb[0];
@@ -273,7 +285,7 @@ int create_sphere(double m[4][4], double ir, double ig, double ib){
 }
 
 // creates a unit cylinder multiplied by v with and irgb
-int create_cylinder(double m[4][4], double ir, double ig, double ib){
+int create_cylinder(double m[4][4], double ir, double ig, double ib, char *texture){
   tanhalfangle = tan(halfangle);
   double p[3],q[3],r[3];
   double irgb[3] = {ir,ig,ib};
@@ -283,18 +295,27 @@ int create_cylinder(double m[4][4], double ir, double ig, double ib){
   double vlo = 0;
   double vhi = 2;
 
-  //texture!
-  char nameA[100] = "clock.xwd";
+  int texFlag;
+  char *nameA = texture;
   int idA;
   int widthA, heightA;
   int d[2], e,texx,texy;
   double urat,vrat;
   
-  idA = init_xwd_map_from_file (nameA) ;// returns -1 on error, 1 if ok
-  if (idA == -1) { printf("failure\n") ;  exit(0) ; }
-  e = get_xwd_map_dimensions(idA, d) ;
-  if (e == -1) { printf("failure\n") ;  exit(0) ; }
-  widthA = d[0] ; heightA = d[1] ;
+  if(texture == "null"){
+    texFlag = 0;
+  }
+  else{
+    texFlag = 1;
+    //texture!
+    
+  
+    idA = init_xwd_map_from_file (nameA) ;// returns -1 on error, 1 if ok
+    if (idA == -1) { printf("failure\n") ;  exit(0) ; }
+    e = get_xwd_map_dimensions(idA, d) ;
+    if (e == -1) { printf("failure\n") ;  exit(0) ; }
+    widthA = d[0] ; heightA = d[1] ;
+  }
   
   //get matrix for file
   int nl;
@@ -325,19 +346,20 @@ int create_cylinder(double m[4][4], double ir, double ig, double ib){
       r[1] = v+inc;
       r[2] = sin(u);
 
-      //Texture!
-      //if u in first half
-      if(v < (vhi-vlo) / 2){
-	vrat = (v-vlo) / ((vhi/2)-vlo);
-	urat = (u-ulo) / (uhi-ulo);
+      if(texFlag == 1){
+	//Texture!
+	//if u in first half
+	if(v < (vhi-vlo) / 2){
+	  vrat = (v-vlo) / ((vhi/2)-vlo);
+	  urat = (u-ulo) / (uhi-ulo);
+	}
+	else{
+	  vrat = (v - ((vhi-vlo)/2)) / (vhi-((vhi-vlo)/2));
+	  urat = (u-ulo) / (uhi-ulo);
+	}
+	texx = widthA * urat;
+	texy = heightA * vrat;
       }
-      else{
-	vrat = (v - ((vhi-vlo)/2)) / (vhi-((vhi-vlo)/2));
-	urat = (u-ulo) / (uhi-ulo);
-      }
-      texx = widthA * urat;
-      texy = heightA * vrat;
-      
       //transform x,y,z
       M3d_mat_mult_pt(p,m,p);
       M3d_mat_mult_pt(q,m,q);
@@ -354,13 +376,14 @@ int create_cylinder(double m[4][4], double ir, double ig, double ib){
 	//save point
 	zbuff[xfilm][yfilm].zval = p[2];
 
-	//get irgb from file
-	e = get_xwd_map_color(idA, texx,texy,irgb) ; // returns -1 on error, 1 if ok
-        if (e == -1) { printf("Color invalid, defaulting to 1,1,1\n") ;
-	  irgb[0] = 1;
-	  irgb[1] = 1;
-	  irgb[2] = 1;}
-	
+	if(texFlag == 1){
+	  //get irgb from file
+	  e = get_xwd_map_color(idA, texx,texy,irgb) ; // returns -1 on error, 1 if ok
+	  if (e == -1) { printf("Color invalid, defaulting to irgb\n") ;
+	    irgb[0] = ir;
+	    irgb[1] = ig;
+	    irgb[2] = ib;}
+	}
 	light_model(irgb,p,q,r,argb);
 	zbuff[xfilm][yfilm].r = argb[0];
 	zbuff[xfilm][yfilm].g = argb[1];
@@ -391,7 +414,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating light sphere\n");
-  create_sphere(V,1,0.0,1.0);
+  create_sphere(V,1,0.0,1.0,"null");
 
   
   // Build an origin point out of the sphere file.
@@ -403,7 +426,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating origin sphere\n");
-  create_sphere(V,1,0.8,0.0);
+  create_sphere(V,1,0.8,0.0,"clock.xwd");
 
   //build tip sphere x
   nl = 0 ;
@@ -414,7 +437,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating x-tip sphere\n");
-  create_sphere(V,1,0.8,0);
+  create_sphere(V,1,0.8,0,"clock.xwd");
 
   //build tip sphere y
 
@@ -426,7 +449,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating y-tip sphere\n");
-  create_sphere(V,1,0.8,0);
+  create_sphere(V,1,0.8,0,"clock.xwd");
 
   //build tip sphere z
   nl = 0 ;
@@ -437,7 +460,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating z-tip sphere\n");
-  create_sphere(V,1,0.8,0);
+  create_sphere(V,1,0.8,0,"clock.xwd");
 
   
 
@@ -449,7 +472,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating +x axis cylinder\n");
-  create_cylinder(V,1,0.2,0.2);
+  create_cylinder(V,1,0.2,0.2,"null");
 
 
   // Build a +y axis with the cylinder file.
@@ -460,7 +483,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating +y axis cylinder\n");
-  create_cylinder(V,1,1,1);
+  create_cylinder(V,1,1,1,"null");
 
 
   // Build a +z axis with a cylinder.
@@ -471,7 +494,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;  
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating +z axis cylinder\n");
-  create_cylinder(V,0.3,0.2,1);
+  create_cylinder(V,0.3,0.2,1,"null");
 
   // Build a x-z axis with a cylinder.
 
@@ -485,7 +508,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;  
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating x-z axis cylinder\n");
-  create_cylinder(V,0.2,1,0.3);
+  create_cylinder(V,0.2,1,0.3,"null");
 
   
   // Build a x-y axis with a cylinder.
@@ -500,7 +523,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;  
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating x-y axis cylinder\n");
-  create_cylinder(V,0.2,1,0.3);
+  create_cylinder(V,0.2,1,0.3,"null");
 
 
   // Build a y-z axis with a cylinder.
@@ -515,7 +538,7 @@ int create_base_objects(double eye[4][4]){
   M3d_make_movement_sequence_matrix (V,Vi,  nl,tlist,plist) ;
   M3d_mat_mult(V,eye,V);
   if(debug) printf("Creating y-z axis cylinder\n");
-  create_cylinder(V,0.2,1,0.3);
+  create_cylinder(V,0.2,1,0.3,"null");
 }
 
 
