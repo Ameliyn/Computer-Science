@@ -36,3 +36,48 @@ def tricky(a,*b,c):
     return something
 
 Legal calls to this function are: tricky(x,[1,2,3,4],12,c=5)
+
+
+Heuristic Search
+when used in a map with costs to get different places
+Node   g()  h()   f()
+g = total cost thus far
+h = theoretical remaining cost to get somewhere (no idea how to solve for this)
+f = g + h
+Goes through and choose the smallest f value as our next spot to "open up" (if the same, go for the largest g)
+Take one node, and find f,g,h for all connected nodes (our start position has a cost of 0)
+
+Arad		366   Mehadia		    241
+Bucharest	0     Neamt		        234
+Craiova	    160   Oradea		    380
+Drobeta	    242   Pitesti		    100
+Eforie		161   Rimnicu Vilcea    193
+Fagaras	    176   Sibiu			    253
+Giurgiu	    77    Timisoara		    329
+Hirsova	    151   Urziceni		    80
+Iasi		226   Vaslui	        199
+Lugoj		244   Zerind		    374
+
+Each search:
+Node            g       h       f
+
+Arad            0       366     366
+Zerind          75      374     449
+Sibiu           140     253     393  Step 2 opens Sibiu
+Timisoara       118     329     447
+Add Sibiu to this section
+Fagaras         239     176     415  Step 3 opens Fagaras
+Rimnicu Vilcea  220     193     413
+Oradea          291     380     671
+Add Fagaras and Sibiu to this section
+Bucharest       450     000     450  Step 5 goes back and opens Rimnicu Vilcea
+Add Rimnicu and Sibiu to this section
+Pitesti         317     100     417  Step 4 opens Pitesti
+Craiova         366     160     526
+Add Pitesti Rimnicu and Sibiu to this section
+Bucharest       417     0       417  Smallest f value, we're done
+
+
+
+
+

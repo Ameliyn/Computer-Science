@@ -127,12 +127,49 @@ def state_agent(space):
     return w_or_e
 
 
-# run(20, 50000, state_agent)
+next_action = 0
+directions = ["north", "east", "south", "west"]
+
+
+def right_turn_agent(space):
+    global prev_action
+    global next_action
+    global directions
+    global clean_counter
+    global action_queue
+
+    if space is True:
+        clean_counter = 0
+        prev_action = "clean"
+        return "clean"
+
+    if len(action_queue) > 0:
+        temp = action_queue[0]
+        action_queue.remove(action_queue[0])
+        return temp
+
+    clean_counter += 1
+    if clean_counter == 1:
+        return directions[next_action]
+    elif clean_counter > 4:
+        return random.choice(directions)
+    elif next_action == 3:
+        next_action = 0
+        return directions[0]
+    else:
+        next_action += 1
+        return directions[next_action]
+
+
+run(20, 50000, right_turn_agent)
+
+"""
 rand = many_runs(20, 50000, 10, random_agent)
 pr_rand = "{:.2f}".format(rand)
 print("Random: %s" % pr_rand)
-state = many_runs(20, 50000, 10, state_agent)
+state = many_runs(20, 50000, 10, right_turn_agent)
 pr_state = "{:.2f}".format(state)
 print("State: %s" % pr_state)
 pr_speed = "{:.2f}".format((1 - state / rand) * 100)
 print("State is %s%% faster" % pr_speed)
+"""
