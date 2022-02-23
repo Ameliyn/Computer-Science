@@ -34,9 +34,4 @@ def find_solution(limit, c, queen_list):
 
 
 def nqueens(num):
-    temp = find_solution(num, 0, ())
-    if not temp:
-        # account for requiring a tuple list containing simply "false" for Peter's test file
-        return temp,
-    else:
-        return temp
+    return find_solution(num, 0, ())
