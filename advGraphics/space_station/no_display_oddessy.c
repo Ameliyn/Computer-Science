@@ -1,4 +1,3 @@
-#include "../FPToolkit.c"
 #include "../M3d_matrix_tools.c"
 #include "../xwd_tools_03.c"
 #define MAXOBJECTS 10
@@ -16,7 +15,7 @@ double SPECPOW      = 50 ;
 int save_files;
 double halfangle = 30*M_PI/180;
 double tanhalfangle;
-int debug = 1;
+int debug = 0;
 char *file_prefix = "spaceod";
 char *file_suffix = ".xwd";
 double hitherDist = 1;
@@ -99,6 +98,7 @@ int clear_zbuff(){
   
 }
 
+/*
 int display_zbuff(){
   if(debug) printf("Printing ZBuffer\n");
   for(int i = 0; i < scrnsize; i++){
@@ -107,17 +107,17 @@ int display_zbuff(){
       G_point(i,j);
     }
   }
-}
+  }*/
 
 int save_zbuff(char * filename){
+  int id = create_new_xwd_map(scrnsize,scrnsize);
   if(debug) printf("Saving ZBuffer to %s\n", filename);
   for(int i = 0; i < scrnsize; i++){
     for(int j = 0; j < scrnsize; j++){
-      G_rgb(zbuff[i][j].r,zbuff[i][j].g,zbuff[i][j].b);
-      G_point(i,j);
+      set_xwd_map_color(id,i,j,zbuff[i][j].r,zbuff[i][j].g,zbuff[i][j].b);
     }
   }
-  G_save_image_to_file(filename);
+  xwd_map_to_named_xwd_file(id,filename);
 }
 
 int Light_Model (double irgb[3],
@@ -607,19 +607,18 @@ int create_base_objects(double eye[4][4]){
 
 int main(int argc, char **argv){
 
-  if(argc < 5){printf("Usage: ./a.out point_increase save_files filepath num_frames\n"); exit(0);}
+  //if(argc < 5){printf("Usage: ./a.out point_increase save_files filepath num_frames\n"); exit(0);}
   char fileName[100];
-  save_files = atoi(argv[2]);
-  inc = atof(argv[1]);
-  int num_frames = atoi(argv[4]);
-  G_init_graphics(scrnsize, scrnsize);
+  save_files = 1;
+  inc = 0.001;
+  int num_frames = 2;
+  //G_init_graphics(scrnsize, scrnsize);
   tanhalfangle = tan(halfangle);
   
   double eye[3], coi[3], up[3] ;
   double V[4][4];
   double Vi[4][4];
   int fnum ;
-  double t ;
   int q;
   modxyz[0] = 0;
   modxyz[1] = 0;
@@ -635,17 +634,16 @@ int main(int argc, char **argv){
   int sign = 1;
   int rot = 1;
   fnum = 0 ;
-  while(1){
+  up[0]  = eye[0] ; 
+  up[1]  = eye[1] + 0.01 ;
+  up[2]  = eye[2]; 
+  for(double t = 0; t <= 2*M_PI; t += 0.05){
     
-    t = 0.01*fnum ;
-
     //printf("t = %lf   eye = %lf %lf %lf\n",t, eye[0],eye[1],eye[2]) ;
 
     coi[0] = sin(t);
 
-    up[0]  = eye[0] ; 
-    up[1]  = eye[1] + 0.01 ;
-    up[2]  = eye[2] ; 
+    
 
     M3d_view (V, Vi,  eye,coi,up) ;
     M3d_mat_mult_pt(light_in_eye_space, V, light_in_world_space);
@@ -653,30 +651,15 @@ int main(int argc, char **argv){
     clear_zbuff();
     if(debug) printf("Creating base objects \n");
     create_base_objects(V);
-
-    if(save_files){
-      sprintf(fileName,"%s%s%04d%s",argv[3],file_prefix,fnum,file_suffix);
-      save_zbuff(fileName);
-    }
     
     if(debug) printf("Displaying zbuff\n");
-    display_zbuff();
+    sprintf(fileName,"%s%s%04d%s","vids/",file_prefix,fnum,file_suffix);
 
-    q = G_no_wait_key();
-    G_display_image();
-    if(q == 'q') break;
-    /*if(q == 's') sign *= -1;
-    if(q == 'r') rot *= -1;
-    if(rot == -1 && q == 'x') modxyz[0] += 1*sign;
-    if(rot == -1 && q == 'y') modxyz[1] += 1*sign;
-    if(rot == -1 && q == 'z') modxyz[2] += 1*sign;
-    if(rot == 1 && q == 'x') modrot[0] += 5*sign;
-    if(rot == 1 && q == 'y') modrot[1] += 5*sign;
-    if(rot == 1 && q == 'z') modrot[2] += 5*sign;*/
-    printf("Current xyz: %02f, %02f, %02f\n", modxyz[0], modxyz[1], modxyz[2]);
-    printf("Current rot: %02f, %02f, %02f\n", modrot[0], modrot[1], modrot[2]);
+    save_zbuff(fileName);
+    //display_zbuff();
+    
     fnum++;
-    if(save_files && fnum == num_frames) break;
+    //if(fnum == num_frames) break;
   }
   printf("Program Finished\n");
   // ./video 800 800 files/lab1mov 0 99 0 40000

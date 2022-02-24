@@ -39,3 +39,18 @@ y = sin(v);
 z = cos(v)*sin(u);
 
 
+Torus
+u = [0,2*M_PI]
+v = [0,2*M_PI]
+x = 2 * cos(u);
+y = cos(v) * (2 * sin(u) + 10);
+z = sin(v) * (2 * sin(u) + 10);
+
+Alternate Torus
+u = [0,2*M_PI]
+v = [0,2*M_PI]
+x = (c + a*cos(v)) * cos(u)
+y = (c + a*cos(v)) * sin(u)
+z = a * sin(v)
+
+
