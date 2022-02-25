@@ -9,6 +9,13 @@ If no solution was found, return False
 
 
 def check_space(r: int, c: int, board: tuple):
+    """
+    checks if the space passed is a valid queen location
+    :param r: row to be filled
+    :param c: column to be filled
+    :param board: list of current queens rows (in column order 0 -> n)
+    :return: False if not valid, True if valid
+    """
     if r in board:  # if row already taken
         return False
     i = 1  # start at 1 less than the current row
@@ -20,6 +27,13 @@ def check_space(r: int, c: int, board: tuple):
 
 
 def find_solution(limit, c, queen_list):
+    """
+    Recursively finds if there is a solution at given column with a limit of columns
+    :param limit: board size (column limit)
+    :param c: current column number
+    :param queen_list: rows of current queens placed
+    :return: False if no possibilities, otherwise return tuple with list of rows for queens to fill
+    """
     for r in range(limit):
         if check_space(r, c, queen_list):
             if limit == c+1:  # if on last row
@@ -34,4 +48,9 @@ def find_solution(limit, c, queen_list):
 
 
 def nqueens(num):
+    """
+    returns tuple of rows for queens to be in with board size num (False if no options)
+    :param num: number of queens / size of board
+    :return: tuple of rows for queens or False if no possible answers
+    """
     return find_solution(num, 0, ())

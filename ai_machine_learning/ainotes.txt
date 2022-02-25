@@ -78,6 +78,37 @@ Add Pitesti Rimnicu and Sibiu to this section
 Bucharest       417     0       417  Smallest f value, we're done
 
 
+Adversarial Search
+Examples: Tic-Tac-Toe, checkers, chess,
+Features: deterministic games, no luck, turn-taking, two players, zero-sum, perfect information
+
+Game Tree: all possible outcomes
+Number of legal board states: (about 10^3 for tic-tac-toe or 10^120 for Chess)
+
+Don't store the entire tree, (for small games we just don't, for large games it's impossible)
+
+Minimax idea:
+Players play perfectly (play to get the highest reward for themselves). Algorithm chooses what will be the best outcome
+for them.
+
+Creating perfect Tic-Tac-Toe
 
 
+
+Altaf's interview question:
+Take a list and sort it by the square value in O(n) time:
+templist
+origlist
+i = 0
+j = len(origlist)
+while(len(templist) < len(origlist)-1){
+    if(origlist[i]^2 > origlist[j]^2){
+        templist.append(origlist[i]^2)
+        i++
+    }
+    else{
+        templist.append(origlist[j]^2)
+        j--
+    }
+}
 
