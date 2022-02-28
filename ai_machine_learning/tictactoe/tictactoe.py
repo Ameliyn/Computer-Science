@@ -35,6 +35,20 @@ def winner(board):
     return 0
 
 
+def value_for_o(board):
+    moves = legal_moves(board, "O")
+    if moves:
+        return min([value_for_x(successor(board, "O", move)) for move in moves])
+    return winner(board)
+
+
+def value_for_x(board):
+    moves = legal_moves(board, "X")
+    if moves:
+        return max([value_for_o(successor(board, "X", move)) for move in moves])
+    return winner(board)
+
+
 print(successor(".........", 'X', 0))
 print(legal_moves("..XX..OOX", "X"))
 print(winner("X.X..X..X"))
