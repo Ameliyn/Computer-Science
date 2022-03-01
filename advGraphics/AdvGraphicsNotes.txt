@@ -54,3 +54,13 @@ y = (c + a*cos(v)) * sin(u)
 z = a * sin(v)
 
 
+
+
+Ray Tracing:
+Take 2d film and send out rays and return closest intersecting object
+For mirror, find normal and then bounce light to find if any other objects
+For shadows, in light model send ray to light and see if anything in the way
+
+Deal with the intersection:
+
+

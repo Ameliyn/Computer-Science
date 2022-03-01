@@ -610,8 +610,8 @@ int main(int argc, char **argv){
   //if(argc < 5){printf("Usage: ./a.out point_increase save_files filepath num_frames\n"); exit(0);}
   char fileName[100];
   save_files = 1;
-  inc = 0.001;
-  int num_frames = 2;
+  inc = 0.003;
+  int num_frames = 90;
   //G_init_graphics(scrnsize, scrnsize);
   tanhalfangle = tan(halfangle);
   
@@ -637,11 +637,12 @@ int main(int argc, char **argv){
   up[0]  = eye[0] ; 
   up[1]  = eye[1] + 0.01 ;
   up[2]  = eye[2]; 
-  for(double t = 0; t <= 2*M_PI; t += 0.05){
+  for(double t = 0; t <= 2*M_PI; t += 2*M_PI/90){
     
     //printf("t = %lf   eye = %lf %lf %lf\n",t, eye[0],eye[1],eye[2]) ;
 
-    coi[0] = sin(t);
+    coi[2] = cos(t);
+    coi[1] = sin(t);
 
     
 
@@ -654,7 +655,6 @@ int main(int argc, char **argv){
     
     if(debug) printf("Displaying zbuff\n");
     sprintf(fileName,"%s%s%04d%s","vids/",file_prefix,fnum,file_suffix);
-
     save_zbuff(fileName);
     //display_zbuff();
     
