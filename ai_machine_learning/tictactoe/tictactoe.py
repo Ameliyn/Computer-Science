@@ -16,6 +16,8 @@ def legal_moves(board, player):
     :param player: "X" or "O"
     :return: sequence of possible legal moves player can take
     """
+    if winner(board) != 0:
+        return ()
     return tuple([i for i in range(len(board)) if board[i] == "."])
 
 
@@ -35,20 +37,58 @@ def winner(board):
     return 0
 
 
-def value_for_o(board):
-    moves = legal_moves(board, "O")
+def value(board, player):
+    """
+    Computes the value of the board for the parameter player
+    :param board: string board
+    :param player: "X" or "O"
+    :return: -1 for O, 1 for X, 0 for tie
+    """
+    moves = legal_moves(board, player)
     if moves:
-        return min([value_for_x(successor(board, "O", move)) for move in moves])
+        if player == "X":
+            return max([value(successor(board, "X", move), "O") for move in moves])
+        return min([value(successor(board, "O", move), "X") for move in moves])
     return winner(board)
 
 
-def value_for_x(board):
-    moves = legal_moves(board, "X")
-    if moves:
-        return max([value_for_o(successor(board, "X", move)) for move in moves])
-    return winner(board)
+def best_move(board, player):
+    """
+    Computes the best move for the parameter player
+    :param board: string board
+    :param player: "X" or "O"
+    :return: integer spot to fill
+    """
+    moves = legal_moves(board, player)
+    val = 0
+    best = -1
+    for move in moves:
+        temp = value(successor(board, player, move), player)
+        if player == "X" and temp > val:
+            best = move
+            val = temp
+        elif player == "O" and temp < val:
+            best = move
+            val = temp
+    return best
 
 
-print(successor(".........", 'X', 0))
-print(legal_moves("..XX..OOX", "X"))
-print(winner("X.X..X..X"))
+def opposite(player):
+    if player == "X":
+        return "O"
+    return "X"
+
+
+def main(board, player):
+    while legal_moves(board, player):
+        print(f'{board[0:3]}\n{board[3:6]}\n{board[6:9]}\n')
+        if player == "X":
+            move = best_move(board, player)
+        else:
+            move = int(input("Your move: "))
+        board = successor(board, player, move)
+        player = opposite(player)
+    print(f'{board[0:3]}\n{board[3:6]}\n{board[6:9]}\n')
+
+
+main(".........", "X")
