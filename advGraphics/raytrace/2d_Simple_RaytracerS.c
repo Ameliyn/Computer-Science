@@ -37,21 +37,17 @@ int quadratic(double rayA[3], double rayB[3], double t[2]){
 int find_normal(int onum, double pointA[3], double xyz[3]){
 
   /*
-    Translate point back to unit circle, find next point, translate back
+    Translate point back to object space, use partial derivitive to find 
+    normal in object space, translate back
    */
   double temp[3];
   M3d_mat_mult_pt(temp, obinv[onum], pointA);
-  xyz[0] = temp[0] + cos(0.001) ;
-  xyz[1] = temp[1] + sin(0.001) ;
-  xyz[2] = temp[2] + 0 ;
-  M3d_mat_mult_pt(xyz, obmat[onum], xyz);
+  xyz[0] = obinv[onum][0][0]*2*temp[0] + obinv[onum][1][0]*2*temp[1];
+  xyz[1] = obinv[onum][0][1]*2*temp[0] + obinv[onum][1][1]*2*temp[1];
+  xyz[2] = 0;
+  //M3d_mat_mult_pt(xyz, obmat[onum], xyz);
 
-  double len ;
   
-  M3d_x_product (xyz, pointA,xyz) ;
-  len = sqrt(xyz[0]*xyz[0] + xyz[1]*xyz[1] + xyz[2]*xyz[2]) ;
-  if (len == 0) return 0 ;
-  xyz[0] = xyz[0]/len ;  xyz[1] = xyz[1]/len ;  xyz[2] = xyz[2]/len ;
   
   return 1;
 
@@ -88,18 +84,30 @@ int ray (double Rsource[3], double Rtip[3], double argb[3]){
     return -1;
   }
 
-  double pointB[3], pointA[3];
-  pointB[0] = Rsource[0] + minT*(Rtip[0] - Rsource[0]);
-  pointB[1] = Rsource[1] + minT*(Rtip[1] - Rsource[1]);
-  pointB[2] = Rsource[2] + minT*(Rtip[2] - Rsource[2]);
-
+  double intersection[3], normal[3];
+  intersection[0] = Rsource[0] + minT*(Rtip[0] - Rsource[0]);
+  intersection[1] = Rsource[1] + minT*(Rtip[1] - Rsource[1]);
+  intersection[2] = Rsource[2] + minT*(Rtip[2] - Rsource[2]);
+  
   G_rgb(argb[0],argb[1],argb[2]);
   G_fill_circle(Rtip[0],Rtip[1],1);
-  G_fill_circle(pointB[0],pointB[1],1);
+  G_fill_circle(intersection[0],intersection[1],1);
   G_rgb(0.5,0.5,0.5);
-  G_line(Rtip[0],Rtip[1],pointB[0],pointB[1]);
-  //find_normal(saved_onum, pointB, pointA);
-  //G_line(pointA[0], pointA[1], pointB[0], pointB[1]);
+  G_line(Rtip[0],Rtip[1],intersection[0],intersection[1]);
+  find_normal(saved_onum, intersection,    normal);
+  //printf("vector: %lf %lf %lf\n",normal[0], normal[1], normal[2]);
+  //printf("intersection: %lf %lf %lf\n",intersection[0], intersection[1], intersection[2]);
+
+  
+  //make normal length 1
+  double len ;
+  double N[3] ; 
+  len = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]) ;
+  if (len == 0) return 0 ;
+  N[0] = normal[0]/len ;  N[1] = normal[1]/len ;  N[2] = normal[2]/len ;
+  //printf("unit normal: %lf %lf %lf\n",N[0], N[1], N[2]);
+  
+  G_line(intersection[0] + 20*N[0], intersection[1] + 20*N[1], intersection[0], intersection[1]);
   return 1;
   
 }
