@@ -182,5 +182,30 @@ def main():
         print('Tie.')
 
 
+def ai_game():
+    board = INITIAL_STATE
+    player = 'X'
+    while True:
+        moves = legal_moves(board, player)
+        if not moves:
+            break
+        if moves == ['pass']:
+            move = 'pass'
+        elif player == 'X':
+            move = best_move(board, player, 5)  # Adjust this number for a stronger, slower player
+        else:
+            move = best_move(board, player, 1)
+        board = successor(board, player, move)
+        print_board(board)
+        player = opposite(player)
+    w = score(board)
+    if w == 1:
+        print('X wins!')
+    elif w == -1:
+        print('O wins!')
+    else:
+        print('Tie.')
+
+
 if __name__ == '__main__':
     main()
