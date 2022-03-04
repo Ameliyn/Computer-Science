@@ -113,15 +113,6 @@ def value(board, player, depth):
         return min([value(successor(board, "O", move), "X", depth - 1) for move in moves])
     return score(board)
 
-    # moves = legal_moves(board, player)
-    # if moves:
-    #     if player == 'X':
-    #         best = max
-    #     else:
-    #         best = min
-    #     return best([value(successor(board, player, move), opposite(player), depth - 1) for move in moves])
-    # return score(board)
-
 
 def less(x, y):
     return x < y
@@ -140,16 +131,15 @@ def best_move(board, player, depth):
     """
     moves = legal_moves(board, player)
     if player == "X":
+        better = greater
         val = -70
     else:
+        better = less
         val = 70
     best = -1, -1
     for move in moves:
-        temp = value(successor(board, player, move), player, depth-1)
-        if player == "X" and temp > val:
-            best = move
-            val = temp
-        elif player == "O" and temp < val:
+        temp = value(successor(board, player, move), opposite(player), depth-1)
+        if better(temp, val):
             best = move
             val = temp
     return best
@@ -183,9 +173,9 @@ def main():
         print_board(board)
         player = opposite(player)
     w = score(board)
-    if w == 1:
+    if w > 0:
         print('X wins!')
-    elif w == -1:
+    elif w < 0:
         print('O wins!')
     else:
         print('Tie.')
@@ -208,9 +198,9 @@ def ai_game():
         print_board(board)
         player = opposite(player)
     w = score(board)
-    if w == 1:
+    if w > 0:
         print('X wins!')
-    elif w == -1:
+    elif w < 0:
         print('O wins!')
     else:
         print('Tie.')
