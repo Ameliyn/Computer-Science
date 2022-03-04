@@ -102,7 +102,7 @@ def value(board, player, depth):
     :return: The value of board if it is player's turn
     """
     # handle depth limit
-    if depth == 0:
+    if depth <= 0:
         return score(board)
 
     # Compute value for each player (copied from tictactoe)
@@ -112,6 +112,15 @@ def value(board, player, depth):
             return max([value(successor(board, "X", move), "O", depth - 1) for move in moves])
         return min([value(successor(board, "O", move), "X", depth - 1) for move in moves])
     return score(board)
+
+    # moves = legal_moves(board, player)
+    # if moves:
+    #     if player == 'X':
+    #         best = max
+    #     else:
+    #         best = min
+    #     return best([value(successor(board, player, move), opposite(player), depth - 1) for move in moves])
+    # return score(board)
 
 
 def less(x, y):
@@ -134,9 +143,9 @@ def best_move(board, player, depth):
         val = -70
     else:
         val = 70
-    best = 1, 1
+    best = -1, -1
     for move in moves:
-        temp = value(successor(board, player, move), player, depth)
+        temp = value(successor(board, player, move), player, depth-1)
         if player == "X" and temp > val:
             best = move
             val = temp

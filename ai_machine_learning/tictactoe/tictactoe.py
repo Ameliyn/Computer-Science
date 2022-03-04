@@ -46,9 +46,11 @@ def value(board, player):
     """
     moves = legal_moves(board, player)
     if moves:
-        if player == "X":
-            return max([value(successor(board, "X", move), "O") for move in moves])
-        return min([value(successor(board, "O", move), "X") for move in moves])
+        if player == 'X':
+            best = max
+        else:
+            best = min
+        return best([value(successor(board, player, move), opposite(player)) for move in moves])
     return winner(board)
 
 
@@ -91,4 +93,5 @@ def main(board, player):
     print(f'{board[0:3]}\n{board[3:6]}\n{board[6:9]}\n')
 
 
-main(".........", "X")
+if __name__ == '__main__':
+    main(".........", "X")
