@@ -8,11 +8,50 @@ double color[100][3] ;
 int    num_objects ;
 
 
+double partial_der_hyper(double xyz[3], int n){
+  if(n == 1)
+    return -1*xyz[n]*2;
+  return xyz[n]*2;
+}
+
+double partial_der_circle(double xyz[3], int n){
+
+  return xyz[n]*2;
+}
 
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
+
+
+int hyperbola_equat(double rayA[3], double rayB[3], double t[2]){
+  double dx = (rayB[0] - rayA[0]);
+  double dy = (rayB[1] - rayA[1]);
+  
+  double A = (dx*dx - dy*dy);
+  double B = 2*rayA[0]*dx - 2*rayA[1]*dy;
+  double C = rayA[0]*rayA[0] - rayA[1]*rayA[1] - 1;
+
+  if(B*B - 4*A*C < 0) return 0;
+
+  if(B*B - 4*A*C == 0) {
+    t[0] = (-B + sqrt(B*B - 4*A*C)) / (2*A);
+    if(rayA[1] + t[0]*dy > 1 || rayA[1] + t[0]*dy < -1) return 0;
+    return 1;
+  }
+  t[0] = (-B + sqrt(B*B - 4*A*C)) / (2*A);
+  if(rayA[1] + t[0]*dy > 1 || rayA[1] + t[0]*dy < -1){
+    t[0] = (-B - sqrt(B*B - 4*A*C)) / (2*A);
+    if(rayA[1] + t[0]*dy > 1 || rayA[1] + t[0]*dy < -1)
+      return 0;
+    return 1;
+  }
+  t[1] = (-B - sqrt(B*B - 4*A*C)) / (2*A);
+  if(rayA[1] + t[1]*dy > 1 || rayA[1] + t[1]*dy < -1)
+      return 1;
+  return 2; 
+}
 
 //2d quadratic
 int quadratic(double rayA[3], double rayB[3], double t[2]){
@@ -34,23 +73,26 @@ int quadratic(double rayA[3], double rayB[3], double t[2]){
   return 2;  
 }
 
-int find_normal(int onum, double pointA[3], double xyz[3]){
+int find_normal(int onum, double pointA[3], double xyz[3], double(*F)(double pt[3], int n)){
 
-  /*
-    Translate point back to object space, use partial derivitive to find 
-    normal in object space, translate back
-   */
   double temp[3];
   M3d_mat_mult_pt(temp, obinv[onum], pointA);
-  xyz[0] = obinv[onum][0][0]*2*temp[0] + obinv[onum][1][0]*2*temp[1];
-  xyz[1] = obinv[onum][0][1]*2*temp[0] + obinv[onum][1][1]*2*temp[1];
+  xyz[0] = obinv[onum][0][0]*F(temp,0) + obinv[onum][1][0]*F(temp,1);
+  xyz[1] = obinv[onum][0][1]*F(temp,0) + obinv[onum][1][1]*F(temp,1);
   xyz[2] = 0;
-  //M3d_mat_mult_pt(xyz, obmat[onum], xyz);
-
-  
   
   return 1;
 
+  /*
+  // 3d normal vector (2*temp is the partial derivative of the equation x^2 + y^2 + z^2 + 1 = 0
+  xyz[0] = obinv[onum][0][0]*2*temp[0] + obinv[onum][1][0]*2*temp[1] + obinv[onum][2][0]*2*temp[2];
+  xyz[1] = obinv[onum][0][1]*2*temp[0] + obinv[onum][1][1]*2*temp[1] + obinv[onum][2][1]*2*temp[2];
+  xyz[2] = obinv[onum][0][2]*2*temp[0] + obinv[onum][1][2]*2*temp[1] + obinv[onum][2][2]*2*temp[2];
+  */
+  /*
+    x^2 +xy + y^2 -1 => <2x+y, x+2y>
+
+   */
 }
 
 int ray (double Rsource[3], double Rtip[3], double argb[3]){
@@ -66,7 +108,11 @@ int ray (double Rsource[3], double Rtip[3], double argb[3]){
     M3d_mat_mult_pt(rayA, obinv[i], Rsource);
     M3d_mat_mult_pt(rayB, obinv[i], Rtip);
 
-    n = quadratic(rayA, rayB, t);
+    if(i < num_objects - 2)
+      n = quadratic(rayA, rayB, t);
+    else
+      n = hyperbola_equat(rayA,rayB,t);
+    
     if (n == 0) continue;
 
     for(int j = 0; j < n; j++){
@@ -94,7 +140,10 @@ int ray (double Rsource[3], double Rtip[3], double argb[3]){
   G_fill_circle(intersection[0],intersection[1],1);
   G_rgb(0.5,0.5,0.5);
   G_line(Rtip[0],Rtip[1],intersection[0],intersection[1]);
-  find_normal(saved_onum, intersection,    normal);
+  if(saved_onum + 2 < num_objects)
+    find_normal(saved_onum, intersection,    normal,partial_der_circle);
+  else
+    find_normal(saved_onum, intersection,    normal,partial_der_hyper);
   //printf("vector: %lf %lf %lf\n",normal[0], normal[1], normal[2]);
   //printf("intersection: %lf %lf %lf\n",intersection[0], intersection[1], intersection[2]);
 
@@ -135,14 +184,38 @@ void Draw_ellipsoid (int onum)
 
 }
 
+void Draw_hyperbola (int onum)
+{
+  int n,i ;
+  double t, xyz[3] ;
+  double x,y ;
 
+  G_rgb (color[onum][0],color[onum][1],color[onum][2]) ;
+  
+  n = 10000 ;
+  for (i = 0 ; i < n ; i++) {
+    t = i*2*M_PI/n ;
+    if(cos(t) == 0) continue;
+    xyz[0] = 1/cos(t) ;
+    xyz[1] = tan(t) ;
+    if(xyz[1] > 2 || xyz[1] < -2) continue;
+    xyz[2] = 0 ;
+    M3d_mat_mult_pt(xyz, obmat[onum], xyz) ;
+    x = xyz[0] ;
+    y = xyz[1] ;
+    G_point(x,y) ;
+  }
+
+}
 
 
 void Draw_the_scene()
 {
   int onum ;
   for (onum = 0 ; onum < num_objects ; onum++) {
-    Draw_ellipsoid(onum) ;
+    if(onum > num_objects - 3)
+      Draw_hyperbola(onum);
+    else Draw_ellipsoid(onum) ;
   }
 }
 
@@ -215,7 +288,7 @@ int test01()
     color[num_objects][2] = 1.0 ;
 	
     Tn = 0 ;
-    Ttypelist[Tn] = SX ; Tvlist[Tn] =   75   ; Tn++ ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =  175   ; Tn++ ;
     Ttypelist[Tn] = SY ; Tvlist[Tn] =   35   ; Tn++ ;
     Ttypelist[Tn] = RZ ; Tvlist[Tn] =  150   ; Tn++ ;
     Ttypelist[Tn] = TX ; Tvlist[Tn] =  360   ; Tn++ ;
@@ -246,8 +319,42 @@ int test01()
     num_objects++ ; // don't forget to do this
     
     //////////////////////////////////////////////////////////////
+    color[num_objects][0] = 0.5 ;
+    color[num_objects][1] = 1.0 ; 
+    color[num_objects][2] = 0.5 ;
+	
+    Tn = 0 ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =   30   ; Tn++ ;
+    Ttypelist[Tn] = SY ; Tvlist[Tn] =   15   ; Tn++ ;
+    Ttypelist[Tn] = RZ ; Tvlist[Tn] =  -15   ; Tn++ ;
+    Ttypelist[Tn] = TX ; Tvlist[Tn] =  350   ; Tn++ ;
+    Ttypelist[Tn] = TY ; Tvlist[Tn] =  300   ; Tn++ ;
+	
+    M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+    M3d_mat_mult(obmat[num_objects], vm, m) ;
+    M3d_mat_mult(obinv[num_objects], mi, vi) ;
 
-    
+    num_objects++ ; // don't forget to do this
+
+    //////////////////////////////////////////////////////////////
+    color[num_objects][0] = 0.5 ;
+    color[num_objects][1] = 0.5 ; 
+    color[num_objects][2] = 1.0 ;
+	
+    Tn = 0 ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =   40   ; Tn++ ;
+    Ttypelist[Tn] = SY ; Tvlist[Tn] =  -50   ; Tn++ ;
+    Ttypelist[Tn] = RZ ; Tvlist[Tn] =   40   ; Tn++ ;
+    Ttypelist[Tn] = TX ; Tvlist[Tn] =  575   ; Tn++ ;
+    Ttypelist[Tn] = TY ; Tvlist[Tn] =  350   ; Tn++ ;
+	
+    M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+    M3d_mat_mult(obmat[num_objects], vm, m) ;
+    M3d_mat_mult(obinv[num_objects], mi, vi) ;
+
+    num_objects++ ; // don't forget to do this
+
+    //////////////////////////////////////////////////////////////
 
     G_rgb(0,0,0) ;
     G_clear() ;
