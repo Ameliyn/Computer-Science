@@ -4,6 +4,7 @@
 
 double obmat[100][4][4] ;
 double obinv[100][4][4] ;
+int obtype[100];
 double color[100][3] ;
 int    num_objects ;
 
@@ -19,11 +20,36 @@ double partial_der_circle(double xyz[3], int n){
   return xyz[n]*2;
 }
 
+double partial_der_line(double xyz[3], int n){
+  if (n == 1)
+    return 1;
+  return 0;
+}
+
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
+int line_equat(double rayA[3], double rayB[3], double t[2]){
+
+  double dx = (rayB[0] - rayA[0]);
+  double dy = (rayB[1] - rayA[1]);
+
+  if(dy == 0) {
+    if(rayA[0] == 0 && dx != 0) {
+      t[0] = (1 - rayA[0]) / dx;
+      return 1;
+    }
+    return 0;
+  }
+
+  t[0] = -1*rayA[1] / dy;
+  if(rayA[0] + t[0]*dx < -1 || rayA[0] + t[0]*dx > 1)
+    return 0;
+  return 1;
+
+}
 
 int hyperbola_equat(double rayA[3], double rayB[3], double t[2]){
   double dx = (rayB[0] - rayA[0]);
@@ -95,6 +121,45 @@ int find_normal(int onum, double pointA[3], double xyz[3], double(*F)(double pt[
    */
 }
 
+int normalize(double in[3], double res[3]){
+
+  double len ;
+  len = sqrt(in[0]*in[0] + in[1]*in[1] + in[2]*in[2]) ;
+  if (len == 0) return 0 ;
+  res[0] = in[0]/len ;  res[1] = in[1]/len ;  res[2] = in[2]/len ;
+  return 1;
+}
+
+double vec_dot(double A[3], double B[3]){
+  return A[0]*B[0] + A[1]*B[1] + A[2] * B[2];
+}
+
+int find_reflection(double Rtip[3], double intersection[3], double N[3], double res[3]){
+
+  double dN[3];
+  dN[0] = intersection[0] + 10 * N[0];
+  dN[1] = intersection[1] + 10 * N[1];
+  dN[2] = intersection[2] + 10 * N[2];
+
+  normalize(dN,dN);
+
+  double dR[3];
+  dR[0] = Rtip[0] + intersection[0];
+  dR[1] = Rtip[1] + intersection[1];
+  dR[2] = Rtip[2] + intersection[2];
+
+  normalize(dR,dR);
+
+  res[0] = dR[0] - 2*(vec_dot(dR,dN)) * dN[0];
+  res[1] = dR[1] - 2*(vec_dot(dR,dN)) * dN[1];
+  res[2] = 0;
+  normalize(res,res);
+  //res[2] = dR[2] - 2*(vec_dot(dR,dN)) * dN[2];
+  
+  return 1;
+  
+}
+
 int ray (double Rsource[3], double Rtip[3], double argb[3]){
   
   double t[2];
@@ -108,9 +173,11 @@ int ray (double Rsource[3], double Rtip[3], double argb[3]){
     M3d_mat_mult_pt(rayA, obinv[i], Rsource);
     M3d_mat_mult_pt(rayB, obinv[i], Rtip);
 
-    if(i < num_objects - 2)
+    if(obtype[i] == 1)
+      n = line_equat(rayA,rayB,t);
+    else if(obtype[i] == 0)
       n = quadratic(rayA, rayB, t);
-    else
+    else if(obtype[i] == 2)
       n = hyperbola_equat(rayA,rayB,t);
     
     if (n == 0) continue;
@@ -138,25 +205,31 @@ int ray (double Rsource[3], double Rtip[3], double argb[3]){
   G_rgb(argb[0],argb[1],argb[2]);
   G_fill_circle(Rtip[0],Rtip[1],1);
   G_fill_circle(intersection[0],intersection[1],1);
-  G_rgb(0.5,0.5,0.5);
+  G_rgb(0.4,0.4,0.4);
   G_line(Rtip[0],Rtip[1],intersection[0],intersection[1]);
-  if(saved_onum + 2 < num_objects)
-    find_normal(saved_onum, intersection,    normal,partial_der_circle);
-  else
+  G_rgb(0.7,0.7,0.7);
+  if(obtype[saved_onum] == 1)
+    find_normal(saved_onum, intersection,    normal,partial_der_line);
+  else if(obtype[saved_onum] == 2)
     find_normal(saved_onum, intersection,    normal,partial_der_hyper);
+  else if (obtype[saved_onum] == 0)
+    find_normal(saved_onum, intersection,    normal,partial_der_circle);
   //printf("vector: %lf %lf %lf\n",normal[0], normal[1], normal[2]);
   //printf("intersection: %lf %lf %lf\n",intersection[0], intersection[1], intersection[2]);
 
   
   //make normal length 1
-  double len ;
-  double N[3] ; 
-  len = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]) ;
-  if (len == 0) return 0 ;
-  N[0] = normal[0]/len ;  N[1] = normal[1]/len ;  N[2] = normal[2]/len ;
-  //printf("unit normal: %lf %lf %lf\n",N[0], N[1], N[2]);
+  double N[3] ;
+  normalize(normal,N);
   
   G_line(intersection[0] + 20*N[0], intersection[1] + 20*N[1], intersection[0], intersection[1]);
+
+  
+  double res[3];
+  find_reflection(Rtip, intersection, N, res);
+  G_rgb(1,1,1);
+  G_line(intersection[0], intersection[1], intersection[0] + 30 * res[0], intersection[1] + 30 * res[1]);
+  
   return 1;
   
 }
@@ -198,7 +271,7 @@ void Draw_hyperbola (int onum)
     if(cos(t) == 0) continue;
     xyz[0] = 1/cos(t) ;
     xyz[1] = tan(t) ;
-    if(xyz[1] > 2 || xyz[1] < -2) continue;
+    if(xyz[1] > 1 || xyz[1] < -1) continue;
     xyz[2] = 0 ;
     M3d_mat_mult_pt(xyz, obmat[onum], xyz) ;
     x = xyz[0] ;
@@ -208,12 +281,32 @@ void Draw_hyperbola (int onum)
 
 }
 
+void Draw_line(int onum){
+
+  int n,i ;
+  double t, xyz[3], xyz2[3] ;
+  double x,y ;
+
+  G_rgb (color[onum][0],color[onum][1],color[onum][2]) ;
+
+  xyz[0] = -1;
+  xyz[1] = 0;
+  xyz2[0] = 1;
+  xyz2[1] = 0;
+  M3d_mat_mult_pt(xyz, obmat[onum], xyz) ;
+  M3d_mat_mult_pt(xyz2, obmat[onum], xyz2) ;
+
+  G_line(xyz[0], xyz[1], xyz2[0], xyz2[1]);
+
+}
 
 void Draw_the_scene()
 {
   int onum ;
   for (onum = 0 ; onum < num_objects ; onum++) {
-    if(onum > num_objects - 3)
+    if(onum + 1 == num_objects)
+      Draw_line(onum);
+    else if(onum > num_objects - 3)
       Draw_hyperbola(onum);
     else Draw_ellipsoid(onum) ;
   }
@@ -247,6 +340,7 @@ int test01()
 
     //////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////
+    obtype[num_objects] = 0;
     color[num_objects][0] = 0.0 ;
     color[num_objects][1] = 0.8 ; 
     color[num_objects][2] = 0.0 ;
@@ -265,6 +359,7 @@ int test01()
     num_objects++ ; // don't forget to do this
 
     //////////////////////////////////////////////////////////////
+    obtype[num_objects] = 0;
     color[num_objects][0] = 1.0 ;
     color[num_objects][1] = 0.3 ; 
     color[num_objects][2] = 0.0 ;
@@ -283,12 +378,13 @@ int test01()
     num_objects++ ; // don't forget to do this
     
     //////////////////////////////////////////////////////////////
+    obtype[num_objects] = 0;
     color[num_objects][0] = 0.3 ;
     color[num_objects][1] = 0.3 ; 
     color[num_objects][2] = 1.0 ;
 	
     Tn = 0 ;
-    Ttypelist[Tn] = SX ; Tvlist[Tn] =  175   ; Tn++ ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =   75   ; Tn++ ;
     Ttypelist[Tn] = SY ; Tvlist[Tn] =   35   ; Tn++ ;
     Ttypelist[Tn] = RZ ; Tvlist[Tn] =  150   ; Tn++ ;
     Ttypelist[Tn] = TX ; Tvlist[Tn] =  360   ; Tn++ ;
@@ -301,6 +397,7 @@ int test01()
     num_objects++ ; // don't forget to do this
     
     //////////////////////////////////////////////////////////////
+    obtype[num_objects] = 0;
     color[num_objects][0] = 0.5 ;
     color[num_objects][1] = 1.0 ; 
     color[num_objects][2] = 1.0 ;
@@ -317,17 +414,36 @@ int test01()
     M3d_mat_mult(obinv[num_objects], mi, vi) ;
 
     num_objects++ ; // don't forget to do this
-    
+
     //////////////////////////////////////////////////////////////
-    color[num_objects][0] = 0.5 ;
+    obtype[num_objects] = 2;
+    color[num_objects][0] = 1.0 ;
+    color[num_objects][1] = 0.7 ; 
+    color[num_objects][2] = 0.4 ;
+	
+    Tn = 0 ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =   15   ; Tn++ ;
+    Ttypelist[Tn] = SY ; Tvlist[Tn] =   80   ; Tn++ ;
+    Ttypelist[Tn] = RZ ; Tvlist[Tn] =   -7   ; Tn++ ;
+    Ttypelist[Tn] = TX ; Tvlist[Tn] =  200   ; Tn++ ;
+    Ttypelist[Tn] = TY ; Tvlist[Tn] =  630   ; Tn++ ;
+	
+    M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+    M3d_mat_mult(obmat[num_objects], vm, m) ;
+    M3d_mat_mult(obinv[num_objects], mi, vi) ;
+
+    num_objects++ ; // don't forget to do this
+
+    //////////////////////////////////////////////////////////////
+    obtype[num_objects] = 1;
+    color[num_objects][0] = 1.0 ;
     color[num_objects][1] = 1.0 ; 
     color[num_objects][2] = 0.5 ;
 	
     Tn = 0 ;
-    Ttypelist[Tn] = SX ; Tvlist[Tn] =   30   ; Tn++ ;
-    Ttypelist[Tn] = SY ; Tvlist[Tn] =   15   ; Tn++ ;
-    Ttypelist[Tn] = RZ ; Tvlist[Tn] =  -15   ; Tn++ ;
-    Ttypelist[Tn] = TX ; Tvlist[Tn] =  350   ; Tn++ ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =   50   ; Tn++ ;
+    Ttypelist[Tn] = RZ ; Tvlist[Tn] =  110   ; Tn++ ;
+    Ttypelist[Tn] = TX ; Tvlist[Tn] =  300   ; Tn++ ;
     Ttypelist[Tn] = TY ; Tvlist[Tn] =  300   ; Tn++ ;
 	
     M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
@@ -337,25 +453,7 @@ int test01()
     num_objects++ ; // don't forget to do this
 
     //////////////////////////////////////////////////////////////
-    color[num_objects][0] = 0.5 ;
-    color[num_objects][1] = 0.5 ; 
-    color[num_objects][2] = 1.0 ;
-	
-    Tn = 0 ;
-    Ttypelist[Tn] = SX ; Tvlist[Tn] =   40   ; Tn++ ;
-    Ttypelist[Tn] = SY ; Tvlist[Tn] =  -50   ; Tn++ ;
-    Ttypelist[Tn] = RZ ; Tvlist[Tn] =   40   ; Tn++ ;
-    Ttypelist[Tn] = TX ; Tvlist[Tn] =  575   ; Tn++ ;
-    Ttypelist[Tn] = TY ; Tvlist[Tn] =  350   ; Tn++ ;
-	
-    M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-    M3d_mat_mult(obmat[num_objects], vm, m) ;
-    M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-    num_objects++ ; // don't forget to do this
-
-    //////////////////////////////////////////////////////////////
-
+    
     G_rgb(0,0,0) ;
     G_clear() ;
 
