@@ -7,7 +7,7 @@ double obinv[100][4][4] ;
 int obtype[100];
 double color[100][3] ;
 int    num_objects ;
-int numBounces = 3;
+int numBounces = 6 ;
 
 
 double partial_der_hyper(double xyz[3], int n){
@@ -100,28 +100,6 @@ int quadratic(double rayA[3], double rayB[3], double t[2]){
   return 2;  
 }
 
-int find_normal(int onum, double pointA[3], double xyz[3], double(*F)(double pt[3], int n)){
-
-  double temp[3];
-  M3d_mat_mult_pt(temp, obinv[onum], pointA);
-  xyz[0] = obinv[onum][0][0]*F(temp,0) + obinv[onum][1][0]*F(temp,1);
-  xyz[1] = obinv[onum][0][1]*F(temp,0) + obinv[onum][1][1]*F(temp,1);
-  xyz[2] = 0;
-  
-  return 1;
-
-  /*
-  // 3d normal vector (2*temp is the partial derivative of the equation x^2 + y^2 + z^2 + 1 = 0
-  xyz[0] = obinv[onum][0][0]*2*temp[0] + obinv[onum][1][0]*2*temp[1] + obinv[onum][2][0]*2*temp[2];
-  xyz[1] = obinv[onum][0][1]*2*temp[0] + obinv[onum][1][1]*2*temp[1] + obinv[onum][2][1]*2*temp[2];
-  xyz[2] = obinv[onum][0][2]*2*temp[0] + obinv[onum][1][2]*2*temp[1] + obinv[onum][2][2]*2*temp[2];
-  */
-  /*
-    x^2 +xy + y^2 -1 => <2x+y, x+2y>
-
-   */
-}
-
 int normalize(double in[3], double res[3]){
 
   double len ;
@@ -129,6 +107,35 @@ int normalize(double in[3], double res[3]){
   if (len == 0) return 0 ;
   res[0] = in[0]/len ;  res[1] = in[1]/len ;  res[2] = in[2]/len ;
   return 1;
+}
+
+int find_normal(int onum, double intersection[3], double Rsource[3], double res[3], double(*F)(double pt[3], int n)){
+
+  double temp[3];
+  M3d_mat_mult_pt(temp, obinv[onum], intersection);
+  res[0] = obinv[onum][0][0]*F(temp,0) + obinv[onum][1][0]*F(temp,1);
+  res[1] = obinv[onum][0][1]*F(temp,0) + obinv[onum][1][1]*F(temp,1);
+  res[2] = 0;
+
+  normalize(res,res);
+  
+  double E[3] ;
+  E[0] = Rsource[0] - intersection[0] ; 
+  E[1] = Rsource[1] - intersection[1] ; 
+  E[2] = Rsource[2] - intersection[2] ; 
+  normalize(E,E);
+  double NdotE = res[0]*E[0] + res[1]*E[1] + res[2]*E[2] ;
+
+  if(NdotE < 0){
+    res[0] *= (-1.0) ;    res[1] *= (-1.0) ;    res[2] *= (-1.0) ; 
+  }
+
+  /*
+  // 3d normal vector (2*temp is the partial derivative of the equation x^2 + y^2 + z^2 + 1 = 0
+  xyz[0] = obinv[onum][0][0]*2*temp[0] + obinv[onum][1][0]*2*temp[1] + obinv[onum][2][0]*2*temp[2];
+  xyz[1] = obinv[onum][0][1]*2*temp[0] + obinv[onum][1][1]*2*temp[1] + obinv[onum][2][1]*2*temp[2];
+  xyz[2] = obinv[onum][0][2]*2*temp[0] + obinv[onum][1][2]*2*temp[1] + obinv[onum][2][2]*2*temp[2];
+  */
 }
 
 double vec_dot(double A[3], double B[3]){
@@ -199,13 +206,11 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
   intersection[2] = Rsource[2] + minT*(Rtip[2] - Rsource[2]);
 
   if(obtype[saved_onum] == 1)
-    find_normal(saved_onum, intersection,    normal,partial_der_line);
+    find_normal(saved_onum, intersection, Rsource,    normal,partial_der_line);
   else if(obtype[saved_onum] == 2)
-    find_normal(saved_onum, intersection,    normal,partial_der_hyper);
+    find_normal(saved_onum, intersection, Rsource,    normal,partial_der_hyper);
   else if (obtype[saved_onum] == 0)
-    find_normal(saved_onum, intersection,    normal,partial_der_circle);
-
-  normalize(normal,normal);
+    find_normal(saved_onum, intersection, Rsource,    normal,partial_der_circle);
 
   return saved_onum;
 }
@@ -232,14 +237,21 @@ int ray (double Rsource[3], double Rtip[3], double argb[3]){
   double res[3];
   double temp[3];
   for(int i = 0; i < numBounces; i++){
+    
     find_reflection(Rtip, intersection, normal, res);
+
+
     temp[0] = intersection[0] + 2*res[0];
     temp[1] = intersection[1] + 2*res[1];
     temp[2] = intersection[2] + 2*res[2];
+    intersection[0] += 0.1*res[0];
+    intersection[1] += 0.1*res[1];
+    intersection[2] += 0.1*res[2];
+    
     G_rgb(1,0,0);
-    G_fill_circle(temp[0],temp[1],4);
+    G_fill_circle(temp[0],temp[1],2);
     G_rgb(0,1,0);
-    G_fill_circle(intersection[0],intersection[1],2);
+    G_fill_circle(intersection[0],intersection[1],1);
 
 
     saved_onum = find_intersection(intersection,temp,res, normal);
@@ -258,7 +270,6 @@ int ray (double Rsource[3], double Rtip[3], double argb[3]){
     intersection[0] = res[0];
     intersection[1] = res[1];
     intersection[2] = res[2];
-    
   }
   return 1;
   
@@ -499,8 +510,14 @@ int test01()
     while(1){
       G_wait_click(P);
       if(P[1] < 20) break;
-
-      Rtip[0] = 100; Rtip[1] = Rsource[1] + (100 - Rsource[0]) * (P[1] - Rsource[1]) / (P[0] - Rsource[0]); Rtip[2] = 0;
+      if(P[0] < 100){
+	Rtip[0] = P[0];
+	if(P[1] > Rsource[1]) Rtip[1] = 600;
+	else Rtip[1] = 200;
+      }
+      else{
+	Rtip[0] = 100; Rtip[1] = Rsource[1] + (100 - Rsource[0]) * (P[1] - Rsource[1]) / (P[0] - Rsource[0]); Rtip[2] = 0;
+      }
       G_rgb(0,0,0) ;
       G_clear() ;
       G_rgb(1,0,1) ; G_fill_circle(Rsource[0], Rsource[1], 3) ;
