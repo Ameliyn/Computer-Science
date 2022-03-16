@@ -112,7 +112,16 @@ while(len(templist) < len(origlist)-1){
     }
 }
 
-"End - to - End Machine Learning Project"
+
+Basic AI Idea:
+Take a data set, set aside a portion for testing, train the AI with the rest, then test the AI with the final portion
+and that tells you how good your AI is.
+
+Cross-validation (in the training stage):
+Cut data into quarters, then train on three and validate on others, then take average of four different options and
+finally train the data on the whole dataset for production.
+--If you do well on a validation set, it means that the training set and validation set are similar, and you have not
+  over-fit the data
 
 
 
