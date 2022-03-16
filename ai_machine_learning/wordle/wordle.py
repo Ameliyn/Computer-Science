@@ -3,11 +3,11 @@ import random
 legal_words = []
 mystery_words = []
 
-with open("wordle/legal_words.txt") as f:
+with open("legal_words.txt") as f:
     for line in f:
         legal_words.append(line.strip())
 
-with open("wordle/mystery_words.txt") as f:
+with open("mystery_words.txt") as f:
     for line in f:
         mystery_words.append(line.strip())
 
