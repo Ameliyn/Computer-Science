@@ -12,6 +12,7 @@ for(int v = vlo; v <= vhi; v +=inc){}
 }
 
 Cylinder
+X^2 + Z^2 -1 = 0
 u = [0,2*M_PI]
 v = [0,height]
 x(u,v) = cos(u);

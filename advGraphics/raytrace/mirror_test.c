@@ -10,7 +10,7 @@ double hither = 1;
 double yon = 1e50;
 double obmat[100][4][4] ;
 double obinv[100][4][4] ;
-int obtype[100]; //0=sphere, 1=plane, 2=hyperbaloid, 3=cylinder
+int obtype[100];
 double color[100][3] ;
 double objreflectivity[100]; //[0,1] percent reflectivity, -1 for no light/reflection model
 int    num_objects ;
@@ -24,29 +24,21 @@ double AMBIENT      = 0.2 ;
 double MAX_DIFFUSE  = 0.5 ;
 double SPECPOW      = 50 ;
 
-//Object 0
-double sphere_deriv(double xyz[3], int n){
-  return xyz[n]*2;
-}
 
-//Object 1
-double plane_deriv(double xyz[3], int n){
-  if (n == 2)
-    return 1;
-  return 0;
-}
-
-//Object 2
 double hyperbola_deriv(double xyz[3], int n){
   if(n == 1)
     return -1*xyz[n]*2;
   return xyz[n]*2;
 }
 
-//Object 3
-double cylinder_deriv(double xyz[3], int n){
-  if (n == 1) return 0;
-  return 2*xyz[n];
+double sphere_deriv(double xyz[3], int n){
+  return xyz[n]*2;
+}
+
+double plane_deriv(double xyz[3], int n){
+  if (n == 2)
+    return 1;
+  return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -73,28 +65,6 @@ double sphere_intercept(double rayA[3], double rayB[3], double t[2]){
   t[1] = (-B - sqrt(B*B - 4*A*C)) / (2*A);
   return 2; 
 
-}
-
-double plane_intercept(double rayA[3], double rayB[3], double t[2]){
-
-  double dx = rayB[0] - rayA[0];
-  double dy = rayB[1] - rayA[1];
-  double dz = rayB[2] - rayA[2];
-
-  
-  if(dz == 0) {
-    if(rayA[0] == 0 && dx != 0) {
-      t[0] = (1 - rayA[0]) / dx;
-      return 1;
-    }
-    return 0;
-  }
-
-  t[0] = -1*rayA[2] / dz;
-  if(rayA[0] + t[0]*dx < -1 || rayA[0] + t[0]*dx > 1 ||
-     rayA[1] + t[0]*dy < -1 || rayA[1] + t[0]*dy > 1)
-    return 0;
-  return 1;
 }
 
 double hyperbola_intercept(double rayA[3], double rayB[3], double t[2]){
@@ -128,35 +98,26 @@ double hyperbola_intercept(double rayA[3], double rayB[3], double t[2]){
 
 }
 
-double cylinder_intercept(double rayA[3], double rayB[3], double t[2]){
+double plane_intercept(double rayA[3], double rayB[3], double t[2]){
 
   double dx = rayB[0] - rayA[0];
   double dy = rayB[1] - rayA[1];
   double dz = rayB[2] - rayA[2];
 
-  double A = dx*dx  + dz*dz;
-  double B = 2*rayA[0]*dx + 2*rayA[2]*dz;
-  double C = rayA[0]*rayA[0] + rayA[2]*rayA[2] - 1;
-
-  if(B*B - 4*A*C < 0) return 0;
-
-  if(B*B - 4*A*C == 0) {
-    t[0] = (-B + sqrt(B*B - 4*A*C)) / (2*A);
-    if(rayA[1] + t[0]*dy > 1 || rayA[1] + t[0]*dy < -1) return 0;
-    return 1;
-  }
-  t[0] = (-B + sqrt(B*B - 4*A*C)) / (2*A);
-  if(rayA[1] + t[0]*dy > 1 || rayA[1] + t[0]*dy < -1){
-    t[0] = (-B - sqrt(B*B - 4*A*C)) / (2*A);
-    if(rayA[1] + t[0]*dy > 1 || rayA[1] + t[0]*dy < -1)
-      return 0;
-    return 1;
-  }
-  t[1] = (-B - sqrt(B*B - 4*A*C)) / (2*A);
-  if(rayA[1] + t[1]*dy > 1 || rayA[1] + t[1]*dy < -1)
+  
+  if(dz == 0) {
+    if(rayA[0] == 0 && dx != 0) {
+      t[0] = (1 - rayA[0]) / dx;
       return 1;
-  return 2; 
+    }
+    return 0;
+  }
 
+  t[0] = -1*rayA[2] / dz;
+  if(rayA[0] + t[0]*dx < -1 || rayA[0] + t[0]*dx > 1 ||
+     rayA[1] + t[0]*dy < -1 || rayA[1] + t[0]*dy > 1)
+    return 0;
+  return 1;
 }
 
 int normalize(double in[3], double res[3]){
@@ -239,15 +200,13 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
   for(int i = 0; i < num_objects; i++){
     M3d_mat_mult_pt(rayA, obinv[i], Rsource);
     M3d_mat_mult_pt(rayB, obinv[i], Rtip);
-
-    if(obtype[i] == 0)
-      n = sphere_intercept(rayA, rayB, t);
-    else if(obtype[i] == 1)
+   
+    if(obtype[i] == 1)
       n = plane_intercept(rayA,rayB,t);
+    else if(obtype[i] == 0)
+      n = sphere_intercept(rayA, rayB, t);
     else if(obtype[i] == 2)
       n = hyperbola_intercept(rayA,rayB,t);
-    else if(obtype[i] == 3)
-      n = cylinder_intercept(rayA,rayB,t);
     
     if (n == 0) {continue; }
     for(int j = 0; j < n; j++){
@@ -267,15 +226,12 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
   intersection[1] = Rsource[1] + minT*(Rtip[1] - Rsource[1]);
   intersection[2] = Rsource[2] + minT*(Rtip[2] - Rsource[2]);
 
-
-  if (obtype[saved_onum] == 0)
-    find_normal(saved_onum, intersection, Rsource,    normal,sphere_deriv);
-  else if(obtype[saved_onum] == 1)
+  if(obtype[saved_onum] == 1)
     find_normal(saved_onum, intersection, Rsource,    normal,plane_deriv);
   else if(obtype[saved_onum] == 2)
     find_normal(saved_onum, intersection, Rsource,    normal,hyperbola_deriv);
-  else if(obtype[saved_onum] == 3)
-    find_normal(saved_onum, intersection, Rsource,    normal,cylinder_deriv);
+  else if (obtype[saved_onum] == 0)
+    find_normal(saved_onum, intersection, Rsource,    normal,sphere_deriv);
 
   return saved_onum;
 }
@@ -594,9 +550,9 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   //MIRRORS
     
   obtype[num_objects] = 1;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.4 ; 
-  color[num_objects][2] = 0.4 ;
+  color[num_objects][0] = 1.0 ;
+  color[num_objects][1] = 0.8 ; 
+  color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0.8;
 	
   Tn = 0 ;
@@ -634,8 +590,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
 
   num_objects++ ; // don't forget to do this
   //////////////////////////////////////////////////////////////
-
-  //world sphere
+  
   obtype[num_objects] = 0;
   color[num_objects][0] = 0.2 ;
   color[num_objects][1] = 0.2 ; 
@@ -648,27 +603,6 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   Ttypelist[Tn] = SZ ; Tvlist[Tn] =  100    ; Tn++ ;
   Ttypelist[Tn] = TZ ; Tvlist[Tn] =  50    ; Tn++ ;
   Ttypelist[Tn] = TY ; Tvlist[Tn] =  0    ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-
-  //create cylinder
-  obtype[num_objects] = 3;
-  color[num_objects][0] = 0.8 ;
-  color[num_objects][1] = 0.2 ; 
-  color[num_objects][2] = 0.2 ;
-  objreflectivity[num_objects] = 0;
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  4    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  25    ; Tn++ ;
-  Ttypelist[Tn] = TX ; Tvlist[Tn] =  10    ; Tn++ ;
 	
   M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
   M3d_mat_mult(obmat[num_objects], vm, m) ;
