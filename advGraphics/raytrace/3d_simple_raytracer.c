@@ -1,11 +1,11 @@
 #include "../FPToolkit.c"
 #include "../M3d_matrix_tools.c"
 
-double eye_in_object_space[3];
+double eyeMat[4][4];
+double eyeMatInv[4][4];
+double eye[3];
 double coi[3];
 double up[3];
-double eyemat[4][4];
-double eyeinv[4][4];
 double hither = 1;
 double yon = 1e50;
 double obmat[100][4][4] ;
@@ -13,8 +13,16 @@ double obinv[100][4][4] ;
 int obtype[100];
 double color[100][3] ;
 int    num_objects ;
+int objlightmodel[100]; //1 for standard lighting, 0 for no lighting, 2 for reflection
 int numBounces = 6 ;
 int scrnsize = 800;
+
+//Support Light model
+double light_in_world_space[3];
+double light_in_eye_space[3] = {10,10,-10};
+double AMBIENT      = 0.2 ;
+double MAX_DIFFUSE  = 0.5 ;
+double SPECPOW      = 50 ;
 
 
 double hyperbola_deriv(double xyz[3], int n){
@@ -189,7 +197,6 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
   int n;
   double minT = 1e50;
   int saved_onum;
-  
   for(int i = 0; i < num_objects; i++){
     M3d_mat_mult_pt(rayA, obinv[i], Rsource);
     M3d_mat_mult_pt(rayB, obinv[i], Rtip);
@@ -229,23 +236,177 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
   return saved_onum;
 }
 
+int Light_Model (double irgb[3],
+                 double s[3],
+                 double p[3],
+                 double n[3],
+                 double argb[3])
+// s,p,n in eyespace
+
+// irgb == inherent color of object (input to this function)
+// s = location of start of ray (probably the eye)
+// p = point on object (input to this function)
+// n = normal to the object at p (input to this function)
+// argb == actual color of object (output of this function)
+// globals : AMBIENT, MAX_DIFFUSE, SPECPOW, light_in_eye_space[3]
+
+// return 1 if successful, 0 if error
+{
+
+  double len ;
+  double N[3] ; 
+  len = sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]) ;
+  if (len == 0) return 0 ;
+  N[0] = n[0]/len ;  N[1] = n[1]/len ;  N[2] = n[2]/len ;
+
+  double E[3] ;
+  E[0] = s[0] - p[0] ; 
+  E[1] = s[1] - p[1] ; 
+  E[2] = s[2] - p[2] ; 
+  len = sqrt(E[0]*E[0] + E[1]*E[1] + E[2]*E[2]) ;
+  if (len == 0) return 0 ;
+  E[0] /= len ;  E[1] /= len ;  E[2] /= len ;
+  double NdotE = N[0]*E[0] + N[1]*E[1] + N[2]*E[2] ;
+
+  double L[3] ;
+  L[0] = light_in_eye_space[0] - p[0] ; 
+  L[1] = light_in_eye_space[1] - p[1] ; 
+  L[2] = light_in_eye_space[2] - p[2] ; 
+  len = sqrt(L[0]*L[0] + L[1]*L[1] + L[2]*L[2]) ;
+  if (len == 0) return 0 ;
+  L[0] /= len ;  L[1] /= len ;  L[2] /= len ;
+  double NdotL = N[0]*L[0] + N[1]*L[1] + N[2]*L[2] ;
+
+  double max_ambient_and_diffuse = AMBIENT + MAX_DIFFUSE ;
+     // this needs to occur BEFORE you possibly jump to LLL below
+
+  double intensity ;
+  if (NdotL*NdotE < 0) {
+    // eye and light are on opposite sides of polygon
+    intensity = AMBIENT ; 
+    goto LLL ;
+  } else if ((NdotL < 0) && (NdotE < 0)) {
+    // eye and light on same side but normal pointing "wrong" way
+    N[0] *= (-1.0) ;    N[1] *= (-1.0) ;    N[2] *= (-1.0) ; 
+    NdotL *= (-1.0) ;
+    NdotE *= (-1.0) ;   // don't use NdotE below, probably should eliminate this
+  }
+
+  // ignore Blinn's variant
+  double R[3] ; // Reflection vector of incoming light
+  R[0] = 2*NdotL*N[0] - L[0] ;
+  R[1] = 2*NdotL*N[1] - L[1] ;
+  R[2] = 2*NdotL*N[2] - L[2] ;
+
+  double EdotR = E[0]*R[0] + E[1]*R[1] + E[2]*R[2] ;
+
+  double diffuse ;
+  if (NdotL <= 0.0) { diffuse = 0.0 ; }
+  else { diffuse = MAX_DIFFUSE*NdotL ; }
+
+  double specular ;
+  if (EdotR <= 0.0) { specular = 0.0 ; }
+  else { specular = (1.0 - max_ambient_and_diffuse)*pow(EdotR,SPECPOW) ;}
+
+  // printf("%lf %lf\n",diffuse,specular) ;
+  intensity = AMBIENT + diffuse + specular ;
+  
+ LLL : ;
+
+  double f,g ;
+  if (intensity <= max_ambient_and_diffuse) {
+    f = intensity / max_ambient_and_diffuse ;
+    argb[0] = f * irgb[0] ;
+    argb[1] = f * irgb[1] ;
+    argb[2] = f * irgb[2] ;
+  } else {
+    f = (intensity - max_ambient_and_diffuse) / 
+                           (1.0 - max_ambient_and_diffuse) ;
+    g = 1.0 - f ;
+    argb[0] = g * irgb[0] + f ;
+    argb[1] = g * irgb[1] + f ;
+    argb[2] = g * irgb[2] + f ;
+  }
+
+  return 1 ;
+}
+
+void light_model (double irgb[3], double normal[3], int onum,
+                  double intersection[3], double Rsource[3], 
+                  double argb[3])
+// irgb == inherent color of object (input to this function)
+// onum == object number we're on
+// intersection == intersection point we're interested in
+// Rsource == eye location
+// argb == actual color of object (output of this function)
+{
+  
+  Light_Model (irgb, Rsource, intersection, normal, argb) ;
+}
+
+int decide_color(int saved_onum, double Rsource[3], double normal[3],
+		 double intersection[3], double argb[3]){
+  int c;
+  double irgb[3], temp[3], res[3]; 
+  if (saved_onum == -1) {
+    return -1;
+  }
+  if(objlightmodel[saved_onum] == 1){
+    
+    irgb[0] = color[saved_onum][0];
+    irgb[1] = color[saved_onum][1];
+    irgb[2] = color[saved_onum][2];
+  
+    light_model (irgb, normal, saved_onum, intersection, Rsource, argb);
+  }else if(objlightmodel[saved_onum] == 2){
+    //Allow for some inherent color of the mirror
+    argb[0] = color[saved_onum][0] / 10;
+    argb[1] = color[saved_onum][1] / 10;
+    argb[2] = color[saved_onum][2] / 10;
+
+    //find reflection
+    find_reflection(Rsource, intersection, normal, res);
+
+    //offset reflection vector
+    temp[0] = intersection[0] + 2*res[0];
+    temp[1] = intersection[1] + 2*res[1];
+    temp[2] = intersection[2] + 2*res[2];
+    intersection[0] += 0.1*res[0];
+    intersection[1] += 0.1*res[1];
+    intersection[2] += 0.1*res[2];
+
+    //find object in mirror
+    saved_onum = find_intersection(intersection,temp,res, normal);
+    c = decide_color(saved_onum, temp, normal, res, argb);
+    if(c == -1) return -1;
+
+    irgb[0] = color[saved_onum][0];
+    irgb[1] = color[saved_onum][1];
+    irgb[2] = color[saved_onum][2];
+
+    light_model (irgb, normal, saved_onum, res, temp, argb);
+    
+  }else{
+    argb[0] = color[saved_onum][0];
+    argb[1] = color[saved_onum][1];
+    argb[2] = color[saved_onum][2];
+  }
+  return 1;
+}
+
 int ray (double Rtip[3], double argb[3]){
   double Rsource[3];
   Rsource[0] = 0;
   Rsource[1] = 0;
   Rsource[2] = 0;
-  double intersection[3], normal[3];
+  double irgb[3];
+  double intersection[3], normal[3], res[3], temp[3];
+  argb[0] = 0;
+  argb[1] = 0;
+  argb[2] = 0;
   int saved_onum = find_intersection(Rsource,Rtip,intersection, normal);
-  if (saved_onum == -1) {
-    
-    argb[0] = 0;
-    argb[1] = 0;
-    argb[2] = 0;
-    return -1;
-  }
-  argb[0] = color[saved_onum][0];
-  argb[1] = color[saved_onum][1];
-  argb[2] = color[saved_onum][2];
+  decide_color(saved_onum, Rsource, normal, intersection, argb);
+
   
 
 
@@ -294,11 +455,16 @@ int ray (double Rtip[3], double argb[3]){
 
 void Draw_the_scene()
 {
+
   double temp[3], argb[3];
   temp[0] = -1;
   temp[1] = -1;
   temp[2] = hither;
   normalize(temp,temp);
+  
+  /*M3d_view (eyeMat, eyeMatInv,  eye,coi,up) ;
+  M3d_mat_mult_pt(light_in_eye_space, eyeMat, light_in_world_space);
+  */
   for(int x = 0; x < scrnsize; x++){
     for(int y = 0; y < scrnsize; y++){
       temp[0] = x / (scrnsize/2.0) - 1;
@@ -336,20 +502,21 @@ int test01()
     //////////////////////////////////////////////////////////////////////
 
     num_objects = 0 ;
-
+    
     //////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////
-    obtype[num_objects] = 1;
+    obtype[num_objects] = 0;
     color[num_objects][0] = 0.0 ;
     color[num_objects][1] = 0.8 ; 
     color[num_objects][2] = 0.0 ;
+    objlightmodel[num_objects] = 1;
 	
     Tn = 0 ;
     Ttypelist[Tn] = SX ; Tvlist[Tn] =  5    ; Tn++ ;
     Ttypelist[Tn] = SY ; Tvlist[Tn] =  5    ; Tn++ ;
     Ttypelist[Tn] = SZ ; Tvlist[Tn] =  5    ; Tn++ ;
     Ttypelist[Tn] = RX ; Tvlist[Tn] =  20   ; Tn++ ;
-    Ttypelist[Tn] = TZ ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = TZ ; Tvlist[Tn] =  50   ; Tn++ ;
 	
     M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
     M3d_mat_mult(obmat[num_objects], vm, m) ;
@@ -357,11 +524,83 @@ int test01()
 
     num_objects++ ; // don't forget to do this
     //////////////////////////////////////////////////////////////
+    
+    obtype[num_objects] = 1;
+    color[num_objects][0] = 1.0 ;
+    color[num_objects][1] = 0.8 ; 
+    color[num_objects][2] = 0.0 ;
+    objlightmodel[num_objects] = 2;
+	
+    Tn = 0 ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = SY ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = SZ ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = RX ; Tvlist[Tn] =  89   ; Tn++ ;
+    Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30   ; Tn++ ;
+    Ttypelist[Tn] = TY ; Tvlist[Tn] =  -20   ; Tn++ ;
+    
+    M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+    M3d_mat_mult(obmat[num_objects], vm, m) ;
+    M3d_mat_mult(obinv[num_objects], mi, vi) ;
 
+    num_objects++ ; // don't forget to do this
+    //////////////////////////////////////////////////////////////
+    
+    obtype[num_objects] = 1;
+    color[num_objects][0] = 0.0 ;
+    color[num_objects][1] = 0.8 ; 
+    color[num_objects][2] = 1.0 ;
+    objlightmodel[num_objects] = 2;
+	
+    Tn = 0 ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = SY ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = SZ ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = RX ; Tvlist[Tn] =  150   ; Tn++ ;
+    Ttypelist[Tn] = TZ ; Tvlist[Tn] =  50   ; Tn++ ;
+    Ttypelist[Tn] = TY ; Tvlist[Tn] =  20   ; Tn++ ;
+    
+    M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+    M3d_mat_mult(obmat[num_objects], vm, m) ;
+    M3d_mat_mult(obinv[num_objects], mi, vi) ;
+
+    num_objects++ ; // don't forget to do this
+    //////////////////////////////////////////////////////////////
+    /*
+    obtype[num_objects] = 1;
+    color[num_objects][0] = 0.0 ;
+    color[num_objects][1] = 0.8 ; 
+    color[num_objects][2] = 1.0 ;
+    objlightmodel[num_objects] = 2;
+	
+    Tn = 0 ;
+    Ttypelist[Tn] = SX ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = SY ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = SZ ; Tvlist[Tn] =  20   ; Tn++ ;
+    Ttypelist[Tn] = TZ ; Tvlist[Tn] =  60   ; Tn++ ;
+    Ttypelist[Tn] = TY ; Tvlist[Tn] =  0   ; Tn++ ;
+    
+    M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+    M3d_mat_mult(obmat[num_objects], vm, m) ;
+    M3d_mat_mult(obinv[num_objects], mi, vi) ;
+
+    num_objects++ ; // don't forget to do this
+    //////////////////////////////////////////////////////////////
+    */
     G_rgb(0,0,0) ;
     G_clear() ;
     Draw_the_scene() ;
-
+    
+    eye[0] = 0;
+    eye[1] = 0;
+    eye[2] = 0;
+    coi[0] = 0;
+    coi[1] = 0;
+    coi[2] = 5;
+    up[0] = 0;
+    up[1] = 1;
+    up[2] = 0;
+    
     int c;
     while(1){
       c = G_wait_key();
