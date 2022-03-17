@@ -14,7 +14,7 @@ int obtype[100];
 double color[100][3] ;
 int    num_objects ;
 int objlightmodel[100]; //1 for standard lighting, 0 for no lighting, 2 for reflection
-int numBounces = 6 ;
+int reflection_limit = 6 ;
 int scrnsize = 800;
 
 //Support Light model
@@ -345,10 +345,10 @@ void light_model (double irgb[3], double normal[3], int onum,
 }
 
 int decide_color(int saved_onum, double Rsource[3], double normal[3],
-		 double intersection[3], double argb[3]){
+		 double intersection[3], double argb[3], int reflection_count){
   int c;
   double irgb[3], temp[3], res[3]; 
-  if (saved_onum == -1) {
+  if (saved_onum == -1 || reflection_count >= reflection_limit) {
     return -1;
   }
   if(objlightmodel[saved_onum] == 1){
@@ -377,7 +377,7 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
 
     //find object in mirror
     saved_onum = find_intersection(intersection,temp,res, normal);
-    c = decide_color(saved_onum, temp, normal, res, argb);
+    c = decide_color(saved_onum, temp, normal, res, argb, reflection_count+1);
     if(c == -1) return -1;
 
     irgb[0] = color[saved_onum][0];
@@ -395,6 +395,7 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
 }
 
 int ray (double Rtip[3], double argb[3]){
+  //camera_light = flag for camera or shadow (camera shows all, shadow shoots through transp)
   double Rsource[3];
   Rsource[0] = 0;
   Rsource[1] = 0;
@@ -405,50 +406,8 @@ int ray (double Rtip[3], double argb[3]){
   argb[1] = 0;
   argb[2] = 0;
   int saved_onum = find_intersection(Rsource,Rtip,intersection, normal);
-  decide_color(saved_onum, Rsource, normal, intersection, argb);
+  decide_color(saved_onum, Rsource, normal, intersection, argb, 0);
 
-  
-
-
-  /*
-  double res[3];
-  double temp[3];
-  for(int i = 0; i < numBounces; i++){
-    
-    find_reflection(Rtip, intersection, normal, res);
-
-
-    temp[0] = intersection[0] + 2*res[0];
-    temp[1] = intersection[1] + 2*res[1];
-    temp[2] = intersection[2] + 2*res[2];
-    intersection[0] += 0.1*res[0];
-    intersection[1] += 0.1*res[1];
-    intersection[2] += 0.1*res[2];
-    
-    G_rgb(1,0,0);
-    G_fill_circle(temp[0],temp[1],2);
-    G_rgb(0,1,0);
-    G_fill_circle(intersection[0],intersection[1],1);
-
-
-    saved_onum = find_intersection(intersection,temp,res, normal);
-    if (saved_onum == -1) return -1;
-    
-    
-    argb[0] = color[saved_onum][0];
-    argb[1] = color[saved_onum][1];
-    argb[2] = color[saved_onum][2];
-    G_rgb(argb[0],argb[1],argb[2]);
-    G_line(intersection[0], intersection[1], res[0], res[1]);
-
-    Rtip[0] = intersection[0];
-    Rtip[1] = intersection[1];
-    Rtip[2] = intersection[2];
-    intersection[0] = res[0];
-    intersection[1] = res[1];
-    intersection[2] = res[2];
-  }
-  */
   return 1;
   
 }
@@ -568,9 +527,9 @@ int test01()
     //////////////////////////////////////////////////////////////
     /*
     obtype[num_objects] = 1;
-    color[num_objects][0] = 0.0 ;
-    color[num_objects][1] = 0.8 ; 
-    color[num_objects][2] = 1.0 ;
+    color[num_objects][0] = 0.8 ;
+    color[num_objects][1] = 0 ; 
+    color[num_objects][2] = 0.0 ;
     objlightmodel[num_objects] = 2;
 	
     Tn = 0 ;
