@@ -1,5 +1,8 @@
 import numpy as np
-
+# all_inputs = np.array([[0, 0],
+#                        [0, 1],
+#                        [1, 0],
+#                        [1, 1]])
 and_weights = np.array([2, 2])
 and_bias = np.array([-3])
 or_weights = np.array([2, 2])
@@ -15,11 +18,32 @@ xor_weights = np.array([0, 0])
 xor_bias = np.array([0])
 
 
-def convert(x):
-    if x >= 0:
-        return 1
-    return 0
-
-
 def net_output(inputs: np.array, weights: np.array, bias: np.array):
-    return np.asmatrix([convert(x) for x in np.matmul(inputs, weights) + bias]).T
+    return np.asmatrix([1 if x >= 0 else 0 for x in np.matmul(inputs, weights) + bias]).T
+
+
+# Advanced 1
+and_weights_bias = np.array([2, 2, -3])
+or_weights_bias = np.array([2, 2, -1])
+nand_weights_bias = np.array([-2, -2, 3])
+nor_weights_bias = np.array([-1, -1, 0])
+
+
+def net_output_advanced1(inputs: np.array, weights: np.array):
+    return np.asmatrix([1 if x >= 0 else 0 for x in np.matmul(np.insert(inputs, 2, 1, axis=1), weights)]).T
+
+
+# Test advanced 1
+# print(net_output_advanced1(all_inputs, and_weights_bias))
+# print(net_output_advanced1(all_inputs, or_weights_bias))
+# print(net_output_advanced1(all_inputs, nand_weights_bias))
+# print(net_output_advanced1(all_inputs, nor_weights_bias))
+
+
+# Advanced 2
+def net_output_advanced2(inputs: np.array, weights: np.array):
+    return np.asmatrix([[1 if x >= 0 else 0 for x in np.matmul(np.insert(inputs, 2, 1, axis=1), weight)] for weight in weights]).T
+
+
+mega_matrix = np.array([and_weights_bias, or_weights_bias, nand_weights_bias, nor_weights_bias])
+# print(mega_matrix)
