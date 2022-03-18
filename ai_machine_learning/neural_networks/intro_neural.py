@@ -12,8 +12,8 @@ nand_bias = np.array([3])
 nor_weights = np.array([-1, -1])
 nor_bias = np.array([0])
 
-# Exclusive or is impossible with our neural network formula because a positive offset creates or and a negative offset
-# creates and
+# Exclusive or is impossible with our neural network formula because a positive bias creates "or" and a negative bias
+# creates "and"
 xor_weights = np.array([0, 0])
 xor_bias = np.array([0])
 
