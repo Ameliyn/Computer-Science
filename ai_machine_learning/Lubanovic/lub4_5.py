@@ -13,7 +13,7 @@ def standard1(a, b, c, d):
 def standard2(names):
     for i in names:
         i = i.capitalize()
-        print("%sy Mc%sface" % (i, i))
+        print(f"{i}y Mc{i}face")
 
 
 # Advanced Problem 1
@@ -46,7 +46,7 @@ def advanced2(novel):
 # standard1(-1,21,23,25)
 # standard1(-1,0,3,1)
 
-# standard2(["Water","Boat","Horse"])
+standard2(["Water","Boat","Horse"])
 
 # advanced1("of mice and men")
 # advanced1("percy jackson and the titans curse")

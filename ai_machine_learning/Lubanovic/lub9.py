@@ -3,17 +3,17 @@ import math
 
 # Standard 1
 def euclidean_distance(a: list, b: list):
-    return (a[1] - b[1]) / (a[0] - b[0])
+    return math.sqrt((a[1] - b[1])*(a[1] - b[1]) + (a[0] - b[0])*(a[0] - b[0]))
 
 
 # Standard 2
 def repeated_values(param: dict):
     temp = []
     for i in param.values():
-        if i[1:] in temp:
+        if i in temp:
             return True
         else:
-            temp.append(i[1:])
+            temp.append(i)
     return False
 
 
@@ -37,5 +37,6 @@ def deep_max(a: list):
     return max(a)
 
 
-print(repeated_values({1: "yes", 2: "no", 3: "what"}))
+print(repeated_values({1: "yes", 2: "no", 3: "what", 4: "yo"}))
+print(repeated_values({1: 1, 2: 5, 3: 3, 4: "yo"}))
 print(deep_max([[2, [3, 1, 1], 2], 3, [2, 0, [4, 5, 1]]]))

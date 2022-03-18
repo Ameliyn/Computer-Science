@@ -6,9 +6,12 @@ import random
 engSpanDict = {"one": "uno", "two": "dos", "three": "tres", "four": "cuatro", "five": "cinco",
                "six": "seis", "seven": "siete", "eight": "ocho", "nine": "nueve", "ten": "diez"}
 
+
 # Standard 2
-spanEngDict = {"uno": "one", "dos": "two", "tres": "three", "cuatro": "four", "cinco": "five", "seis": "six",
-               "siete": "seven", "ocho": "eight", "nueve": "nine", "diez": "ten"}
+def lub_two(swapped: dict):
+    new_dict = dict([(value, key) for key, value in swapped.items()])
+    return new_dict
+
 
 # Standard 3
 oddNumbers = {x for x in range(10) if x % 2 == 1}
@@ -49,4 +52,5 @@ def advanced3():
         print("You weild a %s" % two_handed_weapon[random.randint(0, 5)])
 
 
-advanced3()
+# advanced3()
+print(lub_two(engSpanDict))
