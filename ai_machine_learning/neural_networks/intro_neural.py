@@ -33,17 +33,9 @@ def net_output_advanced1(inputs: np.array, weights: np.array):
     return np.asmatrix([1 if x >= 0 else 0 for x in np.matmul(np.insert(inputs, 2, 1, axis=1), weights)]).T
 
 
-# Test advanced 1
-# print(net_output_advanced1(all_inputs, and_weights_bias))
-# print(net_output_advanced1(all_inputs, or_weights_bias))
-# print(net_output_advanced1(all_inputs, nand_weights_bias))
-# print(net_output_advanced1(all_inputs, nor_weights_bias))
-
-
 # Advanced 2
+mega_matrix = np.array([and_weights_bias, or_weights_bias, nand_weights_bias, nor_weights_bias])
+
+
 def net_output_advanced2(inputs: np.array, weights: np.array):
     return np.asmatrix([[1 if x >= 0 else 0 for x in np.matmul(np.insert(inputs, 2, 1, axis=1), weight)] for weight in weights]).T
-
-
-mega_matrix = np.array([and_weights_bias, or_weights_bias, nand_weights_bias, nor_weights_bias])
-# print(mega_matrix)
