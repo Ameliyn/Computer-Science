@@ -124,5 +124,48 @@ finally train the data on the whole dataset for production.
   over-fit the data
 
 
+Linear Regression:
+--Works in as many dimensions as you want with multiple inputs and one output
+-- y = mx+b => yhat = theta0 + theta1*X1 + ... + thetanXn
+  -- theta0 = bias
+
+Find the best one with minimizing the Mean Squared Error:
+-- m = mean
+-- MSE(X, htheta) = (1 / m) * sum(1->m)(yhati-yi)^2
+
+The solution exists but is long-winded (and slow for many features), only works for linear (line/plane/hyperplane)
+
+Gradiant Descent:
+--Start with random initial value, find gradiant at that point, and step towards the center
+  --If gradiant very steep, take big step, if shallow, take small step
+See slideshow
+
+Batch Gradient Descent:
+--Do gradient descent for all data points (slow for large sets)
+
+Stochastic Gradient Descent:
+--Adjust for one data point at a time, in random order. Doesn't have to look at the whole data set
+--Can bounce around due to randomness
+
+Mini-batch gradient descent:
+--Middle point between batch and stochastic
+
+
+Polynomial Regression:
+--Do linear regression but add more features (theta0 + theta1x1 +theta2(x1^2) + etc)
+  --The higher the degree of the polynomial leads to over-fitting and under-fitting
+
+Bias/variance tradeoff
+--Bias = what you've decided the line is in advance (decide it's a line, you get a line, decide it's a parabola, you get
+  a parabola, etc.) ("turning bias up means smoother curve")
+--Variance == amount algorithm can adjust to the data (1-bias)
+--Irreducible Error = noise (other variables, etc)
+
+How to prevent over-fitting:
+-- Use simpler model
+-- Constrain the weights (constrain thetas)
+-- Stop early (don't train too much)
+
+
 
 
