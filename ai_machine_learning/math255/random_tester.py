@@ -11,20 +11,19 @@ def create_dataset(num_points, limit_a, limit_b, integer):
     :return:
     """
     # file_name = "python%d_%d_%d.txt" % (num_points, limit_a, limit_b)
-    file_name = "pythondataset.txt"
+    file_name = "pythondataset.R"
     with open(file_name, "a") as f:
-        f.write("py_%d_%d_%d = " % (num_points, limit_a, limit_b))
+        f.write("py_%d_%d_%d <- c(" % (num_points, limit_a, limit_b))
         for i in range(num_points):
             if integer == 1:
                 f.write(str(random.randint(limit_a, limit_b)))
-                f.write(", ")
-                # print(random.randint(limit_a, limit_b), end=", ", file=f)
             else:
                 f.write(str(random.random() * limit_b))
+            if i+1 != num_points:
                 f.write(", ")
-                # print(random.random() * limit_b, end=", ", file=f)
+            else:
+                f.write(")")
         f.write("\n")
-        # print(file=f)
 
 
 def main():
