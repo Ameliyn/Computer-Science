@@ -1,5 +1,6 @@
 #include "../FPToolkit.c"
 #include "../M3d_matrix_tools.c"
+#include "../xwd_tools_03.c"
 
 double eyeMat[4][4];
 double eyeMatInv[4][4];
@@ -13,6 +14,8 @@ double obinv[100][4][4] ;
 int obtype[100]; //0=sphere, 1=plane, 2=hyperbaloid, 3=cylinder
 double color[100][3] ;
 double objreflectivity[100]; //[0,1] percent reflectivity, -1 for no light/reflection model
+char *objtexture[100];
+int objtexmap[100];
 int    num_objects ;
 int reflection_limit = 6 ;
 int scrnsize = 800;
@@ -49,6 +52,10 @@ double cylinder_deriv(double xyz[3], int n){
   if (n == 1) return 0;
   return 2*xyz[n];
 }
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 double sphere_intercept(double rayA[3], double rayB[3], double t[2]){
 
@@ -154,7 +161,61 @@ double cylinder_intercept(double rayA[3], double rayB[3], double t[2]){
   return 2; 
 
 }
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
+//x = sqrt(1-v*v) * cos(u)
+//y = v
+//z = sqrt(1-v*v) * sin(u)
+int sphere_point_to_parametric(double uvrat[2], double intersect[3], int onum){
+  printf("NOT YET IMPLEMENTED SPHERE\n");
+  double u,v;
+
+  v = intersect[2];
+  if(v == 1 || v == -1)
+    u = 0;
+  else
+    u = asin(intersect[2] / sqrt(1-v*v));
+
+  uvrat[0] = u / 2*M_PI;
+  uvrat[1] = v / 2;
+}
+
+int plane_point_to_parametric(double uvrat[2], double intersect[3], int onum){
+  printf("NOT YET IMPLEMENTED PLANE\n");
+}
+
+int hyperbola_point_to_parametric(double uvrat[2], double intersect[3], int onum){
+  printf("NOT YET IMPLEMENTED HYPERBOLA\n");
+}
+
+int cylinder_point_to_parametric(double uvrat[2], double intersect[3], int onum){
+  double u,v;
+  double ulo = -M_PI/2 ;  double uhi = M_PI/2;
+  double vlo = -1;  double vhi = 1;
+  v = intersect[1];
+  u = asin(intersect[2]);
+
+  uvrat[0] = (u - ulo) / (uhi-ulo);
+  uvrat[1] = (v - vlo) / (vhi-vlo);
+  //printf("uvrat: %02f %02f\n",uvrat[0],uvrat[1]);
+}
+
+int obj_point_to_parametric(double uvrat[2], double intersect[3], int onum){
+
+  int n;
+  if(obtype[onum] == 0)
+    n = sphere_point_to_parametric(uvrat, intersect, onum);
+  else if(obtype[onum] == 1)
+    n = plane_point_to_parametric(uvrat, intersect, onum);
+  else if(obtype[onum] == 2)
+    n = hyperbola_point_to_parametric(uvrat, intersect, onum);
+  else if(obtype[onum] == 3)
+    n = cylinder_point_to_parametric(uvrat, intersect, onum);
+  return n;
+}
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -401,10 +462,46 @@ int Light_Model (double irgb[3],
 int decide_color(int saved_onum, double Rsource[3], double normal[3],
 		 double intersection[3], double argb[3], int reflection_count){
   int c;
-  double irgb[3], temp[3], res[3]; 
+  double irgb[3], temp[3], res[3];
   if (saved_onum == -1 || reflection_count > reflection_limit) {
     return -1;
   }
+
+  //store inherent color just in case
+  double save_color[3];
+  save_color[0] = color[saved_onum][0];
+  save_color[1] = color[saved_onum][1];
+  save_color[2] = color[saved_onum][2];
+
+  
+  if(objtexture[saved_onum] != "none"){
+    //open object texture;
+    int e, d[2], widthA, heightA, texx, texy;
+    e = get_xwd_map_dimensions(objtexmap[saved_onum], d) ;
+    if (e == -1) { printf("failure to get dimensions\n") ;  goto decideColorPostTexture; }
+    widthA = d[0] ; heightA = d[1] ;
+    
+    //find pixel at intersection
+    //translate intersection back to object space, then find texture spot
+    double objspcintersect[3], uvrat[2];
+    M3d_mat_mult_pt(objspcintersect, obinv[saved_onum], intersection);
+
+    obj_point_to_parametric(uvrat, objspcintersect, saved_onum);
+
+    texx = widthA * uvrat[0];
+    texy = heightA * uvrat[1];
+    printf("texx: %d\ntexy: %d\n",texx,texy);
+    
+    e = get_xwd_map_color(objtexmap[saved_onum], texx,texy,color[saved_onum]) ;
+    if (e == -1) {
+      color[saved_onum][0] = save_color[0];
+      color[saved_onum][1] = save_color[1];
+      color[saved_onum][2] = save_color[2];
+      printf("failure to find color\n") ; goto decideColorPostTexture; }
+  }
+  
+ decideColorPostTexture:
+  
   if(objreflectivity[saved_onum] == 0){
     
     irgb[0] = color[saved_onum][0];
@@ -433,7 +530,12 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
     int new_onum;
     new_onum = find_intersection(intersection,temp,res, normal);
     c = decide_color(new_onum, temp, normal, res, argb, reflection_count+1);
-    if(c == -1) return -1;
+    if(c == -1) {
+      //reset color to saved color if necessary
+      color[saved_onum][0] = save_color[0];
+      color[saved_onum][1] = save_color[1];
+      color[saved_onum][2] = save_color[2];
+      return -1;}
 
     irgb[0] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[0]*objreflectivity[saved_onum];
     irgb[1] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[1]*objreflectivity[saved_onum];
@@ -446,6 +548,11 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
     argb[1] = color[saved_onum][1];
     argb[2] = color[saved_onum][2];
   }
+
+  //reset color to saved color if necessary
+  color[saved_onum][0] = save_color[0];
+  color[saved_onum][1] = save_color[1];
+  color[saved_onum][2] = save_color[2];
   return 1;
 }
 
@@ -483,6 +590,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
@@ -502,6 +610,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
@@ -524,6 +633,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
@@ -546,6 +656,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
@@ -566,6 +677,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.7 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  10    ; Tn++ ;
@@ -586,6 +698,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.7 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  1    ; Tn++ ;
@@ -608,6 +721,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.4 ; 
   color[num_objects][2] = 0.4 ;
   objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  30   ; Tn++ ;
@@ -629,6 +743,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 1.0 ;
   objreflectivity[num_objects] = 0.8;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  20   ; Tn++ ;
@@ -650,6 +765,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 1.0 ;
   objreflectivity[num_objects] = 0.8;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  15   ; Tn++ ;
@@ -674,6 +790,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.2 ; 
   color[num_objects][2] = 0.2 ;
   objreflectivity[num_objects] = -1;
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  100    ; Tn++ ;
@@ -696,6 +813,10 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.2 ; 
   color[num_objects][2] = 0.2 ;
   objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "graywood.xwd";
+  objtexmap[num_objects] = init_xwd_map_from_file (objtexture[num_objects]) ;// returns -1 on error, 1 if ok
+  if (objtexmap[num_objects] == -1) { printf("failure to open texture\n");}
+
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
