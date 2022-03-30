@@ -21,6 +21,8 @@ int reflection_limit = 6 ;
 int scrnsize = 800;
 double worldrgb[3] = {0.2,0.2,0.2};
 
+int earthrotate = 0;
+
 //Support Light model
 double light_in_world_space[3] = {0,20,30};
 double light_in_eye_space[3];
@@ -170,21 +172,34 @@ double cylinder_intercept(double rayA[3], double rayB[3], double t[2]){
 //y = v
 //z = sqrt(1-v*v) * sin(u)
 int sphere_point_to_parametric(double uvrat[2], double intersect[3], int onum){
-  printf("NOT YET IMPLEMENTED SPHERE\n");
   double u,v;
+  double ulo = -M_PI ;  double uhi = M_PI;
+  double vlo = -1;  double vhi = 1;
 
-  v = intersect[2];
-  if(v == 1 || v == -1)
-    u = 0;
-  else
-    u = asin(intersect[2] / sqrt(1-v*v));
+  v = intersect[1];
+  if(v == 1 || v == -1){
+    printf("TOP OF SPHERE\n");
+    u = 0;}
+  else{
+    u = atan2(intersect[0] / sqrt(1-v*v), intersect[2] / sqrt(1-v*v));}
 
-  uvrat[0] = u / 2*M_PI;
-  uvrat[1] = v / 2;
+  uvrat[0] = (u - ulo) / (uhi-ulo);
+  uvrat[1] = (v - vlo) / (vhi-vlo);
+  return 1;
 }
 
 int plane_point_to_parametric(double uvrat[2], double intersect[3], int onum){
-  printf("NOT YET IMPLEMENTED PLANE\n");
+  double u,v;
+  double ulo = -1 ;  double uhi = 1;
+  double vlo = -1 ;  double vhi = 1;
+
+  u = intersect[0];
+  v = intersect[1];
+
+  uvrat[0] = (u - ulo) / (uhi-ulo);
+  uvrat[1] = (v - vlo) / (vhi-vlo);
+
+  return 1;
 }
 
 int hyperbola_point_to_parametric(double uvrat[2], double intersect[3], int onum){
@@ -193,14 +208,14 @@ int hyperbola_point_to_parametric(double uvrat[2], double intersect[3], int onum
 
 int cylinder_point_to_parametric(double uvrat[2], double intersect[3], int onum){
   double u,v;
-  double ulo = -M_PI/2 ;  double uhi = M_PI/2;
+  double ulo = -M_PI ;  double uhi = M_PI;
   double vlo = -1;  double vhi = 1;
   v = intersect[1];
-  u = asin(intersect[2]);
+  u = atan2(intersect[2],intersect[0]);
 
   uvrat[0] = (u - ulo) / (uhi-ulo);
   uvrat[1] = (v - vlo) / (vhi-vlo);
-  //printf("uvrat: %02f %02f\n",uvrat[0],uvrat[1]);
+  return 1;
 }
 
 int obj_point_to_parametric(double uvrat[2], double intersect[3], int onum){
@@ -490,7 +505,7 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
 
     texx = widthA * uvrat[0];
     texy = heightA * uvrat[1];
-    printf("texx: %d\ntexy: %d\n",texx,texy);
+    //printf("texx: %d\ntexy: %d\n",texx,texy);
     
     e = get_xwd_map_color(objtexmap[saved_onum], texx,texy,color[saved_onum]) ;
     if (e == -1) {
@@ -721,7 +736,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.4 ; 
   color[num_objects][2] = 0.4 ;
   objreflectivity[num_objects] = 0;
-  objtexture[num_objects] = "none";
+  objtexture[num_objects] = "graywood.xwd";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  30   ; Tn++ ;
@@ -766,7 +781,8 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 1.0 ;
   objreflectivity[num_objects] = 0.8;
   objtexture[num_objects] = "none";
-	
+
+  
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  15   ; Tn++ ;
   Ttypelist[Tn] = SY ; Tvlist[Tn] =  15   ; Tn++ ;
@@ -813,17 +829,41 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.2 ; 
   color[num_objects][2] = 0.2 ;
   objreflectivity[num_objects] = 0;
-  objtexture[num_objects] = "graywood.xwd";
-  objtexmap[num_objects] = init_xwd_map_from_file (objtexture[num_objects]) ;// returns -1 on error, 1 if ok
-  if (objtexmap[num_objects] == -1) { printf("failure to open texture\n");}
+  objtexture[num_objects] = "woodgood600x300.xwd";
 
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  4    ; Tn++ ;
+  Ttypelist[Tn] = SY ; Tvlist[Tn] =  6    ; Tn++ ;
   Ttypelist[Tn] = SZ ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  25    ; Tn++ ;
-  Ttypelist[Tn] = TX ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = TY ; Tvlist[Tn] =  -5    ; Tn++ ;
+  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  5    ; Tn++ ;
+  Ttypelist[Tn] = TX ; Tvlist[Tn] =  -15    ; Tn++ ;
+	
+  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+  M3d_mat_mult(obmat[num_objects], vm, m) ;
+  M3d_mat_mult(obinv[num_objects], mi, vi) ;
+
+  num_objects++ ; // don't forget to do this
+  //////////////////////////////////////////////////////////////
+
+  //Floating Earth
+  obtype[num_objects] = 0;
+  color[num_objects][0] = 0.2 ;
+  color[num_objects][1] = 0.2 ; 
+  color[num_objects][2] = 0.2 ;
+  objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "Earthgood1024x512.xwd";
+  
+	
+  Tn = 0 ;
+  Ttypelist[Tn] = SX ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = SY ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = RY ; Tvlist[Tn] =  -45-earthrotate    ; Tn++ ;
+  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  35    ; Tn++ ;
+  Ttypelist[Tn] = TY ; Tvlist[Tn] =  20    ; Tn++ ;
+  Ttypelist[Tn] = TX ; Tvlist[Tn] =  50    ; Tn++ ;
 	
   M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
   M3d_mat_mult(obmat[num_objects], vm, m) ;
@@ -866,7 +906,15 @@ void Draw_the_scene()
 /////////////////////////////////////////////////////////////////////////
 
 
+int openXWDfiles(){
 
+  for(int i = 0; i < num_objects; i++){
+    objtexmap[i] = init_xwd_map_from_file (objtexture[i]) ;
+    if (objtexmap[i] == -1) { printf("Object %d has no texture\n",i);}
+
+  }
+
+}
 
 
 int test01()
@@ -893,8 +941,15 @@ int test01()
     
   double t = 0;
   int c;
+
+  //handle opening the xwd files just once to prevent overflow.
+  M3d_view(vm, vi,  eye,coi,up);
+  create_object_matricies(vm, vi);
+  openXWDfiles();
+  
   while(1){
     t += 0.1;
+    earthrotate += 10;
     //move the eye!
     eye[0] = 25*cos(M_PI + t);
     eye[1] = 25*sin(M_PI + t) + 25;
@@ -903,7 +958,6 @@ int test01()
     up[0] = eye[0];
     up[1] = eye[1] + 1;
     up[2] = eye[2];
-
 
     if(mode == 1){
       Draw_the_scene() ;
