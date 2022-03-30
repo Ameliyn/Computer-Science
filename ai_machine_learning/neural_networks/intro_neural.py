@@ -1,4 +1,7 @@
 import numpy as np
+
+# @Author: Skye Russ
+
 # all_inputs = np.array([[0, 0],
 #                        [0, 1],
 #                        [1, 0],
@@ -41,7 +44,7 @@ def net_output_advanced2(inputs: np.array, weights: np.array):
     return np.asmatrix([[1 if x >= 0 else 0 for x in np.matmul(np.insert(inputs, 2, 1, axis=1), weight)] for weight in weights]).T
 
 
-# implement the forbidden
+# implement the forbidden (doesn't work)
 xor_weights_bias = np.array([1, -1, 0])
 xor_second_weights_bias = np.array([0, 0, 1])
 mega_matrix_xor = np.array([and_weights_bias, or_weights_bias, nand_weights_bias, nor_weights_bias, xor_weights_bias])
