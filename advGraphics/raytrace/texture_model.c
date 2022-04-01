@@ -21,6 +21,16 @@ int reflection_limit = 6 ;
 int scrnsize = 800;
 double worldrgb[3] = {0.2,0.2,0.2};
 
+double sphere_radius = 10;
+int earthrotate = 0;
+int save_files = 0;
+int display_image = 1;
+int fileCounter = 0;
+int fileLimit = 119;
+char *file_prefix = "raytext";
+char *file_suffix = ".xwd";
+char *directory = "texturemovie/";
+
 //Support Light model
 double light_in_world_space[3] = {0,20,30};
 double light_in_eye_space[3];
@@ -52,6 +62,7 @@ double cylinder_deriv(double xyz[3], int n){
   if (n == 1) return 0;
   return 2*xyz[n];
 }
+
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -78,6 +89,7 @@ double sphere_intercept(double rayA[3], double rayB[3], double t[2]){
 
 }
 
+//unit plane on y axis from x [-1,1] y [-1,1]
 double plane_intercept(double rayA[3], double rayB[3], double t[2]){
 
   double dx = rayB[0] - rayA[0];
@@ -161,6 +173,50 @@ double cylinder_intercept(double rayA[3], double rayB[3], double t[2]){
   return 2; 
 
 }
+
+//unit circle plane on y axis from x [-1,1] y [-1,1]
+double circle_plane_intercept(double rayA[3], double rayB[3], double t[2]){
+
+  double dx = rayB[0] - rayA[0];
+  double dy = rayB[1] - rayA[1];
+  double dz = rayB[2] - rayA[2];
+
+  t[1] = -1;
+  if(dz == 0) {
+    if(rayA[0] == 0 && dx != 0) {
+      t[0] = (1 - rayA[0]) / dx;
+      return 1;
+    }
+    return 0;
+  }
+
+  t[0] = -1*rayA[2] / dz;
+  double x = rayA[0] + t[0]*dx;
+  double y = rayA[1] + t[0]*dy;
+  double x2y2 = x*x + y*y;
+  if(x2y2 > 1)
+    return 0;
+  return 1;
+}
+
+//handle which function to use
+int object_intercept(double rayA[3], double rayB[3], double t[2], int onum){
+
+  if(obtype[onum] == 0)
+    return sphere_intercept(rayA, rayB, t);
+  else if(obtype[onum] == 1)
+    return plane_intercept(rayA,rayB,t);
+  else if(obtype[onum] == 2)
+    return hyperbola_intercept(rayA,rayB,t);
+  else if(obtype[onum] == 3)
+    return cylinder_intercept(rayA,rayB,t);
+  else if(obtype[onum] == 4)
+    return circle_plane_intercept(rayA,rayB,t);
+  
+  printf("OBJECT TYPE NOT FOUND FOR OBJECT %d... DEFAULTING TO SPHERE\n", onum);
+  return sphere_intercept(rayA, rayB, t);
+
+}
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -170,37 +226,65 @@ double cylinder_intercept(double rayA[3], double rayB[3], double t[2]){
 //y = v
 //z = sqrt(1-v*v) * sin(u)
 int sphere_point_to_parametric(double uvrat[2], double intersect[3], int onum){
-  printf("NOT YET IMPLEMENTED SPHERE\n");
   double u,v;
+  double ulo = -M_PI ;  double uhi = M_PI;
+  double vlo = -1;  double vhi = 1;
 
-  v = intersect[2];
-  if(v == 1 || v == -1)
-    u = 0;
-  else
-    u = asin(intersect[2] / sqrt(1-v*v));
+  v = intersect[1];
+  if(v == 1 || v == -1){
+    printf("TOP OF SPHERE\n");
+    u = 0;}
+  else{
+    u = atan2(intersect[0] / sqrt(1-v*v), intersect[2] / sqrt(1-v*v));}
 
-  uvrat[0] = u / 2*M_PI;
-  uvrat[1] = v / 2;
+  uvrat[0] = (u - ulo) / (uhi-ulo);
+  uvrat[1] = (v - vlo) / (vhi-vlo);
+  return 1;
 }
 
 int plane_point_to_parametric(double uvrat[2], double intersect[3], int onum){
-  printf("NOT YET IMPLEMENTED PLANE\n");
+  double u,v;
+  double ulo = -1 ;  double uhi = 1;
+  double vlo = -1 ;  double vhi = 1;
+
+  u = intersect[0];
+  v = intersect[1];
+
+  uvrat[0] = (u - ulo) / (uhi-ulo);
+  uvrat[1] = (v - vlo) / (vhi-vlo);
+
+  return 1;
 }
 
 int hyperbola_point_to_parametric(double uvrat[2], double intersect[3], int onum){
-  printf("NOT YET IMPLEMENTED HYPERBOLA\n");
+  double u,v;
+  double ulo = -M_PI ;  double uhi = M_PI;
+  double vlo = -1;  double vhi = 1;
+
+  v = intersect[1];
+  if(v == 1 || v == -1){
+    printf("TOP OF HYPERBOLA\n");
+    u = 0;}
+  else{
+    u = atan2(intersect[0] / sqrt(1+v*v), intersect[2] / sqrt(1+v*v));}
+
+
+  uvrat[0] = (u - ulo) / (uhi-ulo);
+  uvrat[1] = (v - vlo) / (vhi-vlo);
+
+  return 1;
 }
 
 int cylinder_point_to_parametric(double uvrat[2], double intersect[3], int onum){
   double u,v;
-  double ulo = -M_PI/2 ;  double uhi = M_PI/2;
+  double ulo = -M_PI ;  double uhi = M_PI;
   double vlo = -1;  double vhi = 1;
   v = intersect[1];
-  u = asin(intersect[2]);
+  u = atan2(intersect[2],intersect[0]);
 
   uvrat[0] = (u - ulo) / (uhi-ulo);
   uvrat[1] = (v - vlo) / (vhi-vlo);
-  //printf("uvrat: %02f %02f\n",uvrat[0],uvrat[1]);
+  return 1;
 }
 
 int obj_point_to_parametric(double uvrat[2], double intersect[3], int onum){
@@ -214,6 +298,8 @@ int obj_point_to_parametric(double uvrat[2], double intersect[3], int onum){
     n = hyperbola_point_to_parametric(uvrat, intersect, onum);
   else if(obtype[onum] == 3)
     n = cylinder_point_to_parametric(uvrat, intersect, onum);
+  else if(obtype[onum] == 4)
+    n = plane_point_to_parametric(uvrat, intersect, onum);
   return n;
 }
 /////////////////////////////////////////////////////////////////////////
@@ -230,8 +316,7 @@ int normalize(double in[3], double res[3]){
   return 1;
 }
 
-int find_normal(int onum, double intersection[3], double Rsource[3], double res[3],
-		double(*F)(double pt[3], int n))
+int find_normal(int onum, double intersection[3], double Rsource[3], double res[3])
 
 // onum = object number
 // intersection = intersection point
@@ -239,7 +324,19 @@ int find_normal(int onum, double intersection[3], double Rsource[3], double res[
 // res = normal vector (filled by function)
 // F = partial derivative function
 {
-
+  //decide which function to use
+  double (*F)(double pt[3], int n);
+  if (obtype[onum] == 0)
+    F = sphere_deriv;
+  else if(obtype[onum] == 1)
+    F = plane_deriv;
+  else if(obtype[onum] == 2)
+    F = hyperbola_deriv;
+  else if(obtype[onum] == 3)
+    F = cylinder_deriv;
+  else if(obtype[onum] == 4)
+    F = plane_deriv;
+    
   double temp[3];
   M3d_mat_mult_pt(temp, obinv[onum], intersection);
   res[0] = obinv[onum][0][0]*F(temp, 0) + obinv[onum][1][0]*F(temp, 1) + obinv[onum][2][0]*F(temp, 2);
@@ -302,14 +399,7 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
     M3d_mat_mult_pt(rayA, obinv[i], Rsource);
     M3d_mat_mult_pt(rayB, obinv[i], Rtip);
 
-    if(obtype[i] == 0)
-      n = sphere_intercept(rayA, rayB, t);
-    else if(obtype[i] == 1)
-      n = plane_intercept(rayA,rayB,t);
-    else if(obtype[i] == 2)
-      n = hyperbola_intercept(rayA,rayB,t);
-    else if(obtype[i] == 3)
-      n = cylinder_intercept(rayA,rayB,t);
+    n = object_intercept(rayA, rayB, t, i);
     
     if (n == 0) {continue; }
     for(int j = 0; j < n; j++){
@@ -329,15 +419,8 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
   intersection[1] = Rsource[1] + minT*(Rtip[1] - Rsource[1]);
   intersection[2] = Rsource[2] + minT*(Rtip[2] - Rsource[2]);
 
+  find_normal(saved_onum,intersection,Rsource,  normal);
 
-  if (obtype[saved_onum] == 0)
-    find_normal(saved_onum, intersection, Rsource,    normal,sphere_deriv);
-  else if(obtype[saved_onum] == 1)
-    find_normal(saved_onum, intersection, Rsource,    normal,plane_deriv);
-  else if(obtype[saved_onum] == 2)
-    find_normal(saved_onum, intersection, Rsource,    normal,hyperbola_deriv);
-  else if(obtype[saved_onum] == 3)
-    find_normal(saved_onum, intersection, Rsource,    normal,cylinder_deriv);
 
   return saved_onum;
 }
@@ -363,22 +446,20 @@ int Light_Model (double irgb[3],
 {
 
   //handle shadows
-  if(reflective == 0){
-    double LO[3];
-    LO[0] = light_in_eye_space[0] - p[0] ; 
-    LO[1] = light_in_eye_space[1] - p[1] ; 
-    LO[2] = light_in_eye_space[2] - p[2] ;
-    normalize(LO,LO);
-    double intersection[3];
-    double normal[3];
-    int temp = find_intersection(light_in_eye_space, p, intersection, normal);
-    if(temp != onum){
-      double f = AMBIENT / (AMBIENT+MAX_DIFFUSE);
-      argb[0] = f * irgb[0] ;
-      argb[1] = f * irgb[1] ;
-      argb[2] = f * irgb[2] ;
-      return 1;
-    }
+  double LO[3];
+  LO[0] = light_in_eye_space[0] - p[0] ; 
+  LO[1] = light_in_eye_space[1] - p[1] ; 
+  LO[2] = light_in_eye_space[2] - p[2] ;
+  normalize(LO,LO);
+  double intersection[3];
+  double normal[3];
+  int temp = find_intersection(light_in_eye_space, p, intersection, normal);
+  if(temp != onum){
+    double f = AMBIENT / (AMBIENT+MAX_DIFFUSE);
+    argb[0] = f * irgb[0] ;
+    argb[1] = f * irgb[1] ;
+    argb[2] = f * irgb[2] ;
+
   }
   
   double len ;
@@ -490,14 +571,15 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
 
     texx = widthA * uvrat[0];
     texy = heightA * uvrat[1];
-    printf("texx: %d\ntexy: %d\n",texx,texy);
+    //printf("texx: %d\ntexy: %d\n",texx,texy);
     
     e = get_xwd_map_color(objtexmap[saved_onum], texx,texy,color[saved_onum]) ;
     if (e == -1) {
       color[saved_onum][0] = save_color[0];
       color[saved_onum][1] = save_color[1];
       color[saved_onum][2] = save_color[2];
-      printf("failure to find color\n") ; goto decideColorPostTexture; }
+      printf("failure to find color object %d (type: %d)\n", saved_onum, obtype[saved_onum]) ;
+      goto decideColorPostTexture; }
   }
   
  decideColorPostTexture:
@@ -536,7 +618,6 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
       color[saved_onum][1] = save_color[1];
       color[saved_onum][2] = save_color[2];
       return -1;}
-
     irgb[0] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[0]*objreflectivity[saved_onum];
     irgb[1] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[1]*objreflectivity[saved_onum];
     irgb[2] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[2]*objreflectivity[saved_onum];
@@ -590,7 +671,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
-  objtexture[num_objects] = "none";
+  objtexture[num_objects] = "woodgood600x300.xwd";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
@@ -610,7 +691,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
-  objtexture[num_objects] = "none";
+  objtexture[num_objects] = "woodgood600x300.xwd";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
@@ -633,7 +714,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
-  objtexture[num_objects] = "none";
+  objtexture[num_objects] = "woodgood600x300.xwd";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
@@ -656,7 +737,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
-  objtexture[num_objects] = "none";
+  objtexture[num_objects] = "woodgood600x300.xwd";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
@@ -714,20 +795,20 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   num_objects++ ; // don't forget to do this
   //////////////////////////////////////////////////////////////
   
-  //MIRRORS
-    
-  obtype[num_objects] = 1;
+  
+  //table top
+  obtype[num_objects] = 4;
   color[num_objects][0] = 0.0 ;
   color[num_objects][1] = 0.4 ; 
   color[num_objects][2] = 0.4 ;
   objreflectivity[num_objects] = 0;
-  objtexture[num_objects] = "none";
+  objtexture[num_objects] = "graywood.xwd";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  30   ; Tn++ ;
   Ttypelist[Tn] = SY ; Tvlist[Tn] =  30   ; Tn++ ;
   Ttypelist[Tn] = SZ ; Tvlist[Tn] =  30   ; Tn++ ;
-  Ttypelist[Tn] = RX ; Tvlist[Tn] =  89   ; Tn++ ;
+  Ttypelist[Tn] = RX ; Tvlist[Tn] =  90   ; Tn++ ;
   Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30   ; Tn++ ;
   Ttypelist[Tn] = TY ; Tvlist[Tn] =  -10.2   ; Tn++ ;
     
@@ -737,8 +818,9 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
 
   num_objects++ ; // don't forget to do this
   //////////////////////////////////////////////////////////////
-    
-  obtype[num_objects] = 1;
+
+  //MIRRORS
+  obtype[num_objects] = 4;
   color[num_objects][0] = 0.0 ;
   color[num_objects][1] = 0.8 ; 
   color[num_objects][2] = 1.0 ;
@@ -766,7 +848,8 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 1.0 ;
   objreflectivity[num_objects] = 0.8;
   objtexture[num_objects] = "none";
-	
+
+  
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  15   ; Tn++ ;
   Ttypelist[Tn] = SY ; Tvlist[Tn] =  15   ; Tn++ ;
@@ -790,15 +873,17 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.2 ; 
   color[num_objects][2] = 0.2 ;
   objreflectivity[num_objects] = -1;
-  objtexture[num_objects] = "none";
-	
+  objtexture[num_objects] = "stars1024x1024.xwd";
+
   Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  100    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  100    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  100    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  50    ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  0    ; Tn++ ;
-	
+  Ttypelist[Tn] = SX ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
+  Ttypelist[Tn] = SY ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
+  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
+  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30     ; Tn++ ;
+  Ttypelist[Tn] = TY ; Tvlist[Tn] =  20     ; Tn++ ;
+  Ttypelist[Tn] = TY ; Tvlist[Tn] =  0      ; Tn++ ;
+  
+
   M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
   M3d_mat_mult(obmat[num_objects], vm, m) ;
   M3d_mat_mult(obinv[num_objects], mi, vi) ;
@@ -806,24 +891,48 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   num_objects++ ; // don't forget to do this
   
   //////////////////////////////////////////////////////////////
-
+  
   //create cylinder
   obtype[num_objects] = 3;
   color[num_objects][0] = 0.8 ;
   color[num_objects][1] = 0.2 ; 
   color[num_objects][2] = 0.2 ;
   objreflectivity[num_objects] = 0;
-  objtexture[num_objects] = "graywood.xwd";
-  objtexmap[num_objects] = init_xwd_map_from_file (objtexture[num_objects]) ;// returns -1 on error, 1 if ok
-  if (objtexmap[num_objects] == -1) { printf("failure to open texture\n");}
+  objtexture[num_objects] = "woodgood600x300.xwd";
 
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  4    ; Tn++ ;
+  Ttypelist[Tn] = SY ; Tvlist[Tn] =  6    ; Tn++ ;
   Ttypelist[Tn] = SZ ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  25    ; Tn++ ;
-  Ttypelist[Tn] = TX ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = TY ; Tvlist[Tn] =  -5    ; Tn++ ;
+  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  8    ; Tn++ ;
+  Ttypelist[Tn] = TX ; Tvlist[Tn] =  -15    ; Tn++ ;
+	
+  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+  M3d_mat_mult(obmat[num_objects], vm, m) ;
+  M3d_mat_mult(obinv[num_objects], mi, vi) ;
+
+  num_objects++ ; // don't forget to do this
+  //////////////////////////////////////////////////////////////
+
+  //Floating Earth
+  obtype[num_objects] = 0;
+  color[num_objects][0] = 0.2 ;
+  color[num_objects][1] = 0.2 ; 
+  color[num_objects][2] = 0.2 ;
+  objreflectivity[num_objects] = 0;
+  objtexture[num_objects] = "Earthgood1024x512.xwd";
+  
+	
+  Tn = 0 ;
+  Ttypelist[Tn] = SX ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = SY ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = RY ; Tvlist[Tn] =  -45-earthrotate    ; Tn++ ;
+  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  35    ; Tn++ ;
+  Ttypelist[Tn] = TY ; Tvlist[Tn] =  20    ; Tn++ ;
+  Ttypelist[Tn] = TX ; Tvlist[Tn] =  50    ; Tn++ ;
 	
   M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
   M3d_mat_mult(obmat[num_objects], vm, m) ;
@@ -857,6 +966,13 @@ void Draw_the_scene()
       G_point(x,y);
     }
   }
+  if(save_files == 1){
+    char fileName[100];
+    sprintf(fileName,"%s%s%04d%s",directory,file_prefix,fileCounter,file_suffix);
+    if (display_image == 1) fprintf(stderr,"saving image to file %s\n",fileName);
+    G_save_image_to_file(fileName);
+    fileCounter++;
+  }
 }
 
 
@@ -866,8 +982,140 @@ void Draw_the_scene()
 /////////////////////////////////////////////////////////////////////////
 
 
+int openXWDfiles(){
+
+  for(int i = 0; i < num_objects; i++){
+    objtexmap[i] = init_xwd_map_from_file (objtexture[i]) ;
+    if (objtexmap[i] == -1) { printf("Object %d has no texture\n",i);}
+
+  }
+
+}
 
 
+int test03(){
+  double vm[4][4], vi[4][4];
+  int mode = 1;
+
+  //////////////////////////////////////////////////////////////////////
+  
+  eye[0] = 0;
+  eye[1] = 0;
+  eye[2] = -10;
+  coi[0] = 0;
+  coi[1] = 0;
+  coi[2] = 50;
+  up[0] = 0;
+  up[1] = 1;
+  up[2] = 0;
+  //////////////////////////////////////////////////////////////////////
+
+  
+  G_rgb(0,0,0) ;
+  G_clear() ;
+    
+  double t = 0;
+  int c;
+
+  //handle opening the xwd files just once to prevent overflow.
+  M3d_view(vm, vi,  eye,coi,up);
+  create_object_matricies(vm, vi);
+  openXWDfiles();
+  double pi60 = M_PI/60;
+
+  eye[0] = 25*cos(M_PI + 0);
+  eye[1] = 25*sin(M_PI + 0) + 25;
+    
+
+  up[0] = eye[0];
+  up[1] = eye[1] + 1;
+  up[2] = eye[2];
+  while(1){
+    sphere_radius += 50;
+    printf("sphere_radius = %02f\n",sphere_radius);
+
+    if(mode == 1 && display_image == 1){
+      Draw_the_scene() ;
+      c = G_wait_key();
+      if(c == 'm') mode = 0;
+      if(c == 'q') break;
+    }
+    else if (display_image == 1){
+      Draw_the_scene() ;
+      G_display_image();
+      c = G_no_wait_key();
+      if(c == 'm') mode = 1;
+      if(c == 'q') break;
+    }
+    else{
+      Draw_the_scene();
+      if(fileCounter == fileLimit) break;
+    }
+  }
+
+}
+
+int test02(){
+  double vm[4][4], vi[4][4];
+  int mode = 1;
+
+  //////////////////////////////////////////////////////////////////////
+  
+  eye[0] = 0;
+  eye[1] = 0;
+  eye[2] = -10;
+  coi[0] = 0;
+  coi[1] = 0;
+  coi[2] = 50;
+  up[0] = 0;
+  up[1] = 1;
+  up[2] = 0;
+  //////////////////////////////////////////////////////////////////////
+
+  
+  G_rgb(0,0,0) ;
+  G_clear() ;
+    
+  double t = 0;
+  int c;
+
+  //handle opening the xwd files just once to prevent overflow.
+  M3d_view(vm, vi,  eye,coi,up);
+  create_object_matricies(vm, vi);
+  openXWDfiles();
+  double pi60 = M_PI/60;
+
+  eye[0] = 25*cos(M_PI + 0);
+  eye[1] = 25*sin(M_PI + 0) + 25;
+    
+
+  up[0] = eye[0];
+  up[1] = eye[1] + 1;
+  up[2] = eye[2];
+  while(1){
+    hither += 0.1;
+    printf("hither = %02f\n",hither);
+
+    if(mode == 1 && display_image == 1){
+      Draw_the_scene() ;
+      c = G_wait_key();
+      if(c == 'm') mode = 0;
+      if(c == 'q') break;
+    }
+    else if (display_image == 1){
+      Draw_the_scene() ;
+      G_display_image();
+      c = G_no_wait_key();
+      if(c == 'm') mode = 1;
+      if(c == 'q') break;
+    }
+    else{
+      Draw_the_scene();
+      if(fileCounter == fileLimit) break;
+    }
+  }
+
+}
 
 int test01()
 {
@@ -893,8 +1141,15 @@ int test01()
     
   double t = 0;
   int c;
+
+  //handle opening the xwd files just once to prevent overflow.
+  M3d_view(vm, vi,  eye,coi,up);
+  create_object_matricies(vm, vi);
+  openXWDfiles();
+  double pi60 = M_PI/60;
   while(1){
-    t += 0.1;
+    t += pi60;
+    earthrotate += 6;
     //move the eye!
     eye[0] = 25*cos(M_PI + t);
     eye[1] = 25*sin(M_PI + t) + 25;
@@ -904,21 +1159,22 @@ int test01()
     up[1] = eye[1] + 1;
     up[2] = eye[2];
 
-
-    if(mode == 1){
+    if(mode == 1 && display_image == 1){
       Draw_the_scene() ;
       c = G_wait_key();
       if(c == 'm') mode = 0;
       if(c == 'q') break;
     }
-    else{
+    else if (display_image == 1){
       Draw_the_scene() ;
       G_display_image();
       c = G_no_wait_key();
       if(c == 'm') mode = 1;
       if(c == 'q') break;
-      usleep(30);
-
+    }
+    else{
+      Draw_the_scene();
+      if(fileCounter == fileLimit) break;
     }
   }
 }
@@ -940,5 +1196,9 @@ int main(int argc, char **argv)
   }
   else reflection_limit = atoi(argv[1]);
   G_init_graphics(scrnsize,scrnsize);
-  test01() ;
+  test03() ;
 }
+
+
+//reflect image twice to get seamless
+
