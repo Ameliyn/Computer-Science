@@ -876,9 +876,12 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   objtexture[num_objects] = "stars1024x1024.xwd";
 
   Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
+  //  Ttypelist[Tn] = SX ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
+  //Ttypelist[Tn] = SY ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
+  //Ttypelist[Tn] = SZ ; Tvlist[Tn] =  sphere_radius    ; Tn++ ;
+  Ttypelist[Tn] = SX ; Tvlist[Tn] =  50    ; Tn++ ;
+  Ttypelist[Tn] = SY ; Tvlist[Tn] =  50    ; Tn++ ;
+  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  50    ; Tn++ ;
   Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30     ; Tn++ ;
   Ttypelist[Tn] = TY ; Tvlist[Tn] =  20     ; Tn++ ;
   Ttypelist[Tn] = TY ; Tvlist[Tn] =  0      ; Tn++ ;
@@ -1196,7 +1199,7 @@ int main(int argc, char **argv)
   }
   else reflection_limit = atoi(argv[1]);
   G_init_graphics(scrnsize,scrnsize);
-  test03() ;
+  test01() ;
 }
 
 
