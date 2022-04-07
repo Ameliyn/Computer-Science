@@ -1,6 +1,7 @@
 #include "../FPToolkit.c"
 #include "../M3d_matrix_tools.c"
 #include "../xwd_tools_03.c"
+#define MAXLIGHTS 10
 
 double eyeMat[4][4];
 double eyeMatInv[4][4];
@@ -33,10 +34,11 @@ char *file_suffix = ".xwd";
 char *directory = "texturemovie/";
 
 //Support Light model
-double light_in_world_space[5][3];
-double light_in_eye_space[5][3];
-double light_color[5][3];
-double light_power[5];
+double light_in_world_space[MAXLIGHTS][3];
+double light_in_eye_space[MAXLIGHTS][3];
+double light_color[MAXLIGHTS][3];
+double light_power[MAXLIGHTS];
+double light_radius[MAXLIGHTS];
 int num_lights;
 double AMBIENT      = 0.2 ;
 double MAX_DIFFUSE  = 0.5 ;
@@ -1078,6 +1080,7 @@ int set_lights(){
   light_color[num_lights][1] = 0.1;
   light_color[num_lights][2] = 0.7;
   light_power[num_lights] = 35;
+  light_radius[num_lights] = 35;
   num_lights++;
   
   /*
@@ -1098,6 +1101,7 @@ int set_lights(){
   light_color[num_lights][1] = 1;
   light_color[num_lights][2] = 1;
   light_power[num_lights] = 50;
+  light_radius[num_lights] = 100;
   num_lights++;
 
   return 1;
