@@ -36,6 +36,7 @@ char *directory = "texturemovie/";
 double light_in_world_space[5][3];
 double light_in_eye_space[5][3];
 double light_color[5][3];
+double light_power[5];
 int num_lights;
 double AMBIENT      = 0.2 ;
 double MAX_DIFFUSE  = 0.5 ;
@@ -513,15 +514,30 @@ int Light_Model (double irgb[3],
 {
   double light_distance[num_lights], temp_rgb[num_lights][3];
   double total_distance = 0;
+  double total_power = 0;
+  int light_ignore[num_lights];
   for(int num = 0; num < num_lights; num++){
     light_distance[num] = sqrt( (light_in_eye_space[num][0] - p[0])*(light_in_eye_space[num][0] - p[0]) +
 				(light_in_eye_space[num][1] - p[1])*(light_in_eye_space[num][1] - p[1]) +
 				(light_in_eye_space[num][2] - p[2])*(light_in_eye_space[num][2] - p[2]));
-    total_distance += light_distance[num];
+    if(light_distance[num] > light_power[num]) light_ignore[num] = 1;
+    else{
+      light_ignore[num] = 0;
+      total_distance += light_power[num]-light_distance[num];
+      total_power += light_power[num];
+    }
+  }
+
+  if(total_distance == 0){
+    double f = AMBIENT / (AMBIENT+MAX_DIFFUSE);
+    argb[0] = f * irgb[0];
+    argb[1] = f * irgb[1];
+    argb[2] = f * irgb[2];
+    return 1;
   }
 
   for(int num = 0; num < num_lights; num++){
-    light_distance[num] /= total_distance;
+    light_distance[num] = ((light_power[num] - light_distance[num]) / (total_distance));
   }
   
   for(int num = 0; num < num_lights; num++){
@@ -627,6 +643,7 @@ int Light_Model (double irgb[3],
   argb[2] = 0;
   
   for(int num = 0; num < num_lights; num++){
+    if(light_ignore[num] == 1)continue;
     argb[0] += temp_rgb[num][0];
     argb[1] += temp_rgb[num][1];
     argb[2] += temp_rgb[num][2];
@@ -898,12 +915,13 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   
   //table top
   obtype[num_objects] = 4;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.4 ; 
-  color[num_objects][2] = 0.4 ;
+  color[num_objects][0] = 1 ;
+  color[num_objects][1] = 1 ; 
+  color[num_objects][2] = 1 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
-  objtexture[num_objects] = "graywood.xwd";
+  //objtexture[num_objects] = "graywood.xwd";
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  30   ; Tn++ ;
@@ -1052,23 +1070,35 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
 int set_lights(){
   num_lights = 0;
 
+  
   light_in_world_space[num_lights][0] = -10;
+  light_in_world_space[num_lights][1] = 0;
+  light_in_world_space[num_lights][2] = 30;
+  light_color[num_lights][0] = 0.1;
+  light_color[num_lights][1] = 0.1;
+  light_color[num_lights][2] = 0.7;
+  light_power[num_lights] = 35;
+  num_lights++;
+  
+  /*
+  light_in_world_space[num_lights][0] = 10;
+  light_in_world_space[num_lights][1] = 0;
+  light_in_world_space[num_lights][2] = 30;
+  light_color[num_lights][0] = 0.7;
+  light_color[num_lights][1] = 0.1;
+  light_color[num_lights][2] = 0.1;
+  light_power[num_lights] = 35;
+  num_lights++;*/
+
+  
+  light_in_world_space[num_lights][0] = 0;
   light_in_world_space[num_lights][1] = 20;
   light_in_world_space[num_lights][2] = 30;
   light_color[num_lights][0] = 1;
-  light_color[num_lights][1] = 0;
-  light_color[num_lights][2] = 0;
-  num_lights++;
-
-  
-  light_in_world_space[num_lights][0] = 10;
-  light_in_world_space[num_lights][1] = 20;
-  light_in_world_space[num_lights][2] = 30;
-  light_color[num_lights][0] = 0;
   light_color[num_lights][1] = 1;
-  light_color[num_lights][2] = 0;
+  light_color[num_lights][2] = 1;
+  light_power[num_lights] = 50;
   num_lights++;
-  
 
   return 1;
 }
