@@ -728,17 +728,11 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
       color[saved_onum][1] = save_color[1];
       color[saved_onum][2] = save_color[2];
       return -1;}
-    if(objreflectivity[new_onum] >= 0){
-      irgb[0] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[0]*objreflectivity[saved_onum];
-      irgb[1] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[1]*objreflectivity[saved_onum];
-      irgb[2] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[2]*objreflectivity[saved_onum];
-      Light_Model (irgb, temp, res, normal, argb, saved_onum);
-    }
-    else{
+    
       argb[0] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[0]*objreflectivity[saved_onum];
       argb[1] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[1]*objreflectivity[saved_onum];
       argb[2] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[2]*objreflectivity[saved_onum];
-    }
+    
     
   }else{
     argb[0] = color[saved_onum][0];
