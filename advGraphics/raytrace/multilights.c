@@ -1,6 +1,7 @@
 #include "../FPToolkit.c"
 #include "../M3d_matrix_tools.c"
 #include "../xwd_tools_03.c"
+#define MAXLIGHTS 10
 
 double eyeMat[4][4];
 double eyeMatInv[4][4];
@@ -17,6 +18,7 @@ double objreflectivity[100]; //[0,1] percent reflectivity, -1 for no light/refle
 int objtexreflect[100];
 char *objtexture[100];
 int objtexmap[100];
+int objshadow[100];
 int    num_objects ;
 int reflection_limit = 6 ;
 int scrnsize = 800;
@@ -33,9 +35,11 @@ char *file_suffix = ".xwd";
 char *directory = "texturemovie/";
 
 //Support Light model
-double light_in_world_space[5][3];
-double light_in_eye_space[5][3];
-double light_color[5][3];
+double light_in_world_space[MAXLIGHTS][3];
+double light_in_eye_space[MAXLIGHTS][3];
+double light_color[MAXLIGHTS][3];
+double light_power[MAXLIGHTS];
+double light_radius[MAXLIGHTS];
 int num_lights;
 double AMBIENT      = 0.2 ;
 double MAX_DIFFUSE  = 0.5 ;
@@ -455,8 +459,8 @@ int find_reflection(double Rtip[3], double intersection[3], double normal[3], do
   
 }
 
-int find_intersection(double Rsource[3], double Rtip[3], double intersection[3], double normal[3]){
-
+int find_intersection(double Rsource[3], double Rtip[3], double intersection[3], double normal[3], int mode){
+  //mode: 0 = standard, 1 = light/shadow, 2 = reflection
   double t[2];
   double rayA[3];
   double rayB[3];
@@ -469,7 +473,7 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
 
     n = object_intercept(rayA, rayB, t, i);
     
-    if (n == 0) {continue; }
+    if (n == 0 || (mode == 1 && objshadow[i] == -1)) {continue; }
     for(int j = 0; j < n; j++){
       if(t[j] > 0 && t[j] < minT) {
 	minT = t[j];
@@ -513,20 +517,38 @@ int Light_Model (double irgb[3],
 {
   double light_distance[num_lights], temp_rgb[num_lights][3];
   double total_distance = 0;
+  double total_power = 0;
+  int light_ignore[num_lights];
   for(int num = 0; num < num_lights; num++){
     light_distance[num] = sqrt( (light_in_eye_space[num][0] - p[0])*(light_in_eye_space[num][0] - p[0]) +
 				(light_in_eye_space[num][1] - p[1])*(light_in_eye_space[num][1] - p[1]) +
 				(light_in_eye_space[num][2] - p[2])*(light_in_eye_space[num][2] - p[2]));
-    total_distance += light_distance[num];
+    if(light_distance[num] > light_power[num]) light_ignore[num] = 1;
+    else{
+      light_ignore[num] = 0;
+      total_distance += light_power[num]-light_distance[num];
+      total_power += light_power[num];
+    }
+  }
+
+  if(total_distance == 0){
+    double f = AMBIENT / (AMBIENT+MAX_DIFFUSE);
+    argb[0] = f * irgb[0];
+    argb[1] = f * irgb[1];
+    argb[2] = f * irgb[2];
+    return 1;
   }
 
   for(int num = 0; num < num_lights; num++){
-    light_distance[num] /= total_distance;
+    light_distance[num] = ((light_power[num] - light_distance[num]) / (total_distance));
   }
   
   for(int num = 0; num < num_lights; num++){
+
+    if(light_ignore[num] == 1) continue;
+
     //handle shadows
-    if(objreflectivity[onum] <= 0){
+    if(objreflectivity[onum] <= 0 && objshadow[onum] != -1){
       double LO[3];
       LO[0] = light_in_eye_space[num][0] - p[0] ; 
       LO[1] = light_in_eye_space[num][1] - p[1] ; 
@@ -534,13 +556,10 @@ int Light_Model (double irgb[3],
       normalize(LO,LO);
       double intersection[3];
       double normal[3];
-      int temp = find_intersection(light_in_eye_space[num], p, intersection, normal);
+      int temp = find_intersection(light_in_eye_space[num], p, intersection, normal, 1);
       if(temp != onum){
-	double f = AMBIENT / (AMBIENT+MAX_DIFFUSE);
-	temp_rgb[num][0] = f * irgb[0] * light_distance[num] ;
-	temp_rgb[num][1] = f * irgb[1] * light_distance[num] ;
-	temp_rgb[num][2] = f * irgb[2] * light_distance[num] ;
-        continue;
+	light_ignore[num] = 1;
+	continue;
       }
     }
   
@@ -622,11 +641,14 @@ int Light_Model (double irgb[3],
     continue;
   }
 
-  argb[0] = 0;
-  argb[1] = 0;
-  argb[2] = 0;
-  
+  double f = AMBIENT / (AMBIENT+MAX_DIFFUSE);
+	
+  argb[0] = f * irgb[0];
+  argb[1] = f * irgb[1];
+  argb[2] = f * irgb[2];
+   
   for(int num = 0; num < num_lights; num++){
+    if(light_ignore[num] == 1) continue;
     argb[0] += temp_rgb[num][0];
     argb[1] += temp_rgb[num][1];
     argb[2] += temp_rgb[num][2];
@@ -698,7 +720,7 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
 
     //find object in mirror
     int new_onum;
-    new_onum = find_intersection(intersection,temp,res, normal);
+    new_onum = find_intersection(intersection,temp,res, normal, 2);
     c = decide_color(new_onum, temp, normal, res, argb, reflection_count+1);
     if(c == -1) {
       //reset color to saved color if necessary
@@ -706,17 +728,11 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
       color[saved_onum][1] = save_color[1];
       color[saved_onum][2] = save_color[2];
       return -1;}
-    if(objreflectivity[new_onum] >= 0){
-      irgb[0] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[0]*objreflectivity[saved_onum];
-      irgb[1] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[1]*objreflectivity[saved_onum];
-      irgb[2] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[2]*objreflectivity[saved_onum];
-      Light_Model (irgb, temp, res, normal, argb, saved_onum);
-    }
-    else{
+    
       argb[0] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[0]*objreflectivity[saved_onum];
       argb[1] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[1]*objreflectivity[saved_onum];
       argb[2] = color[saved_onum][0] * (1-objreflectivity[saved_onum]) + argb[2]*objreflectivity[saved_onum];
-    }
+    
     
   }else{
     argb[0] = color[saved_onum][0];
@@ -742,7 +758,7 @@ int ray (double Rtip[3], double argb[3]){
   argb[0] = worldrgb[0];
   argb[1] = worldrgb[1];
   argb[2] = worldrgb[2];
-  int saved_onum = find_intersection(Rsource,Rtip,intersection, normal);
+  int saved_onum = find_intersection(Rsource,Rtip,intersection, normal, 0);
   decide_color(saved_onum, Rsource, normal, intersection, argb, 0);
 
   return 1;
@@ -766,6 +782,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "woodgood600x300.xwd";
 	
   Tn = 0 ;
@@ -787,6 +804,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "woodgood600x300.xwd";
 	
   Tn = 0 ;
@@ -811,6 +829,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "woodgood600x300.xwd";
 	
   Tn = 0 ;
@@ -835,6 +854,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "woodgood600x300.xwd";
 	
   Tn = 0 ;
@@ -857,6 +877,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = -1;
   objtexture[num_objects] = "none";
 	
   Tn = 0 ;
@@ -879,6 +900,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.0 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = -1;
   objtexture[num_objects] = "none";
 	
   Tn = 0 ;
@@ -898,12 +920,14 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   
   //table top
   obtype[num_objects] = 4;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.4 ; 
-  color[num_objects][2] = 0.4 ;
+  color[num_objects][0] = 1 ;
+  color[num_objects][1] = 1 ; 
+  color[num_objects][2] = 1 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
-  objtexture[num_objects] = "graywood.xwd";
+  objshadow[num_objects] = 1;
+  //objtexture[num_objects] = "graywood.xwd";
+  objtexture[num_objects] = "none";
 	
   Tn = 0 ;
   Ttypelist[Tn] = SX ; Tvlist[Tn] =  30   ; Tn++ ;
@@ -927,6 +951,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 1.0 ;
   objreflectivity[num_objects] = 1;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "none";
 	
   Tn = 0 ;
@@ -950,6 +975,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 1.0 ;
   objreflectivity[num_objects] = 1;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "none";
 
   
@@ -977,6 +1003,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.2 ;
   objreflectivity[num_objects] = -1;
   objtexreflect[num_objects] = 1;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "stars1024x1024.xwd";
 
   Tn = 0 ;
@@ -1003,6 +1030,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.2 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "woodgood600x300.xwd";
 
 	
@@ -1028,6 +1056,7 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   color[num_objects][2] = 0.2 ;
   objreflectivity[num_objects] = 0;
   objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "Earthgood1024x512.xwd";
   
 	
@@ -1052,24 +1081,39 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
 int set_lights(){
   num_lights = 0;
 
-  light_in_world_space[num_lights][0] = -10;
-  light_in_world_space[num_lights][1] = 20;
+  
+  light_in_world_space[num_lights][0] = -20;
+  light_in_world_space[num_lights][1] = 0;
   light_in_world_space[num_lights][2] = 30;
-  light_color[num_lights][0] = 1;
-  light_color[num_lights][1] = 0;
-  light_color[num_lights][2] = 0;
+  light_color[num_lights][0] = 0.1;
+  light_color[num_lights][1] = 0.1;
+  light_color[num_lights][2] = 0.7;
+  light_power[num_lights] = 25;
+  light_radius[num_lights] = 35;
   num_lights++;
-
+  
   
   light_in_world_space[num_lights][0] = 10;
-  light_in_world_space[num_lights][1] = 20;
+  light_in_world_space[num_lights][1] = 0;
   light_in_world_space[num_lights][2] = 30;
-  light_color[num_lights][0] = 0;
+  light_color[num_lights][0] = 0.7;
+  light_color[num_lights][1] = 0.1;
+  light_color[num_lights][2] = 0.1;
+  light_power[num_lights] = 25;
+  light_radius[num_lights] = 35;
+  num_lights++;
+
+  
+  light_in_world_space[num_lights][0] = 0;
+  light_in_world_space[num_lights][1] = 30;
+  light_in_world_space[num_lights][2] = 30;
+  light_color[num_lights][0] = 1;
   light_color[num_lights][1] = 1;
-  light_color[num_lights][2] = 0;
+  light_color[num_lights][2] = 1;
+  light_power[num_lights] = 50;
+  light_radius[num_lights] = 100;
   num_lights++;
   
-
   return 1;
 }
 
