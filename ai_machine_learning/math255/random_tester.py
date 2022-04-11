@@ -21,6 +21,8 @@ def create_dataset(num_points, limit_a, limit_b, integer):
                 f.write(str(random.random() * limit_b))
             if i+1 != num_points:
                 f.write(", ")
+                if i%20==0:
+                    f.write("\n")
             else:
                 f.write(")")
         f.write("\n")
