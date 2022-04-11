@@ -27,6 +27,9 @@ int generate_dataset(int num_points, double limit_a, double limit_b, int integer
 	}
       }
       fputs(temp,f);
+      if(i%20==0){
+        fputs("\n",f);
+      }
     }
 }
 
