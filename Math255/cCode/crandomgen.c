@@ -39,28 +39,28 @@ int main(){
   srand((unsigned) time(&t));
 
   generate_dataset(128, 0, 1, 0, f);
-  generate_dataset(128, 1, 128, 0, f);
-  generate_dataset(128, 1, 512, 0, f);
-  generate_dataset(128, 1, 1024, 0, f);
-  generate_dataset(128, 1, 2048, 0, f);
+  generate_dataset(128, 1, 128, 1, f);
+  generate_dataset(128, 1, 512, 1, f);
+  generate_dataset(128, 1, 1024, 1, f);
+  generate_dataset(128, 1, 2048, 1, f);
 
   generate_dataset(512, 0, 1, 0, f);
-  generate_dataset(512, 1, 128, 0, f);
-  generate_dataset(512, 1, 512, 0, f);
-  generate_dataset(512, 1, 1024, 0, f);
-  generate_dataset(512, 1, 2048, 0, f);
+  generate_dataset(512, 1, 128, 1, f);
+  generate_dataset(512, 1, 512, 1, f);
+  generate_dataset(512, 1, 1024, 1, f);
+  generate_dataset(512, 1, 2048, 1, f);
 
   generate_dataset(1024, 0, 1, 0, f);
-  generate_dataset(1024, 1, 128, 0, f);
-  generate_dataset(1024, 1, 512, 0, f);
-  generate_dataset(1024, 1, 1024, 0, f);
-  generate_dataset(1024, 1, 2048, 0, f);
+  generate_dataset(1024, 1, 128, 1, f);
+  generate_dataset(1024, 1, 512, 1, f);
+  generate_dataset(1024, 1, 1024, 1, f);
+  generate_dataset(1024, 1, 2048, 1, f);
 
   generate_dataset(2048, 0, 1, 0, f);
-  generate_dataset(2048, 1, 128, 0, f);
-  generate_dataset(2048, 1, 512, 0, f);
-  generate_dataset(2048, 1, 1024, 0, f);
-  generate_dataset(2048, 1, 2048, 0, f);
+  generate_dataset(2048, 1, 128, 1, f);
+  generate_dataset(2048, 1, 512, 1, f);
+  generate_dataset(2048, 1, 1024, 1, f);
+  generate_dataset(2048, 1, 2048, 1, f);
 
 }
 
