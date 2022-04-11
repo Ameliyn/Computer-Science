@@ -66,6 +66,9 @@ public class Main {
                         byt = (Math.abs(random.nextDouble()) + ")\n").getBytes();
                 }
                 output.write(byt);
+                if(i%20==0){
+                    output.write("\n".getBytes());
+                }
             }
 
         } catch(IOException n){
