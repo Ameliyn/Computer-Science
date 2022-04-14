@@ -1460,9 +1460,9 @@ int create_triangular_prism(double vm[4][4], double vi[4][4]){
   
   //create floor
   obtype[num_objects] = 1; 
-  color[num_objects][0] = 0.9 ;
-  color[num_objects][1] = 0.1 ; 
-  color[num_objects][2] = 0.1 ;
+  color[num_objects][0] = 1 ;
+  color[num_objects][1] = 1 ; 
+  color[num_objects][2] = 1 ;
   objreflectivity[num_objects] = 0;
   objtransperency[num_objects] = 0;
   objtexreflect[num_objects] = 0;
@@ -1677,16 +1677,38 @@ int set_lights(){
 
 
   //start test02
-  light_in_world_space[num_lights][0] = -10;
+  light_in_world_space[num_lights][0] = 0;
   light_in_world_space[num_lights][1] = 12;
   light_in_world_space[num_lights][2] = -20;
   light_color[num_lights][0] = 1;
   light_color[num_lights][1] = 1;
   light_color[num_lights][2] = 1;
-  light_power[num_lights] = 400;
+  light_power[num_lights] = 300;
   light_radius[num_lights] = 1000;
   num_lights++;
 
+  light_in_world_space[num_lights][0] = 10;
+  light_in_world_space[num_lights][1] = 12;
+  light_in_world_space[num_lights][2] = -20;
+  light_color[num_lights][0] = 1;
+  light_color[num_lights][1] = 0.2;
+  light_color[num_lights][2] = 1;
+  light_power[num_lights] = 200;
+  light_radius[num_lights] = 400;
+  num_lights++;
+
+  
+  light_in_world_space[num_lights][0] = -10;
+  light_in_world_space[num_lights][1] = 12;
+  light_in_world_space[num_lights][2] = -20;
+  light_color[num_lights][0] = 1;
+  light_color[num_lights][1] = 0.1;
+  light_color[num_lights][2] = 0.1;
+  light_power[num_lights] = 200;
+  light_radius[num_lights] = 400;
+  num_lights++;
+  
+  
   
   return 1;
 }
@@ -1810,8 +1832,8 @@ int test01()
     }
     else{
       Draw_the_scene();
-      if(fileCounter == fileLimit) break;
     }
+    if(fileCounter == fileLimit) break;
   }
 }
 
