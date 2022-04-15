@@ -590,7 +590,7 @@ int find_reflection(double Rtip[3], double intersection[3], double normal[3], do
   
 }
 
-int find_intersection(double Rsource[3], double Rtip[3], double intersection[3], double normal[3], int mode){
+int find_intersection(double Rsource[3], double Rtip[3], double intersection[3], double normal[3], int mode, double shadperc[1]){
   //mode: 0 = standard, 1 = light/shadow, 2 = reflection
   double t[2];
   double rayA[3];
@@ -598,14 +598,20 @@ int find_intersection(double Rsource[3], double Rtip[3], double intersection[3],
   int n;
   double minT = 1e50;
   int saved_onum;
+  shadperc[0] = 0;
   for(int i = 0; i < num_objects; i++){
     M3d_mat_mult_pt(rayA, obinv[i], Rsource);
     M3d_mat_mult_pt(rayB, obinv[i], Rtip);
 
     n = object_intercept(rayA, rayB, t, i);
     
-    if (n == 0 || (mode == 1 && (objshadow[i] == -1 || objtransperency[i] > 0))) {continue; }
+    if (n == 0 || (mode == 1 && (objshadow[i] == -1))) {continue;}
+    if(mode == 1 && objtransperency[i] > 0 && ((t[0] > 0 && t[0] < 1) || (t[1] > 0 && t[1] < 1))){
+      shadperc[0] += 1-objtransperency[i];
+      continue;
+    }
     for(int j = 0; j < n; j++){
+      
       if(t[j] > 0 && t[j] < minT) {
 	minT = t[j];
 	saved_onum = i;
@@ -674,7 +680,8 @@ int Light_Model (double irgb[3],
     //light_distance[num] = ((light_power[num] - light_distance[num]) / (total_distance));
     light_distance[num] = light_power[num]/((light_distance[num])*(light_distance[num]));
   }
-  
+
+  double shadperc[1];
   for(int num = 0; num < num_lights; num++){
 
     if(light_ignore[num] == 1) continue;
@@ -688,8 +695,11 @@ int Light_Model (double irgb[3],
       normalize(LO,LO);
       double intersection[3];
       double normal[3];
-      int temp = find_intersection(light_in_eye_space[num], p, intersection, normal, 1);
-      if(temp != onum){
+      int temp = find_intersection(light_in_eye_space[num], p, intersection, normal, 1, shadperc);
+      if(shadperc[0] > 0 && shadperc[0] < 1){
+	light_distance[num] *= 1-shadperc[0];
+      }
+      if(temp != onum || shadperc[0] > 1){
 	light_ignore[num] = 1;
 	continue;
       }
@@ -791,7 +801,7 @@ int Light_Model (double irgb[3],
 int decide_color(int saved_onum, double Rsource[3], double normal[3],
 		 double intersection[3], double argb[3], int reflection_count){
   int c;
-  double irgb[3], temp[3], res[3];
+  double irgb[3], temp[3], res[3], shadperc[1];
   if (saved_onum == -1 || reflection_count > reflection_limit) {
     return -1;
   }
@@ -857,7 +867,7 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
     reflintersection[2] = intersection[2] + 0.1*res[2];
 
     int new_onum;
-    new_onum = find_intersection(reflintersection,temp,res, reflnormal, 1);
+    new_onum = find_intersection(reflintersection,temp,res, reflnormal, 0, shadperc);
     if(new_onum == -1){
       reflrgb[0] = worldrgb[0];
       reflrgb[1] = worldrgb[1];
@@ -891,7 +901,7 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
       reflnormal[1] = normal[1];
       reflnormal[2] = normal[2];
 
-      new_onum = find_intersection(reflintersection,temp,res, reflnormal, 1);
+      new_onum = find_intersection(reflintersection,temp,res, reflnormal, 2, shadperc);
       c = decide_color(new_onum, temp, reflnormal, res, argb, reflection_count+1);
       if(c == -1) {
 	//reset color to saved color if necessary
@@ -933,7 +943,7 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
 
     //find object in mirror
     int new_onum;
-    new_onum = find_intersection(intersection,temp,res, normal, 2);
+    new_onum = find_intersection(intersection,temp,res, normal, 2, shadperc);
     c = decide_color(new_onum, temp, normal, res, argb, reflection_count+1);
     if(c == -1) {
       //reset color to saved color if necessary
@@ -962,7 +972,7 @@ int decide_color(int saved_onum, double Rsource[3], double normal[3],
 
 int ray (double Rtip[3], double argb[3]){
   //camera_light = flag for camera or shadow (camera shows all, shadow shoots through transp)
-  double Rsource[3];
+  double Rsource[3], shadperc[1];
   Rsource[0] = 0;
   Rsource[1] = 0;
   Rsource[2] = 0;
@@ -971,7 +981,7 @@ int ray (double Rtip[3], double argb[3]){
   argb[0] = worldrgb[0];
   argb[1] = worldrgb[1];
   argb[2] = worldrgb[2];
-  int saved_onum = find_intersection(Rsource,Rtip,intersection, normal, 0);
+  int saved_onum = find_intersection(Rsource,Rtip,intersection, normal, 0, shadperc);
   decide_color(saved_onum, Rsource, normal, intersection, argb, 0);
 
   return 1;
@@ -1373,7 +1383,7 @@ int create_triangular_prism(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.4 ; 
   color[num_objects][2] = 0.4 ;
   objreflectivity[num_objects] = 0.2;
-  objtransperency[num_objects] = 0.8;
+  objtransperency[num_objects] = 0.2;
   objtexreflect[num_objects] = 0;
   objshadow[num_objects] = 1;
   objtexture[num_objects] = "none";
