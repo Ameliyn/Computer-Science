@@ -994,332 +994,37 @@ int create_object_matricies(double vm[4][4], double vi[4][4]){
   int Tn, Ttypelist[100];
   double m[4][4], mi[4][4];
 
-  
-  num_objects = 0 ;
-    
-  //////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////
-  obtype[num_objects] = 2;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.8 ; 
-  color[num_objects][2] = 0.0 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "woodgood600x300.xwd";
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  55   ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-
-  obtype[num_objects] = 2;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.8 ; 
-  color[num_objects][2] = 0.0 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "woodgood600x300.xwd";
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30   ; Tn++ ;
-  Ttypelist[Tn] = TX ; Tvlist[Tn] =  25   ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-  
-  //////////////////////////////////////////////////////////////
-
-  obtype[num_objects] = 2;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.8 ; 
-  color[num_objects][2] = 0.0 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "woodgood600x300.xwd";
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30   ; Tn++ ;
-  Ttypelist[Tn] = TX ; Tvlist[Tn] =  -25   ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-
-  //////////////////////////////////////////////////////////////
-
-  obtype[num_objects] = 2;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.8 ; 
-  color[num_objects][2] = 0.0 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "woodgood600x300.xwd";
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  5    ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-
-  //Chandelier
-  obtype[num_objects] = 0;
-  color[num_objects][0] = 0.5 ;
-  color[num_objects][1] = 0.5 ; 
-  color[num_objects][2] = 0.0 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = -1;
-  objtexture[num_objects] = "none";
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  1    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30    ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  25    ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-
-  obtype[num_objects] = 0;
-  color[num_objects][0] = 0.5 ;
-  color[num_objects][1] = 0.5 ; 
-  color[num_objects][2] = 0.0 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = -1;
-  objtexture[num_objects] = "none";
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  1    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30    ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  25    ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-  
-  
-  //table top
-  obtype[num_objects] = 4; // 4 is circle
-  color[num_objects][0] = 1 ;
-  color[num_objects][1] = 1 ; 
-  color[num_objects][2] = 1 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "graywood.xwd";
-  //objtexture[num_objects] = "none";
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  30   ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  30   ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  30   ; Tn++ ;
-  Ttypelist[Tn] = RX ; Tvlist[Tn] =  90   ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30   ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  -10.2   ; Tn++ ;
-    
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-
-  //MIRRORS
-  obtype[num_objects] = 4;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.8 ; 
-  color[num_objects][2] = 1.0 ;
-  objreflectivity[num_objects] = 1;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "none";
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  20   ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  20   ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  20   ; Tn++ ;
-  Ttypelist[Tn] = RX ; Tvlist[Tn] =  150   ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  55   ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  20   ; Tn++ ;
-    
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-  
-  obtype[num_objects] = 1;
-  color[num_objects][0] = 0.0 ;
-  color[num_objects][1] = 0.8 ; 
-  color[num_objects][2] = 1.0 ;
-  objreflectivity[num_objects] = 1;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "none";
-
-  
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  15   ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  15   ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  15   ; Tn++ ;
-  Ttypelist[Tn] = RX ; Tvlist[Tn] =  20   ; Tn++ ;
-  Ttypelist[Tn] = RY ; Tvlist[Tn] =  110   ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  25   ; Tn++ ;
-  Ttypelist[Tn] = TX ; Tvlist[Tn] =  -35   ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  20   ; Tn++ ;
-    
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-  
-  //world sphere
-  obtype[num_objects] = 0;
-  color[num_objects][0] = 0.2 ;
-  color[num_objects][1] = 0.2 ; 
-  color[num_objects][2] = 0.2 ;
-  objreflectivity[num_objects] = -1;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 1;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "stars1024x1024.xwd";
-
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  200    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  200    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  200    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  30     ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  20     ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  0      ; Tn++ ;
-  
-
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  
-  //////////////////////////////////////////////////////////////
-  
-  //create cylinder
-  obtype[num_objects] = 3; //cylinder is 3
-  color[num_objects][0] = 0.8 ;
-  color[num_objects][1] = 0.2 ; 
-  color[num_objects][2] = 0.2 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "woodgood600x300.xwd";
-
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  6    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  2    ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  -5    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  8    ; Tn++ ;
-  Ttypelist[Tn] = TX ; Tvlist[Tn] =  15    ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-
-  //Floating Earth
-  obtype[num_objects] = 0;
-  color[num_objects][0] = 0.2 ;
-  color[num_objects][1] = 0.2 ; 
-  color[num_objects][2] = 0.2 ;
-  objreflectivity[num_objects] = 0;
-  objtransperency[num_objects] = 0;
-  objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = 1;
-  objtexture[num_objects] = "Earthgood1024x512.xwd";
-  
-	
-  Tn = 0 ;
-  Ttypelist[Tn] = SX ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = SY ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  10    ; Tn++ ;
-  Ttypelist[Tn] = RY ; Tvlist[Tn] =  -45-earthrotate    ; Tn++ ;
-  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  35    ; Tn++ ;
-  Ttypelist[Tn] = TY ; Tvlist[Tn] =  20    ; Tn++ ;
-  Ttypelist[Tn] = TX ; Tvlist[Tn] =  50    ; Tn++ ;
-	
-  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
-  M3d_mat_mult(obmat[num_objects], vm, m) ;
-  M3d_mat_mult(obinv[num_objects], mi, vi) ;
-
-  num_objects++ ; // don't forget to do this
-  //////////////////////////////////////////////////////////////
-
-}
-
-int create_triangular_prism(double vm[4][4], double vi[4][4]){
-
-  double Tvlist[100];
-  int Tn, Ttypelist[100];
-  double m[4][4], mi[4][4];
-
   num_objects = 0;
+
+
+  //create table top
+  obtype[num_objects] = 4; 
+  color[num_objects][0] = 0.4 ;
+  color[num_objects][1] = 0.4 ; 
+  color[num_objects][2] = 0.4 ;
+  objreflectivity[num_objects] = 0;
+  objtransperency[num_objects] = 0.7;
+  objtexreflect[num_objects] = 0;
+  objshadow[num_objects] = 1;
+  objtexture[num_objects] = "none";
+
+	
+  Tn = 0 ;
+  Ttypelist[Tn] = SX ; Tvlist[Tn] =  3    ; Tn++ ;
+  Ttypelist[Tn] = SY ; Tvlist[Tn] =  3    ; Tn++ ;
+  Ttypelist[Tn] = SZ ; Tvlist[Tn] =  3    ; Tn++ ;
+  //Ttypelist[Tn] = RX ; Tvlist[Tn] =  90    ; Tn++ ;
+  Ttypelist[Tn] = TY ; Tvlist[Tn] =  10    ; Tn++ ;
+  Ttypelist[Tn] = TZ ; Tvlist[Tn] =  -12      ; Tn++ ;
+  Ttypelist[Tn] = TX ; Tvlist[Tn] =  0    ; Tn++ ;
+	
+  M3d_make_movement_sequence_matrix(m, mi, Tn, Ttypelist, Tvlist);
+  M3d_mat_mult(obmat[num_objects], vm, m) ;
+  M3d_mat_mult(obinv[num_objects], mi, vi) ;
+
+  num_objects++ ; // don't forget to do this
+  
+  //////////////////////////////////////////////////////////////
   
   //Floating Earth
   obtype[num_objects] = 0;
@@ -1736,8 +1441,7 @@ void Draw_the_scene()
   for(int i = 0; i < num_lights; i++){
     M3d_mat_mult_pt(light_in_eye_space[i], vm, light_in_world_space[i]);
   }
-  //create_object_matricies(vm,vi); //test01
-  create_triangular_prism(vm, vi); //test02
+  create_object_matricies(vm,vi); //test01
   
   for(int x = 0; x < scrnsize; x++){
     for(int y = 0; y < scrnsize; y++){
@@ -1783,7 +1487,7 @@ int test01()
   
   eye[0] = 0;
   eye[1] = 0;
-  eye[2] = -10;
+  eye[2] = -30;
   coi[0] = 0;
   coi[1] = 0;
   coi[2] = 50;
@@ -1810,8 +1514,8 @@ int test01()
     t += pi60;
     earthrotate += 6;
     //move the eye!
-    eye[0] = 25*cos(M_PI + t);
-    eye[1] = 25*sin(M_PI + t) + 25;
+    eye[0] = 25*cos(M_PI + t) + 25;
+    eye[1] = 25*sin(M_PI - t);
     
 
     up[0] = eye[0];
@@ -1846,80 +1550,6 @@ int test01()
   }
 }
 
-int test02()
-{
-  double vm[4][4], vi[4][4];
-  int mode = 1;
-
-  //////////////////////////////////////////////////////////////////////
-  
-  eye[0] = 0;
-  eye[1] = 0;
-  eye[2] = -40;
-  coi[0] = 0;
-  coi[1] = 0;
-  coi[2] = 50;
-  up[0] = 0;
-  up[1] = 1;
-  up[2] = 0;
-  //////////////////////////////////////////////////////////////////////
-
-  
-  G_rgb(0,0,0) ;
-  G_clear() ;
-    
-  double t = 0;
-  int c;
-
-  //handle opening the xwd files just once to prevent overflow.
-  set_lights();
-  M3d_view(vm, vi,  eye,coi,up);
-  create_triangular_prism(vm, vi);
-  openXWDfiles();
-  double pi60 = M_PI/60;
-  int sign = 1;
-  while(1){
-    t += pi60;
-    earthrotate += 6;
-    //move the eye!
-    eye[0] = 25*cos(M_PI + t);
-    eye[1] = 25*sin(M_PI + t) + 25;
-    
-
-    up[0] = eye[0];
-    up[1] = eye[1] + 1;
-    up[2] = eye[2];
-
-    if(mode == 1 && display_image == 1){
-      Draw_the_scene() ;
-      c = G_wait_key();
-      if(c == 'm') mode = 0;
-      if(c == 'c'){
-	sign *= -1;
-      }
-      if(c == '0' || c == '1' || c == '2'){
-	light_power[(int)c-48] += sign*20;
-	printf("%d",(int)c);
-	printf("New light power %lf\n", light_power[(int)c-48]);
-      }
-      if(c == 'q') break;
-    }
-    else if (display_image == 1){
-      Draw_the_scene() ;
-      G_display_image();
-      c = G_no_wait_key();
-      if(c == 'm') mode = 1;
-      if(c == 'q') break;
-    }
-    else{
-      Draw_the_scene();
-      if(fileCounter == fileLimit) break;
-    }
-  }
-}
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -1935,6 +1565,6 @@ int main(int argc, char **argv)
   }
   else reflection_limit = atoi(argv[1]);
   G_init_graphics(scrnsize,scrnsize);
-  test02() ;
+  test01() ;
 }
 
