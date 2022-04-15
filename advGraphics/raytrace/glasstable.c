@@ -27,7 +27,7 @@ double worldrgb[3] = {0.2,0.2,0.2};
 
 double sphere_radius = 10;
 int earthrotate = 0;
-int save_files = 1;
+int save_files = 0;
 int display_image = 1;
 int fileCounter = 0;
 int fileLimit = 119;
@@ -1373,9 +1373,9 @@ int create_triangular_prism(double vm[4][4], double vi[4][4]){
   color[num_objects][1] = 0.4 ; 
   color[num_objects][2] = 0.4 ;
   objreflectivity[num_objects] = 0.2;
-  objtransperency[num_objects] = 0.4;
+  objtransperency[num_objects] = 0.8;
   objtexreflect[num_objects] = 0;
-  objshadow[num_objects] = -1;
+  objshadow[num_objects] = 1;
   objtexture[num_objects] = "none";
 
 	
@@ -1675,7 +1675,7 @@ int set_lights(){
   num_lights++;
   *///end test01
 
-
+  
   //start test02
   light_in_world_space[num_lights][0] = 0;
   light_in_world_space[num_lights][1] = 12;
@@ -1686,7 +1686,7 @@ int set_lights(){
   light_power[num_lights] = 300;
   light_radius[num_lights] = 1000;
   num_lights++;
-
+  /*
   light_in_world_space[num_lights][0] = 10;
   light_in_world_space[num_lights][1] = 12;
   light_in_world_space[num_lights][2] = -20;
@@ -1707,7 +1707,7 @@ int set_lights(){
   light_power[num_lights] = 200;
   light_radius[num_lights] = 400;
   num_lights++;
-  
+  */
   
   
   return 1;
