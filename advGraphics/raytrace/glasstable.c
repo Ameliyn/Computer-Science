@@ -27,8 +27,8 @@ double worldrgb[3] = {0.2,0.2,0.2};
 
 double sphere_radius = 10;
 int earthrotate = 0;
-int save_files = 0;
-int display_image = 1;
+int save_files = 1;
+int display_image = 0;
 int fileCounter = 0;
 int fileLimit = 119;
 char *file_prefix = "lightmixer";
