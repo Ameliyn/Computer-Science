@@ -27,8 +27,8 @@ double worldrgb[3] = {0.2,0.2,0.2};
 
 double sphere_radius = 10;
 int earthrotate = 0;
-int save_files = 1;
-int display_image = 0;
+int save_files = 0;
+int display_image = 1;
 int fileCounter = 0;
 int fileLimit = 119;
 char *file_prefix = "lightmixer";
@@ -1692,7 +1692,9 @@ int find_earth_circle(double coi[3], double rot, double res[4][4]){
 int test01()
 {
   double vm[4][4], vi[4][4];
-  int mode = 1;
+  int mode;
+  if(display_image == 1) mode = 1;
+  else mode = 0;
 
   //////////////////////////////////////////////////////////////////////
   
@@ -1707,10 +1709,10 @@ int test01()
   up[2] = 0;
   //////////////////////////////////////////////////////////////////////
 
-  
-  G_rgb(0,0,0) ;
-  G_clear() ;
-    
+  if(display_image == 1){
+    G_rgb(0,0,0) ;
+    G_clear() ;
+  }
   double t = 0;
   int c;
   double pi60 = M_PI/60;
@@ -1793,7 +1795,7 @@ int test01()
 	coi[0] -= (changecoi[0]/2);
 	coi[1] -= (changecoi[1]/2);
 	coi[2] -= (changecoi[2]/2);
-	if(steps == 204) changelight = (45 - light_in_world_space[1][0]) / 30;
+	if(steps == 204) changelight = (40 - light_in_world_space[1][0]) / 30;
       }
       else if(steps <= 204+30){
 	reset_lights(changelight);
@@ -1842,7 +1844,7 @@ int main(int argc, char **argv)
     printf("Usage: ./a.out reflectionLimit\nUsing Default Reflection limit (6)\n");
   }
   else reflection_limit = atoi(argv[1]);
-  G_init_graphics(scrnsize,scrnsize);
+  if(display_image == 1) G_init_graphics(scrnsize,scrnsize);
   test01() ;
 }
 
