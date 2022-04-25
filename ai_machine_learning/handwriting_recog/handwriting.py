@@ -31,9 +31,9 @@ def display_history(history):
     plt.show()
 
 
-# answers = pd.read_csv("answers.csv")
+answers = pd.read_csv("answers.csv")
 # This is for testing purposes to use only 1000 images
-answers = pd.read_csv("answers.csv").sample(n=1000)
+# answers = pd.read_csv("answers.csv").sample(n=1000)
 remove_missing_images(answers)
 num_images = answers.shape[0]
 X = read_and_crop_images(answers, num_images)
@@ -66,11 +66,9 @@ print(y_train.shape)
 ################################
 model = tf.keras.models.Sequential([
     tf.keras.layers.Flatten(input_shape=[53, 358]),
-    tf.keras.layers.Dense(1, activation="sigmoid")])
+    tf.keras.layers.Dense(10, activation="sigmoid"),
+    tf.keras.layers.Dense(10, activation="softmax")])
 model.compile(loss="mean_squared_error", optimizer="sgd", metrics=["accuracy"])
-# model.compile(optimizer='adam',
-#               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-#               metrics=['accuracy'])
 history = model.fit(X_train, y_train, epochs=10, validation_data=(X_validate, y_validate))
 
 display_history(history)
