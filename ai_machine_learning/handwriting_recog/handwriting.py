@@ -90,10 +90,10 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(128, activation="relu"),
     tf.keras.layers.Dense(256, activation="relu"),
     tf.keras.layers.Dense(512, activation="relu"),
-
 ])
+
 model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), optimizer="sgd", metrics=["accuracy"])
-history = model.fit(X_train, y_train, epochs=40, validation_data=(X_validate, y_validate))
+history = model.fit(X_train, y_train, epochs=10, validation_data=(X_validate, y_validate))
 
 display_history(history)
 
