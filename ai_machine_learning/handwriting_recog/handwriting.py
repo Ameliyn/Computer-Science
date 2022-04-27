@@ -8,6 +8,8 @@ from os.path import exists
 
 IMAGE_RELATIVE_PATH = "./writein_crops/"
 
+# Authors Skye Russ, Rosalee Hayes, Anders Stall, Simon Buan
+
 
 def remove_missing_images(csv):
     for row in csv.iterrows():
@@ -27,7 +29,7 @@ def read_and_crop_images(csv, num_images):
 def display_history(history):
     pd.DataFrame(history.history).plot(figsize=(8, 5))
     plt.grid(True)
-    plt.gca().set_ylim(0, 1)  # set the vertical range to [0-1]
+    # plt.gca().set_ylim(0, 1)  # set the vertical range to [0-1]
     plt.show()
 
 
@@ -48,38 +50,29 @@ print(X_train.shape)
 print(y_train.shape)
 
 
-# model = keras.models.Sequential([
-#  keras.layers.Flatten(input_shape=[28, 28]),
-#  keras.layers.Dense(300, activation="relu"),
-#  keras.layers.Dense(100, activation="sigmoid"),
-#  keras.layers.Dense(10, activation="softmax")
-# ])
-
-# history = model.fit(X_train, y_train, epochs=30, validation_data=(X_valid, y_valid))
-
-# model = tf.keras.models.Sequential([tf.keras.layers.Dense(1, activation="sigmoid")])
-# history = model.fit(X_train, y_train, epochs=10, validation_data=(X_validate, y_validate))
-#
-# display_history(history)
-
-# history = model.fit(X_train, y_train, epochs=30, validation_data=(X_valid, y_valid))
 ################################
 model = tf.keras.models.Sequential([
+    tf.keras.layers.Conv2D(5, 8, 1, activation="relu", input_shape=(53, 358, 1), kernel_initializer="variance_scaling"),
+    tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2]),
+    tf.keras.layers.Conv2D(5, 16, 1, activation="relu", input_shape=(53, 358, 1), kernel_initializer="variance_scaling"),
+    tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2]),
     tf.keras.layers.Flatten(input_shape=[53, 358]),
-    tf.keras.layers.Dense(512, activation="relu"),
-    tf.keras.layers.Dense(256, activation="relu"),
-    tf.keras.layers.Dense(128, activation="sigmoid"),
-    tf.keras.layers.Dense(512, activation="relu"),
-    tf.keras.layers.Dense(128, activation="sigmoid"),
+    tf.keras.layers.Dense(128, activation="relu"),
     tf.keras.layers.Dense(256, activation="relu"),
     tf.keras.layers.Dense(512, activation="relu"),
-    tf.keras.layers.Dense(256, activation="relu"),
+    # tf.keras.layers.Conv2D(32, 4, 4, activation="relu", input_shape=(53, 358, 1)),
+    # tf.keras.layers.Conv2D(16, 5, 5, activation="relu", input_shape=(53, 358, 1)),
+    # tf.keras.layers.Flatten(input_shape=[53, 358]),
+    # tf.keras.layers.Dense(128, activation="relu"),
+    # tf.keras.layers.Dense(256, activation="relu"),
+    # tf.keras.layers.Dense(128, activation="relu"),
+    # tf.keras.layers.Dense(256, activation="relu"),
+    # tf.keras.layers.Dense(128, activation="relu"),
 ])
-model.compile(loss="mean_squared_error", optimizer="sgd", metrics=["accuracy"])
+model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
 history = model.fit(X_train, y_train, epochs=40, validation_data=(X_validate, y_validate))
 
 display_history(history)
 
 test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
 print('\nTest accuracy:', test_acc)
-
