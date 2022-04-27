@@ -49,8 +49,32 @@ X_train, X_validate, y_train, y_validate = train_test_split(X_train, y_train, te
 print(X_train.shape)
 print(y_train.shape)
 
-
 ################################
+# simon's 88% accuracy
+# model = tf.keras.models.Sequential([
+#     tf.keras.layers.Flatten(input_shape=[53, 358]),
+#     tf.keras.layers.Dense(2048, activation="relu"),
+#     tf.keras.layers.Dense(256, activation="relu"),
+#     tf.keras.layers.Dense(2048, activation="relu"),
+#     tf.keras.layers.Dense(256, activation="relu"),
+#     tf.keras.layers.Dense(128, activation="relu"),
+#     tf.keras.layers.Dense(1024, activation="relu"),
+#     tf.keras.layers.Dense(128, activation="relu"),
+#     tf.keras.layers.Dense(4096, activation="relu"),
+#     tf.keras.layers.Dense(256, activation="relu"),
+#     tf.keras.layers.Dense(128, activation="relu"),
+#     tf.keras.layers.Dense(256, activation="relu"),
+#     tf.keras.layers.Dense(128, activation="relu"),
+#     tf.keras.layers.Dense(256, activation="relu"),
+#     tf.keras.layers.Dense(128, activation="relu"),
+#     # tf.layers.Conv2D(32, 3, padding='same', activation='relu'),
+#     # tf.layers.Conv2D(64, 3, padding='same', activation='relu'),
+#     # tf.layers.Dense(128, activation='relu'),
+#     tf.keras.layers.Dense(2)])
+# model.compile(optimizer='sgd',loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),metrics=['accuracy'])
+# history = model.fit(X_train, y_train, epochs=100, validation_data=(X_validate, y_validate))
+################################
+
 model = tf.keras.models.Sequential([
     tf.keras.layers.Conv2D(5, 8, 1, activation="relu", input_shape=(53, 358, 1), kernel_initializer="variance_scaling"),
     tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2]),
@@ -60,16 +84,15 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(128, activation="relu"),
     tf.keras.layers.Dense(256, activation="relu"),
     tf.keras.layers.Dense(512, activation="relu"),
-    # tf.keras.layers.Conv2D(32, 4, 4, activation="relu", input_shape=(53, 358, 1)),
-    # tf.keras.layers.Conv2D(16, 5, 5, activation="relu", input_shape=(53, 358, 1)),
-    # tf.keras.layers.Flatten(input_shape=[53, 358]),
-    # tf.keras.layers.Dense(128, activation="relu"),
-    # tf.keras.layers.Dense(256, activation="relu"),
-    # tf.keras.layers.Dense(128, activation="relu"),
-    # tf.keras.layers.Dense(256, activation="relu"),
-    # tf.keras.layers.Dense(128, activation="relu"),
+    tf.keras.layers.Dense(128, activation="relu"),
+    tf.keras.layers.Dense(256, activation="relu"),
+    tf.keras.layers.Dense(512, activation="relu"),
+    tf.keras.layers.Dense(128, activation="relu"),
+    tf.keras.layers.Dense(256, activation="relu"),
+    tf.keras.layers.Dense(512, activation="relu"),
+
 ])
-model.compile(loss="mean_squared_error", optimizer="adam", metrics=["accuracy"])
+model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), optimizer="sgd", metrics=["accuracy"])
 history = model.fit(X_train, y_train, epochs=40, validation_data=(X_validate, y_validate))
 
 display_history(history)
