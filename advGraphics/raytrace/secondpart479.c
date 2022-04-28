@@ -29,8 +29,8 @@ double worldrgb[3] = {0.2,0.2,0.2};
 
 double sphere_radius = 10;
 int earthrotate = 0;
-int save_files = 1;
-int display_image = 0;
+int save_files = 0;
+int display_image = 1;
 int fileCounter = 0;
 int fileLimit = 1000;
 char *file_prefix = "frontdoor";
@@ -2580,9 +2580,20 @@ int test01()
 	reset_lights(changelight);
       }
       else if(earthrotate%360 == 0){
+	phase = 4;
+	steps = 0;
+      }
+      
+    }
+    else if(phase == 4){
+      if(steps < 40){
+	eye[1] += 0.375;
+	eye[2] -= 1;
+      }
+      else{
 	break;
       }
-      else if(steps == 550) exit(0);
+
     }
     
     up[0] = eye[0];
