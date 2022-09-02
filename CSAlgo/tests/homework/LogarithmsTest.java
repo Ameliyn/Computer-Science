@@ -28,7 +28,7 @@ class LogarithmsTest {
 
     @Test
     void matchesMathLibrary() {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             int a = StdRandom.uniform(2, 11);
             int b = StdRandom.uniform(1, Integer.MAX_VALUE);
             assertEquals((int)Math.floor(Math.log(b) / Math.log(a)), Logarithms.log(a, b));
