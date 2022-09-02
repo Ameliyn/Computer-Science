@@ -1,6 +1,7 @@
+package homework;
+
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.jupiter.api.Test;
-import homework.Logarithms;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LogarithmsTest {
