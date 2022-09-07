@@ -1,5 +1,6 @@
 package homework;
-
+//@author Skye Russ
+//CS383: Algorithms Lab 1: Logarithms
 public class Logarithms {
 
     public static int log(int a, int b){
