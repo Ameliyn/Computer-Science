@@ -1,9 +1,6 @@
 package inclass;
 import edu.princeton.cs.algs4.*;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class Fibonacci {
 
     public static void main(String args[]){
