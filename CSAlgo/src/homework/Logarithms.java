@@ -1,4 +1,7 @@
 package homework;
+
+import edu.princeton.cs.algs4.StdOut;
+
 //@author Skye Russ
 //CS383: Algorithms Lab 1: Logarithms
 public class Logarithms {
