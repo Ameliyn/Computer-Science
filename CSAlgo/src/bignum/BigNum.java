@@ -26,8 +26,8 @@ public class BigNum {
 
         for(int i = number.length()-1; i >= 0; i--){
             for(int j = other.number.length()-1; j >= 0; j--){
-                Integer sum = (selfChars[i] - '0') * (otherChars[j] - '0');
-                String tempResult = sum.toString();
+                Integer prod = (selfChars[i] - '0') * (otherChars[j] - '0');
+                String tempResult = prod.toString();
 
                 //add the 0s for the other
                 for(int k = 0; k < other.number.length()-j-1; k++){
