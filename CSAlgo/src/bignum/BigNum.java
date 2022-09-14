@@ -26,7 +26,7 @@ public class BigNum {
 
         for(int i = number.length()-1; i >= 0; i--){
             for(int j = other.number.length()-1; j >= 0; j--){
-                Integer sum = (selfChars[i] - 48) * (otherChars[j] - 48);
+                Integer sum = (selfChars[i] - '0') * (otherChars[j] - '0');
                 String tempResult = sum.toString();
 
                 //add the 0s for the other
@@ -58,15 +58,15 @@ public class BigNum {
 
         while(!(j==-1 && i==-1)){
             if(i < 0 && j>=0){
-                tempSum = carry + otherChars[j] - 48;
+                tempSum = carry + otherChars[j] - '0';
                 j--;
             }
             else if(j < 0 && i>=0){
-                tempSum = carry + selfChars[i] - 48;
+                tempSum = carry + selfChars[i] - '0';
                 i--;
             }
             else {
-                tempSum = carry + otherChars[j] + selfChars[i] - 48*2;
+                tempSum = carry + otherChars[j] + selfChars[i] - ('0'*2);
                 i--;
                 j--;
             }
