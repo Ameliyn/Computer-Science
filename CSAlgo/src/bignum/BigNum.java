@@ -22,12 +22,10 @@ public class BigNum {
     public BigNum times2(BigNum other){
         if(other.number.length() == 0 || number.length() == 0) return new BigNum("0");
 
-        BigNum result = new BigNum("");
-
         char[] selfChars = number.toCharArray();
         char[] otherChars = other.number.toCharArray();
         int carry = 0;
-        ArrayList<Character> resultList = new ArrayList<Character>();
+        char[] resultList = new char[selfChars.length+ otherChars.length];
         int selfZeroes = 0; int otherZeroes = 0;
 
         for(int i = number.length()-1; i >= 0; i--){
@@ -43,19 +41,13 @@ public class BigNum {
                 //find where the 0s place of the product will be (0s place, 10s place, 100s place, etc)
                 int index = selfZeroes + otherZeroes;
 
-                //TODO: add to the correct index
+                //TODO: add to the correct index in resultList
 
-                //get the string representation of the current number
-                String tempResult = Integer.toString(prod) +
-                        "0".repeat(Math.max(0, other.number.length() - j - 1)) +
-                        "0".repeat(Math.max(0, number.length() - i - 1));
-
-                result = result.plus(new BigNum(tempResult));
                 otherZeroes++;
             }
             selfZeroes++;
         }
-        return result;
+        return new BigNum(new String(resultList));
     }
 
 
