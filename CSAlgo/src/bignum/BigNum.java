@@ -1,9 +1,9 @@
 package bignum;
 
-import edu.princeton.cs.algs4.StdOut;
-
-import java.util.ArrayList;
-
+/**
+ * CS Algorithm Design and Analysis Group Project 1: BigNum
+ * @Author Skye Russ, Anders Stall, Katie Shimaura, Nuzhat Hoque
+ */
 public class BigNum {
 
     String number;
@@ -19,13 +19,13 @@ public class BigNum {
     }
 
     //this is an attempt at speeding up the times function
-    public BigNum times2(BigNum other){
+    public BigNum times(BigNum other){
         if(other.number.length() == 0 || number.length() == 0) return new BigNum("0");
 
         char[] selfChars = number.toCharArray();
         char[] otherChars = other.number.toCharArray();
         int carry = 0;
-        char[] resultList = new char[selfChars.length+ otherChars.length];
+        int[] resultList = new int[selfChars.length+ otherChars.length];
         int selfZeroes = 0; int otherZeroes = 0;
 
         for(int i = number.length()-1; i >= 0; i--){
@@ -35,23 +35,42 @@ public class BigNum {
                 //find current product
                 int prod = (selfChars[i] - '0') * (otherChars[j] - '0') + carry;
 
-                //find new carry (10s place of product)
-                carry = prod / 10;
-
                 //find where the 0s place of the product will be (0s place, 10s place, 100s place, etc)
                 int index = selfZeroes + otherZeroes;
 
-                //TODO: add to the correct index in resultList
+
+                //Handle adding to our array
+                int tempSum = resultList[resultList.length-index-1] + prod;
+                do{
+                    resultList[resultList.length-1-index] = (tempSum % 10);
+                    carry = tempSum / 10;
+                    index++;
+                    tempSum = resultList[resultList.length-index-1] + carry;
+                }while(carry > 0);
 
                 otherZeroes++;
             }
             selfZeroes++;
         }
-        return new BigNum(new String(resultList));
+
+        //turn our int array into a char array (and remove the leading 0s)
+        char[] answer = new char[1];
+        int offset = -1;
+        for(int i = 0; i < resultList.length; i++){
+            if(resultList[i] != 0 && offset == -1) {
+                answer = new char[resultList.length-i];
+                offset = i;
+                answer[i-offset] = (char)(resultList[i] + '0');
+            }
+            else if (offset != -1){
+                answer[i-offset] = (char)(resultList[i] + '0');
+            }
+        }
+        return new BigNum(new String(answer));
     }
 
 
-    public BigNum times(BigNum other){
+    public BigNum times2(BigNum other){
         if(other.number.length() == 0 || number.length() == 0) return new BigNum("0");
 
         BigNum result = new BigNum("");
