@@ -69,7 +69,7 @@ public class BigNum {
         return new BigNum(new String(answer));
     }
 
-
+    //this is a version of the time function (that I believe is slower than times)
     public BigNum times2(BigNum other){
         if(other.number.length() == 0 || number.length() == 0) return new BigNum("0");
 
