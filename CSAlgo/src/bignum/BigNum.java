@@ -7,10 +7,12 @@ package bignum;
 public class BigNum {
 
     String number;
+    char[] selfChars;
 
     public BigNum(String number){
         if(number.equals("")) this.number = "0";
         else this.number = number;
+        selfChars = number.toCharArray();
     }
 
     @Override
@@ -22,8 +24,8 @@ public class BigNum {
     public BigNum times(BigNum other){
         if(other.number.length() == 0 || number.length() == 0) return new BigNum("0");
 
-        char[] selfChars = number.toCharArray();
-        char[] otherChars = other.number.toCharArray();
+//        char[] selfChars = number.toCharArray();
+        char[] otherChars = other.selfChars;
         int carry = 0;
         int[] resultList = new int[selfChars.length+ otherChars.length];
         int selfZeroes = 0; int otherZeroes = 0;
@@ -100,8 +102,8 @@ public class BigNum {
         int i = number.length()-1;
         int j = other.number.length()-1;
 
-        char[] selfChars = number.toCharArray();
-        char[] otherChars = other.number.toCharArray();
+//        char[] selfChars = number.toCharArray();
+        char[] otherChars = other.selfChars;
 
         while(!(j==-1 && i==-1)){
             if(i < 0 && j>=0){
