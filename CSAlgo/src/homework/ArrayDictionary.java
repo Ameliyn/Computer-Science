@@ -75,9 +75,27 @@ public class ArrayDictionary<key, value> implements Dictionary<key,value>{
             }
             pairs = newPairs;
         }
-        //add the new pair to the end of the array, and increment the end pointer
-        pairs[end] = new pair<key,value>(key,value);
+        pairs[end] = new pair<key, value>(key, value);
         end++;
+        //add the new pair to the end of the array, and increment the end pointer
+//        insertPair(new pair<key,value>(key,value));
+    }
+
+    private void insertPair(pair p){
+        try{
+            Comparable key = (Comparable) p.key;
+            int j = end-1;
+            while(j >= 0 && key.compareTo(pairs[j]) < 0){
+                pairs[j+1] = pairs[j];
+                j--;
+            }
+            pairs[j+1] = p;
+        }
+        catch(Exception e){
+            //unable to cast to comparable
+            pairs[end] = p;
+            end++;
+        }
     }
 
     /**
