@@ -17,3 +17,25 @@ public class Bubble {
         }
     }
 }
+
+
+/*
+ * //n = number of elements in the array, and array bounds are respected (I'm just not writing n-1 all the time)
+ * Invariant: a[0, ..., n] is original a[0, ..., n] but sorted
+ *
+ * 1. Initialization:
+ * i=0 -> a[n-i, ..., n] = a[n, ..., n] = a[n] is one element and therefore always sorted
+ *
+ * 2. Maintenance:
+ * a[n - i, ..., n] sorted
+ * a[i + 1]
+ * a[n - (i + 1), ..., n] is sorted
+ * i++
+ * a[n - i, ..., n] sorted
+ *
+ *
+ * 3. Termination
+ * i >= n
+ * i = n
+ * a[n-i ,... , n] = a[0, ..., n] is sorted
+ */
