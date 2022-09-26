@@ -50,12 +50,10 @@ int newpsize[MAXPOLYS];
 int newcont[MAXPOLYS][MAXSIDES];
 
 //These are added after the class in order to save the images to a portfolio
-int saveFiles = 0;
-int mapID;
-double zbuff[3][scrnsize][scrnsize];
+int fileCounter = 0;
 char *file_prefix = "wireModel";
 char *file_suffix = ".xwd";
-char *directory = "brickhouse/";
+char *directory = "port/";
 
 typedef struct {
   int objNum;
@@ -796,10 +794,6 @@ int main(int argc, char **argv){
     exit(0);
   }
 
-
-  //Load the xwd map for saving images
-  mapID = create_new_xwd_map(scrnsize, scrnsize);
-
   char input = 48;
   char mode = 't';
   int sign = 1;
@@ -861,8 +855,10 @@ int main(int argc, char **argv){
     else if(input == 'r' || input == 'R') mode = 'r';
     else if(input == 'c' || input == 'C') sign = -sign;
     else if(input == 's' || input == 'S') {
-      if(saveFiles) saveFiles = 0;
-      else saveFiles = 1;
+      char saveFileName[100];
+      sprintf(saveFileName,"%s%s%04d%s",directory,file_prefix,fileCounter,file_suffix);
+      Save_Image_To_File_X(saveFileName);
+      fileCounter++;
     }
     else if(input == 'm' || input == 'M') {
       if(topMode == 1){
