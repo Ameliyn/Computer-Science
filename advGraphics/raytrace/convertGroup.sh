@@ -1,8 +1,8 @@
 #!/bin/bash
 
-for name in raytrPort/*;
+for name in texturemovie/*;
 do foo="${name%.xwd}".jpg;
-   foo=${foo#"raytrPort/"};
-   foo=raytrPortJpg/"$foo";
+   foo=${foo#"texturemovie/"};
+   foo=texturemoviejpg/"$foo";
    convert $name $foo ;
 done

@@ -766,7 +766,59 @@ int test01()
   }
 }
 
+int test02()
+{
+  double vm[4][4], vi[4][4];
 
+  //////////////////////////////////////////////////////////////////////
+  
+  eye[0] = 0;
+  eye[1] = 0;
+  eye[2] = -10;
+  coi[0] = 0;
+  coi[1] = 0;
+  coi[2] = 50;
+  up[0] = 0;
+  up[1] = 1;
+  up[2] = 0;
+  //////////////////////////////////////////////////////////////////////
+
+  char saveFileName[100];
+  char *directory = "3dRaytrPort/";
+  char *file_prefix = "3draytr";
+  int fileCounter = 0;
+  char *file_suffix = ".xwd";
+  
+  G_rgb(0,0,0) ;
+  G_clear() ;
+    
+  double t = 0;
+  int c;
+  double change = 3.14/60;
+  while(t < 6.28){
+    t += change;
+    //move the eye!
+    eye[0] = 25*cos(M_PI + t);
+    eye[1] = 25*sin(M_PI + t) + 25;
+    
+
+    up[0] = eye[0];
+    up[1] = eye[1] + 1;
+    up[2] = eye[2];
+
+    Draw_the_scene() ;
+    G_display_image();
+    //save the file!
+    sprintf(saveFileName,"%s%s%04d%s",directory,file_prefix,fileCounter,file_suffix);
+    Save_Image_To_File_X(saveFileName);
+    fileCounter++;
+
+    c = G_no_wait_key();
+    if(c == 'q') break;
+    
+      
+  }
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -779,5 +831,5 @@ int test01()
 int main()
 {
   G_init_graphics(scrnsize,scrnsize);
-  test01() ;
+  test02() ;
 }
