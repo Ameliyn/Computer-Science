@@ -16,28 +16,31 @@ public class LinkedSet<k> implements Set<k>{
 
     private Link head;
     private Link tail;
-    private int size = 0;
+
+
+    public LinkedSet(){
+        head = null;
+        tail = null;
+    }
 
     @Override
     public void add(k key) {
         if(contains(key)) return;
-        if(size == 0){
+        if(head == null){
             head = new Link(key, null, null);
             tail = head;
-            size++;
         }
         else{
             tail.next = new Link(key, null, tail);
             tail = tail.next;
-            size++;
         }
     }
 
     @Override
     public boolean contains(k key) {
-        if(size == 0) return false;
+        if(head == null) return false;
         Link current = head;
-        for(int i = 0; i < size; i++){
+        while(current != null){
             if(current.data.equals(key)) return true;
             else{
                 current = current.next;
@@ -48,26 +51,26 @@ public class LinkedSet<k> implements Set<k>{
 
     @Override
     public boolean isEmpty() {
-        return size == 0;
+        return head == null;
     }
 
     @Override
     public void remove(k key) {
-        if(size == 0) return;
         Link current = head;
-        for(int i = 0; i < size; i++){
+        while(current != null){
             if(current.data.equals(key)){
-                if(i == 0){
+                if(current.data.equals(head.data)){
                     head = head.next;
-                    size--;
                     break;
                 }
-                else if(i + 1 == size){
+                else if(current.data.equals(tail.data)){
                     current.previous = current.next;
                     tail = tail.previous;
+                    break;
                 }
                 else{
                     current.previous = current.next;
+                    break;
                 }
             }
             else{
