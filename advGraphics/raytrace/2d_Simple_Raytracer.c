@@ -505,7 +505,7 @@ int test01()
     G_rgb(1,0,1) ; G_line(100,200,  100,600) ;
     
     //G_wait_key() ;
-
+    /*
     double P[2];
     while(1){
       G_wait_click(P);
@@ -516,7 +516,9 @@ int test01()
 	else Rtip[1] = 200;
       }
       else{
-	Rtip[0] = 100; Rtip[1] = Rsource[1] + (100 - Rsource[0]) * (P[1] - Rsource[1]) / (P[0] - Rsource[0]); Rtip[2] = 0;
+	Rtip[0] = 100;
+	Rtip[1] = Rsource[1] + (100 - Rsource[0]) * (P[1] - Rsource[1]) / (P[0] - Rsource[0]);
+	Rtip[2] = 0;
       }
       G_rgb(0,0,0) ;
       G_clear() ;
@@ -528,21 +530,41 @@ int test01()
 
       Draw_the_scene() ;
     }
+    */
+    
+    char saveFileName[100];
+    char *directory = "raytrPort/";
+    char *file_prefix = "raytr";
+    int fileCounter = 0;
+    char *file_suffix = ".xwd";
 
-    /*
-    for (ytip = 200 ; ytip <= 600 ; ytip++) {
+    for (int ytip = 200 ; ytip <= 600 ; ytip+=2) {
       Rtip[0]    = 100 ;  Rtip[1]    = ytip ;  Rtip[2]   = 0  ;    
 
-      G_rgb(1,1,0) ; G_line(Rsource[0],Rsource[1],  Rtip[0],Rtip[1]) ;
-      ray (Rsource, Rtip, argb) ; 
+      //G_rgb(1,1,0) ; G_line(Rsource[0],Rsource[1],  Rtip[0],Rtip[1]) ;
+      //ray (Rsource, Rtip, argb) ; 
 
+      G_rgb(0,0,0) ;
+      G_clear() ;
+      G_rgb(1,0,1) ; G_fill_circle(Rsource[0], Rsource[1], 3) ;
+      G_rgb(1,0,1) ; G_line(100,200,  100,600) ;
+      G_rgb(1,1,0) ; G_line(Rsource[0],Rsource[1],  Rtip[0],Rtip[1]) ;
+
+      ray (Rsource, Rtip, argb) ;
+      
       Draw_the_scene() ;
+
+      //save the file!
+      sprintf(saveFileName,"%s%s%04d%s",directory,file_prefix,fileCounter,file_suffix);
+      Save_Image_To_File_X(saveFileName);
+      fileCounter++;
+
       G_wait_key() ;
     }
     
     G_rgb(1,1,1) ; G_draw_string("'q' to quit", 50,50) ;
     while (G_wait_key() != 'q') ;
-    G_save_image_to_file("2d_Simple_Raytracer.xwd") ;*/
+    //G_save_image_to_file("2d_Simple_Raytracer.xwd") ;
 }
 
 
