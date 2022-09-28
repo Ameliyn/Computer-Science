@@ -2,31 +2,24 @@ package homework;
 
 public class ArrayDictionary<key, value> implements Dictionary<key,value>{
 
-    //a helper class to store key, value pairs
-    private static class pair<key, value>{
-        key key;
-        value value;
-
-        public pair(key key, value value){
-            this.key = key;
-            this.value = value;
-        }
-    }
-
-    //an array to store the pairs
-    private pair<key, value>[] pairs;
+    private key[] keys;
+    private value[] values;
     //the end pointer on the array
     private int end = 0;
 
+    public ArrayDictionary(){
+        keys = (key[])new Object[10];
+        values = (value[])new Object[10];
+    }
     /**
      * returns the value associated with the given key
-     * @param key key
+     * @param k
      * @return value
      */
-    public value get(Object key) {
+    public value get(key k) {
         if(end == 0) return null;
         for(int i = 0; i < end; i++){
-            if(pairs[i] != null && pairs[i].key.equals(key)) return pairs[i].value;
+            if(keys[i] != null && keys[i].equals(k)) return values[i];
         }
         return null;
     }
@@ -41,20 +34,19 @@ public class ArrayDictionary<key, value> implements Dictionary<key,value>{
 
     /**
      * put adds the given object to the array. adding null removes the object from the array
-     * @param k key
-     * @param v value
+     * @param key key
+     * @param value value
      */
-    public void put(Object k, Object v) {
-        if(k == null) return;
-        key key = (key)k;
-        value value = (value)v;
+    public void put(key key, value value) {
+        if(key == null) return;
 
         //handle if the key already exists
         int index = findKey(key);
         if(index != -1) {
             if(value == null) removePair(index);
             else {
-                pairs[index] = new pair<>(key, value);
+                keys[index] = key;
+                values[index] = value;
             }
             return;
         }
@@ -63,39 +55,26 @@ public class ArrayDictionary<key, value> implements Dictionary<key,value>{
         if(value == null) return;
 
         //if pairs is uninitialized
-        if(pairs == null) {
-            pairs = new pair[10];
-            pairs[0] = new pair<key, value>(key, value);
+        if(keys == null) {
+            keys = (key[])new Object[10];
+            values = (value[])new Object[10];
+            keys[0] = key;
+            values[0] = value;
         }
         //if no room left on array, double the size
-        else if(end > pairs.length){
-            pair<key,value>[] newPairs = new pair[pairs.length*2];
-            for(int i = 0; i <  pairs.length; i++){
-                newPairs[i] = pairs[i];
+        else if(end > keys.length){
+            key[] newKeys = (key[])new Object[keys.length*2];
+            value[] newValues = (value[])new Object[values.length*2];
+            for(int i = 0; i < keys.length; i++){
+                newKeys[i] = keys[i];
+                newValues[i] = values[i];
             }
-            pairs = newPairs;
+            keys = newKeys;
+            values = newValues;
         }
-        pairs[end] = new pair<key, value>(key, value);
+        keys[end] = key;
+        values[end] = value;
         end++;
-        //add the new pair to the end of the array, and increment the end pointer
-//        insertPair(new pair<key,value>(key,value));
-    }
-
-    private void insertPair(pair p){
-        try{
-            Comparable key = (Comparable) p.key;
-            int j = end-1;
-            while(j >= 0 && key.compareTo(pairs[j]) < 0){
-                pairs[j+1] = pairs[j];
-                j--;
-            }
-            pairs[j+1] = p;
-        }
-        catch(Exception e){
-            //unable to cast to comparable
-            pairs[end] = p;
-            end++;
-        }
     }
 
     /**
@@ -105,7 +84,7 @@ public class ArrayDictionary<key, value> implements Dictionary<key,value>{
      */
     private int findKey(key k){
         for(int i = 0; i < end; i++){
-            if(pairs[i] != null && pairs[i].key.equals(k)) return i;
+            if(keys[i] != null && keys[i].equals(k)) return i;
         }
         return -1;
     }
@@ -117,8 +96,14 @@ public class ArrayDictionary<key, value> implements Dictionary<key,value>{
     private void removePair(int index){
         if(index >= end) return;
         for(int i = index; i < end; i++){
-            if(i+1 == end) pairs[i] = null;
-            if(pairs[i] != null) pairs[i] = pairs[i+1];
+            if(i+1 == end) {
+                keys[i] = null;
+                values[i] = null;
+            }
+            if(keys[i] != null) {
+                keys[i] = keys[i+1];
+                values[i] = values[i+1];
+            }
         }
         end--;
     }

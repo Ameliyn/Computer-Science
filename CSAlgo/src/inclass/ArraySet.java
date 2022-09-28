@@ -13,11 +13,37 @@ public class ArraySet<k> implements Set<k>{
     @Override
     public void add(k key) {
         if(contains(key)) return;
-        elements[index] = key;
-        index++;
         if(index > elements.length){
             increaseSize();
         }
+        //if index = 0 we dont have a set yet
+
+        SortedAdd(key);
+    }
+
+    /**
+     * SortedAdd adds the given key into the array with an insertion paradigm (to keep the array sorted)
+     * @param key
+     */
+    private void SortedAdd(k key){
+
+        //if there is nothing in the array, just add the key
+        if(index == 0){
+            elements[0] = key;
+            index++;
+        }
+
+        Comparable tempCompare = (Comparable)key;
+        for(int i = 0; i < index; i++){
+            if(tempCompare.compareTo((Comparable)elements[i]) > 0){
+                for(int j = index; j > i; j--){
+                    elements[j] = elements[j-1];
+                }
+                elements[i] = key;
+                break;
+            }
+        }
+        index++;
     }
 
     private void increaseSize(){
