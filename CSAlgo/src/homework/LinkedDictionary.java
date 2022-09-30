@@ -1,91 +1,72 @@
 package homework;
 
-public class LinkedDictionary<key, value> implements Dictionary{
+public class LinkedDictionary<key, value> implements Dictionary<key, value>{
 
     //a helper class that encompasses a link and a key,value pair
     private class Link{
-        Object key;
-        Object value;
+        key key;
+        value value;
         Link next;
         Link prev;
 
-        public Link(Object key, Object value, Link next, Link prev){
-            this.key = (key)key;
-            this.value = (value)value;
+        public Link(key key, value value, Link next, Link prev){
+            this.key = key;
+            this.value = value;
             this.next = next;
             this.prev = prev;
         }
     }
 
-    private int size = 0;
     private Link head;
-    private Link tail;
 
+    public LinkedDictionary(){
+        head = new Link(null,null,null,null);
+    }
+
+    @Override
     public value get(Object key) {
         Link point = head;
-        for(int i = 0; i < size; i++){
-            if(point == null) return null;
-            if(point.key.equals(key)) return (value)point.value;
+        while(point.value != null){
+            if(point.key.equals(key)) return point.value;
             point = point.next;
         }
         return null;
     }
 
+    @Override
     public boolean isEmpty() {
-        return size == 0;
+        return head.value == null;
     }
 
-    public void put(Object key, Object value) {
-        Link node = find(key);
-        //if node does not exist on the list
-        if(node == null){
-            if(value == null) return;
-            if(size == 0){
-                head = new Link(key,value,null,null);
-                tail = head;
-            }
-            else{
-                tail.next = new Link(key, value, null, tail);
-                tail = tail.next;
-            }
-            size++;
-        }
-        else{
-            //if null, remove the key,value pair
-            if(value == null) {
-                if(node.equals(head)){
-                    if(size == 1){
-                        head = null;
-                        tail = null;
-                        size = 0;
-                        return;
+    @Override
+    public void put(key key, value value) {
+        if(value == null){
+            Link point = head;
+            while(point.value != null){
+                if(point.key.equals(key)) {
+                    if(point.key.equals(head.key)){
+                        head = head.next;
                     }
                     else{
-                        head = head.next;
-                        size--;
+                        point.prev.next = point.next;
+                        point.next.prev = point.prev;
                     }
                 }
-                else if(node.equals(tail)){
-                    tail = tail.prev;
-                    size--;
-                }
-                else{
-                    node.prev = node.next;
-                    size--;
-                }
+                point = point.next;
             }
-            node.value = value;
         }
-    }
-
-    private Link find(Object key){
-        if(head == null || size == 0) return null;
-        Link point = head;
-        for(int i = 0; i < size; i++){
-            if(point == null) return null;
-            if(point.key.equals(key)) return point;
-            point = point.next;
+        else{
+            Link point = head;
+            while(point.value != null){
+                if(point.key.equals(key)) {
+                    point.value = value;
+                    return;
+                }
+                point = point.next;
+            }
+            point.key = key;
+            point.value = value;
+            point.next = new Link(null,null,null, point);
         }
-        return null;
     }
 }
