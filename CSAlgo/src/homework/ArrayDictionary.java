@@ -39,21 +39,30 @@ public class ArrayDictionary<key, value> implements Dictionary<key,value>{
     public void put(key key, value value){
         if(key == null) return;
 
-        //if out of space
+        //grow if necessary
         if(end >= keys.length){
             key[] newKeys = (key[])new Object[keys.length*2];
             value[] newValues = (value[])new Object[values.length*2];
-            for(int i = 0; i < keys.length; i++){
+            for(int i = 0; i < end; i++){
                 newKeys[i] = keys[i];
                 newValues[i] = values[i];
             }
             keys = newKeys;
             values = newValues;
-            keys[end] = key;
-            values[end] = value;
-            end++;
         }
-        else if(value == null){
+        //shrink if necessary
+        else if(end < keys.length/4.0){
+            key[] newKeys = (key[])new Object[keys.length/2];
+            value[] newValues = (value[])new Object[values.length/2];
+            for(int i = 0; i < end; i++){
+                newKeys[i] = keys[i];
+                newValues[i] = values[i];
+            }
+            keys = newKeys;
+            values = newValues;
+        }
+
+        if(value == null){
             boolean removalFlag = false;
             for(int i = 0; i < end; i++){
                 if(!removalFlag && keys[i].equals(key)) {
@@ -64,7 +73,12 @@ public class ArrayDictionary<key, value> implements Dictionary<key,value>{
                     values[i] = values[i+1];
                 }
             }
-            if(removalFlag) end--;
+            //if we removed an element, actually remove the last element
+            if(removalFlag) {
+                keys[end] = null;
+                values[end] = null;
+                end--;
+            }
         }
         else{
             for(int i = 0; i < end; i++){
