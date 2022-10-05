@@ -2,10 +2,10 @@ package homework;
 
 public class HorspoolStringMatcher {
 
-    private String needle;
+    private char[] needle;
 
     public HorspoolStringMatcher(String needle){
-        this.needle = needle;
+        this.needle = needle.toCharArray();
     }
 
     /**
@@ -14,8 +14,14 @@ public class HorspoolStringMatcher {
      * @return
      */
     public int getShift(char c){
-
-        return 0;
+        int firstIndex = needle.length;
+        for(int i = 0; i < needle.length; i++){
+            if(needle[i] == c){
+                firstIndex = needle.length-1-i;
+                break;
+            }
+        }
+        return firstIndex;
     }
 
     /**
