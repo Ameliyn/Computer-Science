@@ -16,7 +16,7 @@ public class HorspoolStringMatcher {
             shiftTable[i] = getShift((char)i);
         }
     }
-    
+
     /**
      * returns how many you can jump before the next occurrence of this letter
      * @param c
