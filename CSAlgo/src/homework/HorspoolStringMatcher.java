@@ -1,5 +1,6 @@
 package homework;
 
+//@Author Skye Russ
 public class HorspoolStringMatcher {
 
     private char[] needle;
