@@ -12,7 +12,7 @@ public class HorspoolStringMatcher {
 
     private void GenerateShiftTable(){
         shiftTable = new int[256];
-        for(int i = 0; i < 257; i++){
+        for(int i = 0; i < 256; i++){
             shiftTable[i] = getShift((char)i);
         }
     }
@@ -24,9 +24,9 @@ public class HorspoolStringMatcher {
      */
     public int getShift(char c){
         int firstIndex = needle.length;
-        for(int i = 0; i < needle.length; i++){
+        for(int i = needle.length-2; i >= 0; i--){
             if(needle[i] == c){
-                firstIndex = needle.length-1-i;
+                firstIndex = needle.length - 1 - i;
                 break;
             }
         }
@@ -39,6 +39,26 @@ public class HorspoolStringMatcher {
      * @return first index of needle in haystack
      */
     public int match(String haystack){
-        return 0;
+        char[] haystackArray = haystack.toCharArray();
+        int skip = 0;
+        char[] subArray;
+        while(haystackArray.length - skip >= needle.length){
+            subArray = haystack.substring(skip).toCharArray();
+            if(same(subArray, needle, needle.length)){
+                return skip;
+            }
+            skip = skip + shiftTable[haystackArray[skip + needle.length - 1]];
+        }
+
+        return -1;
+    }
+
+    private boolean same(char[] a, char[] b, int length){
+        int i = length - 1;
+        while(a[i] == b[i]){
+            if(i == 0) return true;
+            i--;
+        }
+        return false;
     }
 }
