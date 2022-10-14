@@ -39,17 +39,13 @@ public class HorspoolStringMatcher {
      * @return first index of needle in haystack
      */
     public int match(String haystack){
-        char[] haystackArray = haystack.toCharArray();
         int skip = 0;
-        char[] subArray;
-        while(haystackArray.length - skip >= needle.length){
-            subArray = haystack.substring(skip).toCharArray();
-            if(same(subArray, needle, needle.length)){
+        while(haystack.length() - skip >= needle.length){
+            if(same(haystack.substring(skip).toCharArray(), needle, needle.length)){
                 return skip;
             }
-            skip = skip + shiftTable[haystackArray[skip + needle.length - 1]];
+            skip += shiftTable[haystack.toCharArray()[skip + needle.length - 1]];
         }
-
         return -1;
     }
 
