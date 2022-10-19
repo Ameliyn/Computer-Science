@@ -63,8 +63,6 @@ public class BloomFilter<k> {
      */
     private int hashHigh(k s){
         int highSixteen = s.hashCode() >>> 16;
-
-        //somehow make the lowSixteen number between [0,65536]
         return highSixteen;
     }
 
@@ -75,8 +73,6 @@ public class BloomFilter<k> {
      */
     private int hashLow(k s){
         int lowSixteen = s.hashCode() << 16 >>> 16;
-
-        //somehow make the highSixteen number between [0,65536]
         return lowSixteen;
     }
 
