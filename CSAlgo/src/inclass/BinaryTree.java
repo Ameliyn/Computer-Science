@@ -15,10 +15,10 @@ public class BinaryTree {
         }
 
         public String toString() {
-            String s = "{:" + value;
+            String s = "(" + value;
             if (left != null) s += left.toString();
             if (right != null) s += right.toString();
-            return s + "}";
+            return s + ")";
         }
     }
 
@@ -74,15 +74,6 @@ public class BinaryTree {
         }
     }
 
-    private void traverse_breadthFirst(){
-        traverse_breadthFirst(root);
-    }
-
-    private void traverse_breadthFirst(Node n){
-        if(n != null){
-
-        }
-    }
     public static void main(String[] unused) {
         BinaryTree t = new BinaryTree();
         //StdOut.println(t.toString());
