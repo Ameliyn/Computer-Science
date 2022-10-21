@@ -27,21 +27,29 @@ public class BloomFilter<k> {
     public void add(k s) {
         int h1 = hashLow(s);
         int h2 = hashHigh(s);
-
         set(h1);
         set(h2);
     }
 
+    /**
+     * sets the given index [0,65536) to 1
+     * @param i
+     */
     private void set(int i){
         int spot1 = i / 64;
         int offset1 = i % 64;
-        bloom[spot1] |= (1 >> offset1);
+        bloom[spot1] |= (0x1L << offset1);
     }
 
+    /**
+     * returns the status for the given index [0,65536)
+     * @param i
+     * @return
+     */
     private boolean get(int i){
         int spot = i / 64;
         int offset = i % 64;
-        return (bloom[spot] >> offset & 0x1) == 1;
+        return (bloom[spot] >>> offset & 0x1) == 1;
     }
 
     /**
@@ -62,8 +70,7 @@ public class BloomFilter<k> {
      * @return
      */
     private int hashHigh(k s){
-        int highSixteen = s.hashCode() >>> 16;
-        return highSixteen;
+        return s.hashCode() >>> 16;
     }
 
     /**
@@ -72,17 +79,6 @@ public class BloomFilter<k> {
      * @return
      */
     private int hashLow(k s){
-        int lowSixteen = s.hashCode() << 16 >>> 16;
-        return lowSixteen;
-    }
-
-    public static void main(String[] unused){
-        int h = 0x87654321;
-        int low = h >>> 16;
-        int high = h << 16 >> 16;
-        System.out.println(low/64);
-        System.out.println(String.format("0x%08X", low));
-        System.out.println(high/64);
-        System.out.println(String.format("0x%08X", high));
+        return s.hashCode() << 16 >>> 16;
     }
 }
