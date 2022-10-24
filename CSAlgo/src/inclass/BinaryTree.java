@@ -1,6 +1,5 @@
 package inclass;
 
-import com.sun.jdi.connect.Connector;
 import edu.princeton.cs.algs4.StdOut;
 
 public class BinaryTree {
