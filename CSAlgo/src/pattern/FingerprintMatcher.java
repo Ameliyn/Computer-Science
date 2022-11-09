@@ -38,7 +38,7 @@ public class FingerprintMatcher implements Matcher{
 
     /**
      * CheckSection checks if the pattern is equal to the portion of text starting at i,j
-     * @return boolean True if match
+     * @return {@code true} if match
      */
     private boolean CheckSection(int[][] pattern, int[][] text, int i, int j){
         int initialJ = j;
@@ -55,7 +55,7 @@ public class FingerprintMatcher implements Matcher{
 
     /**
      * ShiftSection shifts the given section starting at i,j in the direction and returns the new value
-     * @return integer value
+     * @return {@code int} value
      */
     private int ShiftSection(int[][] text, int i, int j, char direction, int patternLength, int currentValue){
         switch (direction) {
@@ -86,7 +86,7 @@ public class FingerprintMatcher implements Matcher{
 
     /**
      * GetValue returns the sum of all elements in the given length
-     * @return integer value
+     * @return {@code int} value
      */
     private int GetValue(int[][] array, int i, int j, int length){
         int value = 0;
