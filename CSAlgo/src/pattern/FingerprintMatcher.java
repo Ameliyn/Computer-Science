@@ -29,10 +29,13 @@ public class FingerprintMatcher implements Matcher{
         while(i < text.length - pattern.length) {
 
             // go right
-            for(int j = 0; j < text[0].length - pattern[0].length; j++){
-                if(runningValue == patternValue) return new int[] {i,j};
+            for(int j = 0; j <= text[0].length - pattern[0].length; j++){
+                if(runningValue == patternValue) {
+                    if(CheckSection(pattern, text, i, j))
+                        return new int[] {i,j};
+                }
 
-                if(j+1 == text[0].length-pattern[0].length) break;
+                if(j == text[0].length-pattern[0].length) break;
                 for(int k = i; k < i + pattern.length; k++){
                     runningValue -= text[k][j];
                     runningValue += text[k][j+pattern.length];
@@ -40,38 +43,51 @@ public class FingerprintMatcher implements Matcher{
                 //shift right
             }
 
-            if(i+1 == text.length - pattern.length) break;
+            if(i == text.length - pattern.length) break;
             //shift down
-            for(int k = text[0].length-1; k > text[0].length - pattern[0].length; k--){
+            for(int k = text[0].length-1; k >= text[0].length - pattern[0].length; k--){
                 runningValue -= text[i][k];
                 runningValue += text[i+pattern.length][k];
             }
             i++;
 
             // go left
-            for(int j = text[0].length-1; j > pattern[0].length; j--){
-                if(runningValue == patternValue) return new int[] {i,j};
+            for(int j = text[0].length-pattern.length; j >= 0; j--){
+                if(runningValue == patternValue) {
+                    if(CheckSection(pattern, text, i, j))
+                        return new int[] {i,j};
+                }
 
                 //shift left
-                if(j-1 == pattern[0].length) break;
+                if(j == 0) break;
                 for(int k = i; k < i + pattern.length; k++){
-                    runningValue -= text[k][j];
-                    runningValue += text[k][j-pattern.length];
+                    runningValue -= text[k][j+pattern.length-1];
+                    runningValue += text[k][j-1];
                 }
             }
 
             //shift down
 
-            if(i+1 == text.length - pattern.length) break;
+            if(i == text.length - pattern.length) break;
             for(int k = 0; k < pattern.length; k++){
                 runningValue -= text[i][k];
                 runningValue += text[i+pattern.length][k];
             }
             i++;
         }
-
-
-
         return null;
+    }
+
+    private boolean CheckSection(int[][] pattern, int[][] text, int i, int j){
+        int initialJ = j;
+        for(int k = 0; k < pattern.length; k++){
+            for(int l = 0; l < pattern[0].length; l++){
+                if(text[i][j] != pattern[k][l]) return false;
+                j++;
+            }
+            i++;
+            j = initialJ;
+        }
+        return true;
     }
 }
