@@ -4,9 +4,7 @@ import edu.princeton.cs.algs4.*;
 public class Fibonacci {
 
     public static void main(String args[]){
-        for(int n = 0; n < 95; n++){
-            StdOut.println("Fib(" + n + ") = " + fast_small_fib(n));
-        }
+        StdOut.println(fast_small_fib(25));
     }
 
     //the speed is O(2^n)
