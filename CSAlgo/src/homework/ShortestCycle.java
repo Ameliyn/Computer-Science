@@ -59,8 +59,7 @@ public class ShortestCycle {
     public static void main(String[] args) {
         EdgeWeightedDigraph[] digraphs = readG(args[0]);
         for(int i = 0; i < digraphs.length; i++){
-            EdgeWeightedDigraph g = digraphs[i];
-            DijkstraSP b = new DijkstraSP(g, firstEdges[i].to());
+            DijkstraSP b = new DijkstraSP(digraphs[i], firstEdges[i].to());
             double dist = b.distTo(firstEdges[i].from()) + firstEdges[i].weight();
             if(dist == Double.POSITIVE_INFINITY) dist = -1;
             StdOut.print((int)dist + " ");
