@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.List;
 
 /** GUI allowing a human to play against a ScrabbleAI. To change the AI, edit the constructor. */
-public class itScrabble {
+public class Scrabble {
 
     private static final Map<Character, Color> COLORS = new HashMap<>();
 
