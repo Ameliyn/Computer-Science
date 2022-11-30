@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class BruteForceAI implements ScrabbleAI {
     private GateKeeper gatekeeper;
-    private int valueFlag = 30; //This is the point threshold that if we find a word worth this many points we play it immediately
+    private int valueFlag = 40; //This is the point threshold that if we find a word worth this many points we play it immediately
 
     //These variables are for passing between methods easier
     private String bestWord;
