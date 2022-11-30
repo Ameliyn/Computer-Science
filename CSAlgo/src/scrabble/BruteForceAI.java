@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class BruteForceAI implements ScrabbleAI {
     private GateKeeper gatekeeper;
-    private int valueFlag = 40; //This is the point threshold that if we find a word worth this many points we play it immediately
+    private int valueFlag = 45; //This is the point threshold that if we find a word worth this many points we play it immediately
 
     //These variables are for passing between methods easier
     private String bestWord;
@@ -46,9 +46,9 @@ public class BruteForceAI implements ScrabbleAI {
 
             //generate more permutations of lower length words
             //(EX. hand = "ABCDEF" for length 2 could generate "AB, DE, BA, FC")
-            if(wordLength == 2) GeneratePermutations(hand, wordLength, 4);
-            else if(wordLength == 3) GeneratePermutations(hand, wordLength, 3);
-            else if(wordLength == 4 || wordLength == 5) GeneratePermutations(hand, wordLength, 2);
+            if(wordLength == 2) GeneratePermutations(hand, wordLength, 5);
+            else if(wordLength == 3) GeneratePermutations(hand, wordLength, 5);
+            else if(wordLength == 4 || wordLength == 5) GeneratePermutations(hand, wordLength, 5);
             else GeneratePermutations(hand, wordLength, 1);
 
             TestOptions();

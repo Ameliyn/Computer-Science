@@ -18,7 +18,7 @@ public class ScrabbleTournament {
     }
 
     public static void main(String[] args) throws IllegalMoveException {
-        new ScrabbleTournament().runMany(8);
+        new ScrabbleTournament().runMany(4);
     }
 
     public void runMany(int numRuns) throws IllegalMoveException{
