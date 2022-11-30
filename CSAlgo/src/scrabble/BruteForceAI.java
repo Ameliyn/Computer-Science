@@ -54,7 +54,6 @@ public class BruteForceAI implements ScrabbleAI {
             TestOptions();
             if(bestValue > valueFlag) return new PlayWord(bestWord, bestLocation, bestDirection);
         }
-
         //always try to play, but if we can't, exchange tiles
         if(bestValue > -1) return new PlayWord(bestWord, bestLocation, bestDirection);
         return new ExchangeTiles(new boolean[]{true, true, true, true, true, true, true});
