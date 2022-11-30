@@ -23,7 +23,7 @@ public class QuickHull {
 
     public QuickHull(List<Point2D> points) {
         this.points = points;
-        hull = findHull(leftSet(points, extrema()), extrema());
+        hull = findHull(findHull(leftSet(this.points, extrema()), extrema()), extrema().reversed());
         // TODO You have to write this constructor. Its job is to set the instance variables points and hull.
         // This isn't a complicated constructor -- it contains no loops or recursion -- but you have to call
         // several other methods (including methods in other classes).
