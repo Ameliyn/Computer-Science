@@ -45,10 +45,10 @@ public class BruteForceAI implements ScrabbleAI {
         for(int wordLength = 2; wordLength < hand.size()-2; wordLength++){
 
             //generate more permutations of lower length words
-            //(EX. hand = "ABCDEF" for length 2 generate "AB, DE, BA, FC")
-            if(wordLength < 3) GeneratePermutations(hand, wordLength, 4);
-            else if(wordLength < 4) GeneratePermutations(hand, wordLength, 3);
-            else if(wordLength < 6) GeneratePermutations(hand, wordLength, 2);
+            //(EX. hand = "ABCDEF" for length 2 could generate "AB, DE, BA, FC")
+            if(wordLength == 2) GeneratePermutations(hand, wordLength, 4);
+            else if(wordLength == 3) GeneratePermutations(hand, wordLength, 3);
+            else if(wordLength == 4 || wordLength == 5) GeneratePermutations(hand, wordLength, 2);
             else GeneratePermutations(hand, wordLength, 1);
 
             TestOptions();
@@ -72,9 +72,19 @@ public class BruteForceAI implements ScrabbleAI {
      * @param numOptions number of sets of character lists
      */
     private void GeneratePermutations(ArrayList<Character> hand, int length, int numOptions){
+        if(length > hand.size()) return;
         tempOptions = new ArrayList<String>();
         ArrayList<String> optionSet = new ArrayList<String>();
         Random r = new Random();
+        if(hand.size() == length){
+            String s = "";
+            for(int i = 0; i < length; i++){
+                s += hand.get(i);
+            }
+            optionSet.add(s);
+            FindPermutations(s, 0, s.length()-1);
+            return;
+        }
         for(int i = 0; i < numOptions; i++){
             String s = "";
             boolean[] used = new boolean[hand.size()];

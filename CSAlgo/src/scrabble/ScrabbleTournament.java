@@ -1,6 +1,7 @@
 package scrabble;
 
 import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.Stopwatch;
 
 /** A tournament between ScrabbleAIs. Edit the constructor to change the contestants. */
 public class ScrabbleTournament {
@@ -17,7 +18,7 @@ public class ScrabbleTournament {
     }
 
     public static void main(String[] args) throws IllegalMoveException {
-        new ScrabbleTournament().runMany(4);
+        new ScrabbleTournament().runMany(8);
     }
 
     public void runMany(int numRuns) throws IllegalMoveException{
@@ -68,16 +69,29 @@ public class ScrabbleTournament {
         Board board = new Board();
         a.setGateKeeper(new GateKeeper(board, 0));
         b.setGateKeeper(new GateKeeper(board, 1));
+        long t1 = 0;//skye added
+        long t2 = 0;//skye added
+        long tempStart;//skye added
+        int numMoves1 = 0;
+        int numMoves2 = 0;
         while (!board.gameIsOver()) {
+            tempStart = System.nanoTime();//skye added
             playMove(board, a, 0);
+            t1 += System.nanoTime() - tempStart;//skye added
+            numMoves1++;
             if (!board.gameIsOver()) {
+                tempStart = System.nanoTime();//skye added
                 playMove(board, b, 1);
+                t2 += System.nanoTime() - tempStart;//skye added
+                numMoves2++;
             }
         }
         int s0 = board.getScore(0);
         int s1 = board.getScore(1);
         StdOut.print(board);
         StdOut.println("Final score: " + a + " " + s0 + ", " + b + " " + s1);
+        StdOut.println("Time Taken: " + a + " " + (float)t1/1000000000 + "s (" + ((float)t1 / (t1 + t2) * 100) + "%), " + b + " " + (float)t2/1000000000 + "s (" + ((float)t2 / (t1 + t2) * 100) + "%)"); //skye added
+        StdOut.println("Avg Move Time: " + a + " " + (float)t1/numMoves1/1000000000 + "s, " + b + " " + (float)t2/numMoves2/1000000000 + "s");
         StdOut.println();
         if (s0 > s1) {
             return new double[] {1, 0};
