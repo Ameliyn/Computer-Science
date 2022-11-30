@@ -12,12 +12,31 @@ public class ScrabbleTournament {
         // List contestants here
         players = new ScrabbleAI[] {
           new Incrementalist(),
-          new BetterAI()
+          new BruteForceAI()
         };
     }
 
     public static void main(String[] args) throws IllegalMoveException {
-        new ScrabbleTournament().run();
+        new ScrabbleTournament().runMany(4);
+    }
+
+    public void runMany(int numRuns) throws IllegalMoveException{
+        double[] scores = new double[players.length];
+        for(int i = 0; i < numRuns; i++){
+            if(i%2 == 0){
+                double[] result = playGame(players[0], players[1]);
+                scores[0] += result[0];
+                scores[1] += result[1];
+            }
+            else{
+                double[] result = playGame(players[1], players[0]);
+                scores[0] += result[1];
+                scores[1] += result[0];
+            }
+        }
+        for (int i = 0; i < players.length; i++) {
+            StdOut.println(players[i].toString() + ": " + scores[i]);
+        }
     }
 
     /**
