@@ -120,7 +120,9 @@ public class ScrabbleBothAI {
      * Change the first line of this method to change the AIs
      */
     private void Reset(int firstPlayer){
+        //CHOOSE ON THIS LINE
         Contestants = new ScrabbleAI[]{new Incrementalist(), new BruteForceAI()};
+        
         board = new Board();
         if(firstPlayer % 2 == 0){ai1 = Contestants[0]; ai2 = Contestants[1];}
         else{ai1 = Contestants[1]; ai2 = Contestants[0];}
