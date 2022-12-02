@@ -1,7 +1,6 @@
 package scrabble;
 
 import edu.princeton.cs.algs4.StdDraw;
-import edu.princeton.cs.algs4.StdOut;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -104,82 +103,111 @@ public class ScrabbleBothAI {
 
     private ScrabbleAI ai2;
 
+    private ScrabbleAI[] Contestants;
+
     /**
      * Change this constructor to decide which AI is which player
      */
     public ScrabbleBothAI() {
+        Reset(0);
+    }
+
+    private void Reset(int firstPlayer){
+        Contestants = new ScrabbleAI[]{new Incrementalist(), new BruteForceAI()};
         board = new Board();
-        ai1 = new Incrementalist(); // Opponent
-        ai1.setGateKeeper(new GateKeeper(board, 0));
-        ai2 = new Incrementalist(); // Opponent
-        ai2.setGateKeeper(new GateKeeper(board, 1));
+        if(firstPlayer % 2 == 0){
+            ai1 = Contestants[0]; // Opponent
+            ai1.setGateKeeper(new GateKeeper(board, 0));
+            ai2 = Contestants[1]; // Opponent
+            ai2.setGateKeeper(new GateKeeper(board, 1));
+        }
+        else{
+            ai1 = Contestants[1]; // Opponent
+            ai1.setGateKeeper(new GateKeeper(board, 0));
+            ai2 = Contestants[0]; // Opponent
+            ai2.setGateKeeper(new GateKeeper(board, 1));
+        }
         mode = Mode.AI1_PLAYING;
     }
 
     public static void main(String[] args) throws IllegalMoveException {
         new ScrabbleBothAI().run();
     }
-
+    private int numRuns;
+    private float wins1;
+    private float wins2;
+    private int score1;
+    private int score2;
     /** Runs the game. Crashes if the AI opponent plays an illegal move. */
     private void run() throws IllegalMoveException {
-        StdDraw.setCanvasSize(805, 525);
-        StdDraw.setXscale(-1.5, 23.5);
-        StdDraw.setYscale(-1.5, 15.5);
-        StdDraw.enableDoubleBuffering();
-        boardCursor = Location.CENTER;
-        boardCursorDirection = Location.HORIZONTAL;
-        draw();
-        while (mode != Mode.GAME_OVER) {
-            if (mode == Mode.AI1_PLAYING) {
-                draw();
-                ScrabbleMove move = ai1.chooseMove();
-                // This fixes a security hole where the AI player returns an instance of a new class implementing
-                // ScrabbleMove, which then manipulates the Board.
-                if (!(move instanceof PlayWord || move instanceof ExchangeTiles)){
-                    throw new IllegalMoveException("Bogus ScrabbleMove implementation detected!");
-                }
-                Location[] place = move.play(board, 0);
-                if (place != null) {
-                    boardCursor = place[0];
-                    boardCursorDirection = place[1];
-                }
-                if (board.gameIsOver()) {
-                    mode = Mode.GAME_OVER;
+        numRuns = 0;
+        wins1 = 0;
+        wins2 = 0;
+        score1 = 0;
+        score2 = 0;
+        while(true){
+            StdDraw.setCanvasSize(805, 525);
+            StdDraw.setXscale(-1.5, 23.5);
+            StdDraw.setYscale(-1.5, 15.5);
+            StdDraw.enableDoubleBuffering();
+            boardCursor = Location.CENTER;
+            boardCursorDirection = Location.HORIZONTAL;
+            draw();
+            while (mode != Mode.GAME_OVER) {
+                if (mode == Mode.AI1_PLAYING) {
+                    draw();
+                    ScrabbleMove move = ai1.chooseMove();
+                    // This fixes a security hole where the AI player returns an instance of a new class implementing
+                    // ScrabbleMove, which then manipulates the Board.
+                    if (!(move instanceof PlayWord || move instanceof ExchangeTiles)){
+                        throw new IllegalMoveException("Bogus ScrabbleMove implementation detected!");
+                    }
+                    Location[] place = move.play(board, 0);
+                    if (place != null) {
+                        boardCursor = place[0];
+                        boardCursorDirection = place[1];
+                    }
+                    if (board.gameIsOver()) {
+                        mode = Mode.GAME_OVER;
+                    } else {
+                        mode = Mode.AI2_PLAYING;
+                    }
+                    draw();
                 } else {
-                    mode = Mode.AI2_PLAYING;
+                    draw();
+                    ScrabbleMove move = ai2.chooseMove();
+                    // This fixes a security hole where the AI player returns an instance of a new class implementing
+                    // ScrabbleMove, which then manipulates the Board.
+                    if (!(move instanceof PlayWord || move instanceof ExchangeTiles)){
+                        throw new IllegalMoveException("Bogus ScrabbleMove implementation detected!");
+                    }
+                    Location[] place = move.play(board, 1);
+                    if (place != null) {
+                        boardCursor = place[0];
+                        boardCursorDirection = place[1];
+                    }
+                    if (board.gameIsOver()) {
+                        mode = Mode.GAME_OVER;
+                    } else {
+                        mode = Mode.AI1_PLAYING;
+                    }
+                    draw();
                 }
-                draw();
-            } else {
-                draw();
-                ScrabbleMove move = ai2.chooseMove();
-                // This fixes a security hole where the AI player returns an instance of a new class implementing
-                // ScrabbleMove, which then manipulates the Board.
-                if (!(move instanceof PlayWord || move instanceof ExchangeTiles)){
-                    throw new IllegalMoveException("Bogus ScrabbleMove implementation detected!");
-                }
-                Location[] place = move.play(board, 1);
-                if (place != null) {
-                    boardCursor = place[0];
-                    boardCursorDirection = place[1];
-                }
-                if (board.gameIsOver()) {
-                    mode = Mode.GAME_OVER;
-                } else {
-                    mode = Mode.AI1_PLAYING;
-                }
-                draw();
             }
-        }
+            numRuns++;
 
-        int c;
-        do{
-            c = getKeyPressed();
-            if(c == VK_ENTER){
-                c = 'q';
-                new ScrabbleBothAI().run();
-            }
-        }while(c != 'q');
-        System.exit(0);
+            int c;
+            do{
+                c = getKeyPressed();
+                if(c == 'q')
+                    System.exit(0);
+                if(c == VK_ENTER){
+                    c = 'q';
+                    Reset(numRuns);
+                }
+            }while(c != 'q');
+
+        }
     }
 
     /** Prepare for the user to select tiles (if any) to exchange. */
@@ -276,12 +304,48 @@ public class ScrabbleBothAI {
             StdDraw.setPenColor(Color.WHITE);
             StdDraw.setFont(INTERFACE_FONT);
             StdDraw.text(19, 6, "Game over.");
-            if(board.getScore(0) > board.getScore(1))
+            if(numRuns % 2 == 0) {
+                score1 += board.getScore(0);
+                score2 += board.getScore(1);
+            }
+            else {
+                score2 += board.getScore(0);
+                score1 += board.getScore(1);
+            }
+            if(board.getScore(0) > board.getScore(1)){
+                if(numRuns % 2 == 0) {
+                    wins1 += 1;
+                }
+                else {
+                    wins2 += 1;
+                }
                 StdDraw.text(19, 5, ai1.toString().substring(9).split("@")[0] + " Wins!");
-            else
+            }
+            else if(board.getScore(1) > board.getScore(0))
+            {
+                if(numRuns % 2 == 0) {
+                    wins2 += 1;
+                }
+                else {
+                    wins1 += 1;
+                }
                 StdDraw.text(19, 5, ai2.toString().substring(9).split("@")[0] + " Wins!");
-            StdDraw.text(19, 4, "Press enter to play again.");
-            StdDraw.text(19, 3, "Press q to quit.");
+            }
+            else{
+                StdDraw.text(19, 5, "It's a tie!");
+                wins1 += 0.5;
+                wins2 += 0.5;
+            }
+            if(numRuns % 2 == 0){
+                StdDraw.text(19, 4, ai1.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + score1 + ")");
+                StdDraw.text(19, 3, ai2.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + score2 + ")");
+            }
+            else{
+                StdDraw.text(19, 4, ai1.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + score2 + ")");
+                StdDraw.text(19, 3, ai2.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + score1 + ")");
+            }
+            StdDraw.text(19, 2, "Press enter to play again.");
+            StdDraw.text(19, 1, "Press q to quit.");
         } else if (mode == Mode.AI1_PLAYING) {
             StdDraw.setPenColor(Color.WHITE);
             StdDraw.setFont(INTERFACE_FONT);
