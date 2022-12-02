@@ -1,6 +1,7 @@
 package scrabble;
 
 import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.StdOut;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -105,39 +106,33 @@ public class ScrabbleBothAI {
 
     private ScrabbleAI[] Contestants;
 
-    /**
-     * Change this constructor to decide which AI is which player
-     */
+    private int numRuns;
+    private float wins1;
+    private float wins2;
+    private int score1;
+    private int score2;
+
     public ScrabbleBothAI() {
         Reset(0);
     }
 
+    /**
+     * Change the first line of this method to change the AIs
+     */
     private void Reset(int firstPlayer){
         Contestants = new ScrabbleAI[]{new Incrementalist(), new BruteForceAI()};
         board = new Board();
-        if(firstPlayer % 2 == 0){
-            ai1 = Contestants[0]; // Opponent
-            ai1.setGateKeeper(new GateKeeper(board, 0));
-            ai2 = Contestants[1]; // Opponent
-            ai2.setGateKeeper(new GateKeeper(board, 1));
-        }
-        else{
-            ai1 = Contestants[1]; // Opponent
-            ai1.setGateKeeper(new GateKeeper(board, 0));
-            ai2 = Contestants[0]; // Opponent
-            ai2.setGateKeeper(new GateKeeper(board, 1));
-        }
+        if(firstPlayer % 2 == 0){ai1 = Contestants[0]; ai2 = Contestants[1];}
+        else{ai1 = Contestants[1]; ai2 = Contestants[0];}
+        ai1.setGateKeeper(new GateKeeper(board, 0));
+        ai2.setGateKeeper(new GateKeeper(board, 1));
         mode = Mode.AI1_PLAYING;
     }
 
     public static void main(String[] args) throws IllegalMoveException {
         new ScrabbleBothAI().run();
     }
-    private int numRuns;
-    private float wins1;
-    private float wins2;
-    private int score1;
-    private int score2;
+
     /** Runs the game. Crashes if the AI opponent plays an illegal move. */
     private void run() throws IllegalMoveException {
         numRuns = 0;
@@ -146,7 +141,7 @@ public class ScrabbleBothAI {
         score1 = 0;
         score2 = 0;
         while(true){
-            StdDraw.setCanvasSize(805, 525);
+            StdDraw.setCanvasSize(966, 630);
             StdDraw.setXscale(-1.5, 23.5);
             StdDraw.setYscale(-1.5, 15.5);
             StdDraw.enableDoubleBuffering();
@@ -200,7 +195,24 @@ public class ScrabbleBothAI {
             do{
                 c = getKeyPressed();
                 if(c == 'q')
+                {
+                    StdOut.println("-----FINAL STATS-----");
+                    if(numRuns % 2 == 1){
+                        StdOut.println(ai1.toString().substring(9).split("@")[0] + ": " + wins1 + " (Total: " + score1 +
+                                ", Average: " + ((float)score1 / numRuns) + ")");
+                        StdOut.println(ai2.toString().substring(9).split("@")[0] + ": " + wins2 + " (Total: " + score2 +
+                                ", Average: " + ((float)score2 / numRuns) +  ")");
+                    }
+                    else{
+                        StdOut.println(ai1.toString().substring(9).split("@")[0] + ": " + wins2 + " (Total: " + score2 +
+                                ", Average: " + ((float)score2 / numRuns) + ")");
+                        StdOut.println(ai2.toString().substring(9).split("@")[0] + ": " + wins1 + " (Total: " + score1 +
+                                ", Average: " + ((float)score1 / numRuns) +  ")");
+                    }
+                    StdOut.println("Score Differential: " + Math.abs(score1 - score2) + " over " + (numRuns) +
+                            " games (" + (Math.round((Math.abs(score1-score2) * 100.0) / (numRuns)) / 100) + " per game)");
                     System.exit(0);
+                }
                 if(c == VK_ENTER){
                     c = 'q';
                     Reset(numRuns);
@@ -303,7 +315,6 @@ public class ScrabbleBothAI {
         } else if (mode == Mode.GAME_OVER) {
             StdDraw.setPenColor(Color.WHITE);
             StdDraw.setFont(INTERFACE_FONT);
-            StdDraw.text(19, 6, "Game over.");
             if(numRuns % 2 == 0) {
                 score1 += board.getScore(0);
                 score2 += board.getScore(1);
@@ -319,7 +330,7 @@ public class ScrabbleBothAI {
                 else {
                     wins2 += 1;
                 }
-                StdDraw.text(19, 5, ai1.toString().substring(9).split("@")[0] + " Wins!");
+                StdDraw.text(19, 6, ai1.toString().substring(9).split("@")[0] + " Wins!");
             }
             else if(board.getScore(1) > board.getScore(0))
             {
@@ -329,23 +340,37 @@ public class ScrabbleBothAI {
                 else {
                     wins1 += 1;
                 }
-                StdDraw.text(19, 5, ai2.toString().substring(9).split("@")[0] + " Wins!");
+                StdDraw.text(19, 6, ai2.toString().substring(9).split("@")[0] + " Wins!");
             }
             else{
-                StdDraw.text(19, 5, "It's a tie!");
+                StdDraw.text(19, 6, "It's a tie!");
                 wins1 += 0.5;
                 wins2 += 0.5;
             }
             if(numRuns % 2 == 0){
-                StdDraw.text(19, 4, ai1.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + score1 + ")");
-                StdDraw.text(19, 3, ai2.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + score2 + ")");
+                StdDraw.text(19, 5, ai1.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + score1 + ")");
+                StdDraw.text(19, 4, ai2.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + score2 + ")");
             }
             else{
-                StdDraw.text(19, 4, ai1.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + score2 + ")");
-                StdDraw.text(19, 3, ai2.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + score1 + ")");
+                StdDraw.text(19, 5, ai1.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + score2 + ")");
+                StdDraw.text(19, 4, ai2.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + score1 + ")");
             }
+            StdDraw.text(19, 3, "Score Differential: " + Math.abs(score1 - score2) + " over " + (numRuns+1) + " games");
             StdDraw.text(19, 2, "Press enter to play again.");
             StdDraw.text(19, 1, "Press q to quit.");
+
+            //print to console
+            StdOut.println("-----GAME " + (numRuns+1) + "-----");
+            StdOut.println(board);
+            if(numRuns %2 == 0){
+                StdOut.println(ai1.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + board.getScore(0) + ")");
+                StdOut.println(ai2.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + board.getScore(1) + ")");
+            }
+            else{
+                StdOut.println(ai2.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + board.getScore(1) + ")");
+                StdOut.println(ai1.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + board.getScore(0) + ")");
+            }
+            StdOut.println();
         } else if (mode == Mode.AI1_PLAYING) {
             StdDraw.setPenColor(Color.WHITE);
             StdDraw.setFont(INTERFACE_FONT);
