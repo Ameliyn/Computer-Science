@@ -1,7 +1,6 @@
 package scrabble;
 
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.Stopwatch;
 
 /** A tournament between ScrabbleAIs. Edit the constructor to change the contestants. */
 public class ScrabbleTournament {
@@ -12,8 +11,8 @@ public class ScrabbleTournament {
     public ScrabbleTournament() {
         // List contestants here
         players = new ScrabbleAI[] {
-          new BruteForceAI(),
-          new BruteForceAI()
+          new BrutusV2_0(),
+          new BrutusV2_0()
         };
     }
 

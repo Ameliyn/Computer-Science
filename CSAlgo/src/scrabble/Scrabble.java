@@ -101,7 +101,7 @@ public class Scrabble {
 
     public Scrabble() {
         board = new Board();
-        ai = new BruteForceAI(); // Opponent
+        ai = new BrutusV2_0(); // Opponent
         ai.setGateKeeper(new GateKeeper(board, 0));
         mode = Mode.AI_PLAYING;
     }

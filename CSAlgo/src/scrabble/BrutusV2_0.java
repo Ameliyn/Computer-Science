@@ -3,7 +3,7 @@ package scrabble;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class BruteForceAI implements ScrabbleAI {
+public class BrutusV2_0 implements ScrabbleAI {
     private GateKeeper gatekeeper;
     private int valueFlag = 45; //This is the point threshold that if we find a word worth this many points we play it immediately
 
@@ -14,9 +14,9 @@ public class BruteForceAI implements ScrabbleAI {
     private Location bestDirection;
     private ArrayList<String> tempOptions;
 
-    public BruteForceAI(){}
+    public BrutusV2_0(){}
 
-    public BruteForceAI(int valueFlag){
+    public BrutusV2_0(int valueFlag){
         this.valueFlag = valueFlag;
     }
 
