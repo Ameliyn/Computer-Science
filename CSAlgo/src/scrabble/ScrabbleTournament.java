@@ -12,31 +12,36 @@ public class ScrabbleTournament {
     public ScrabbleTournament() {
         // List contestants here
         players = new ScrabbleAI[] {
-          new Incrementalist(),
+          new BruteForceAI(),
           new BruteForceAI()
         };
     }
 
     public static void main(String[] args) throws IllegalMoveException {
-        new ScrabbleTournament().runMany(4);
+        new ScrabbleTournament().runMany(8);
     }
 
     public void runMany(int numRuns) throws IllegalMoveException{
         double[] scores = new double[players.length];
+        double[] values = new double[players.length];
         for(int i = 0; i < numRuns; i++){
             if(i%2 == 0){
                 double[] result = playGame(players[0], players[1]);
                 scores[0] += result[0];
                 scores[1] += result[1];
+                values[0] += result[2];
+                values[1] += result[3];
             }
             else{
                 double[] result = playGame(players[1], players[0]);
                 scores[0] += result[1];
                 scores[1] += result[0];
+                values[0] += result[3];
+                values[1] += result[2];
             }
         }
         for (int i = 0; i < players.length; i++) {
-            StdOut.println(players[i].toString() + ": " + scores[i]);
+            StdOut.println(players[i].toString() + ": " + scores[i] + ", Avg: " + ((float)values[i] / numRuns));
         }
     }
 
@@ -94,12 +99,12 @@ public class ScrabbleTournament {
         StdOut.println("Avg Move Time: " + a + " " + (float)t1/numMoves1/1000000000 + "s, " + b + " " + (float)t2/numMoves2/1000000000 + "s");
         StdOut.println();
         if (s0 > s1) {
-            return new double[] {1, 0};
+            return new double[] {1, 0, s0, s1};
         } else if (s0 < s1) {
-            return new double[] {0, 1};
+            return new double[] {0, 1, s0, s1};
         }
         // Tie -- half credit to each player.
-        return new double[] {0.5, 0.5};
+        return new double[] {0.5, 0.5, s0, s1};
     }
 
     /**

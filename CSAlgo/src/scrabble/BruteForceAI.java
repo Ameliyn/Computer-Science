@@ -28,12 +28,12 @@ public class BruteForceAI implements ScrabbleAI {
         ArrayList<Character> hand = gatekeeper.getHand();
 
         //Treat wilds as 'E'
-        for(int i = 0; i < hand.size(); i++){
-            if(hand.get(i) == '_'){
-                hand.remove(i);
-                hand.add('E');
-            }
-        }
+//        for(int i = 0; i < hand.size(); i++){
+//            if(hand.get(i) == '_'){
+//                hand.remove(i);
+//                hand.add('E');
+//            }
+//        }
 
         //allow for the word to play with a single character of other words
         hand.add(' ');
@@ -58,6 +58,7 @@ public class BruteForceAI implements ScrabbleAI {
         return new ExchangeTiles(new boolean[]{true, true, true, true, true, true, true});
     }
 
+    private char[] wildChecks = new char[]{'A','E','I','O','U', 'S', 'R', 'C', 'T', 'N', 'L'};
     /**
      * GeneratePermutations takes a list of characters and a length and generates a number of permutations all with
      * parameter length and stores them in tempOptions
@@ -80,7 +81,21 @@ public class BruteForceAI implements ScrabbleAI {
                 s += hand.get(i);
             }
             optionSet.add(s);
-            FindPermutations(s, 0, s.length()-1);
+            if(s.contains("_")){
+                for(char c : wildChecks){
+                    FindPermutations(s.replace('_',c), 0, s.length()-1);
+                    FindPermutations(s+" ", 0, s.length()-1);
+                    FindPermutations(s+"  ", 0, s.length()-1);
+                    FindPermutations(s+"   ", 0, s.length()-1);
+                }
+            }
+            else{
+                FindPermutations(s, 0, s.length()-1);
+                FindPermutations(s+" ", 0, s.length()-1);
+                FindPermutations(s+"  ", 0, s.length()-1);
+                FindPermutations(s+"   ", 0, s.length()-1);
+            }
+
             return;
         }
         for(int i = 0; i < numOptions; i++){
@@ -99,7 +114,21 @@ public class BruteForceAI implements ScrabbleAI {
             }
             if(!optionSet.contains(s)){
                 optionSet.add(s);
-                FindPermutations(s, 0, s.length()-1);
+                if(s.contains("_")){
+                    for(char c : wildChecks){
+                        FindPermutations(s.replace('_',c), 0, s.length()-1);
+                        FindPermutations(s+" ", 0, s.length()-1);
+                        FindPermutations(s+"  ", 0, s.length()-1);
+                        FindPermutations(s+"   ", 0, s.length()-1);
+                    }
+                }
+                else{
+                    FindPermutations(s, 0, s.length()-1);
+                    FindPermutations(s+" ", 0, s.length()-1);
+                    FindPermutations(s+"  ", 0, s.length()-1);
+                    FindPermutations(s+"   ", 0, s.length()-1);
+                }
+
             }
             else{
                 i--;
