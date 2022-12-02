@@ -1,5 +1,7 @@
 package scrabble;
 
+import edu.princeton.cs.algs4.StdOut;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -36,19 +38,17 @@ public class BrutusV2_0 implements ScrabbleAI {
 //        }
 
         //allow for the word to play with a single character of other words
-        hand.add(' ');
-
         bestWord = "";
         bestValue = -1;
         //Only allow the AI to play hand.Size - 2 length words because the bigger the word, the more the permutations
-        for(int wordLength = 2; wordLength < hand.size()-2; wordLength++){
+        for(int wordLength = 1; wordLength < hand.size()-2; wordLength++){
 
             //generate more permutations of lower length words
             //(EX. hand = "ABCDEF" for length 2 could generate "AB, DE, BA, FC")
-            if(wordLength == 2) GeneratePermutations(hand, wordLength, 5);
-            else if(wordLength == 3) GeneratePermutations(hand, wordLength, 5);
-            else if(wordLength == 4 || wordLength == 5) GeneratePermutations(hand, wordLength, 5);
-            else GeneratePermutations(hand, wordLength, 3);
+            if(wordLength == 1) GeneratePermutations(hand, wordLength, hand.size());
+            else if(wordLength == 2) GeneratePermutations(hand, wordLength, hand.size()*hand.size()-1);
+            else if(wordLength < 6) GeneratePermutations(hand, wordLength, 5);
+            else GeneratePermutations(hand, wordLength, 2);
 
             TestOptions();
             if(bestValue > valueFlag) return new PlayWord(bestWord, bestLocation, bestDirection);
@@ -75,6 +75,7 @@ public class BrutusV2_0 implements ScrabbleAI {
         tempOptions = new ArrayList<String>();
         ArrayList<String> optionSet = new ArrayList<String>();
         Random r = new Random();
+
         if(hand.size() == length){
             String s = "";
             for(int i = 0; i < length; i++){
@@ -87,6 +88,9 @@ public class BrutusV2_0 implements ScrabbleAI {
                     FindPermutations(s+" ", 0, s.length()-1);
                     FindPermutations(s+"  ", 0, s.length()-1);
                     FindPermutations(s+"   ", 0, s.length()-1);
+                    if(hand.size() < 4){
+                        FindPermutations(s+"    ", 0, s.length()-1);
+                    }
                 }
             }
             else{
@@ -94,32 +98,23 @@ public class BrutusV2_0 implements ScrabbleAI {
                 FindPermutations(s+" ", 0, s.length()-1);
                 FindPermutations(s+"  ", 0, s.length()-1);
                 FindPermutations(s+"   ", 0, s.length()-1);
+                if(hand.size() < 4){
+                    FindPermutations(s+"    ", 0, s.length()-1);
+                }
             }
-
-            return;
         }
-        for(int i = 0; i < numOptions; i++){
-            String s = "";
-            boolean[] used = new boolean[hand.size()];
-
-            for(int j = 0; j < length; j++){
-                int k = Math.abs(r.nextInt() % hand.size());
-                if(!used[k]){
-                    used[k] = true;
-                    s += hand.get(k);
-                }
-                else{
-                    j--;
-                }
-            }
-            if(!optionSet.contains(s)){
-                optionSet.add(s);
+        else if(length == 1){
+            for(int i = 0; i < hand.size(); i++){
+                String s = hand.get(i).toString();
                 if(s.contains("_")){
                     for(char c : wildChecks){
                         FindPermutations(s.replace('_',c), 0, s.length()-1);
                         FindPermutations(s+" ", 0, s.length()-1);
                         FindPermutations(s+"  ", 0, s.length()-1);
                         FindPermutations(s+"   ", 0, s.length()-1);
+                        if(hand.size() < 4){
+                            FindPermutations(s+"    ", 0, s.length()-1);
+                        }
                     }
                 }
                 else{
@@ -127,11 +122,92 @@ public class BrutusV2_0 implements ScrabbleAI {
                     FindPermutations(s+" ", 0, s.length()-1);
                     FindPermutations(s+"  ", 0, s.length()-1);
                     FindPermutations(s+"   ", 0, s.length()-1);
+                    if(hand.size() < 4){
+                        FindPermutations(s+"    ", 0, s.length()-1);
+                    }
                 }
-
             }
-            else{
-                i--;
+        }
+        else if(length == 2){
+            for(int i = 0; i < hand.size(); i++){
+                for(int j = 0; j < hand.size(); j++){
+                    String s = "" + hand.get(i) + hand.get(j);
+                    if(i != j && !optionSet.contains(s)){
+                        optionSet.add(s);
+                        if(s.contains("_")){
+                            for(char c : wildChecks){
+                                FindPermutations(s.replace('_',c), 0, s.length()-1);
+                                FindPermutations(s+" ", 0, s.length()-1);
+                                FindPermutations(s+"  ", 0, s.length()-1);
+                                FindPermutations(s+"   ", 0, s.length()-1);
+                                if(hand.size() < 4){
+                                    FindPermutations(s+"    ", 0, s.length()-1);
+                                }
+                            }
+                        }
+                        else{
+                            FindPermutations(s, 0, s.length()-1);
+                            FindPermutations(s+" ", 0, s.length()-1);
+                            FindPermutations(s+"  ", 0, s.length()-1);
+                            FindPermutations(s+"   ", 0, s.length()-1);
+                            if(hand.size() < 4){
+                                FindPermutations(s+"    ", 0, s.length()-1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else{
+            int randomCheck = 0;
+            for(int i = 0; i < numOptions; i++){
+
+                String s = "";
+                boolean[] used = new boolean[hand.size()];
+
+                for(int j = 0; j < length; j++){
+                    int k = Math.abs(r.nextInt() % hand.size());
+                    if(!used[k]){
+                        used[k] = true;
+                        s += hand.get(k);
+                    }
+                    else{
+                        j--;
+                    }
+                }
+                if(!optionSet.contains(s)){
+                    randomCheck = 0;
+                    optionSet.add(s);
+                    if(s.contains("_")){
+                        for(char c : wildChecks){
+                            FindPermutations(s.replace('_',c), 0, s.length()-1);
+                            FindPermutations(s+" ", 0, s.length()-1);
+                            FindPermutations(s+"  ", 0, s.length()-1);
+                            FindPermutations(s+"   ", 0, s.length()-1);
+                            if(hand.size() < 4){
+                                FindPermutations(s+"    ", 0, s.length()-1);
+                            }
+                        }
+                    }
+                    else{
+                        FindPermutations(s, 0, s.length()-1);
+                        FindPermutations(s+" ", 0, s.length()-1);
+                        FindPermutations(s+"  ", 0, s.length()-1);
+                        FindPermutations(s+"   ", 0, s.length()-1);
+                        if(hand.size() < 4){
+                            FindPermutations(s+"    ", 0, s.length()-1);
+                        }
+                    }
+
+                }
+                else{
+                    randomCheck++;
+                    if(randomCheck > 30) {
+                        StdOut.println("RANDOMNESS BROKE");
+                        break;
+                    }
+                    i--;
+                }
             }
         }
     }
