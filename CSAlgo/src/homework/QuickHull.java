@@ -3,9 +3,7 @@ package homework;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdRandom;
-import edu.princeton.cs.algs4.Topological;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,10 +21,8 @@ public class QuickHull {
 
     public QuickHull(List<Point2D> points) {
         this.points = points;
-        hull = findHull(findHull(leftSet(this.points, extrema()), extrema()), extrema().reversed());
-        // TODO You have to write this constructor. Its job is to set the instance variables points and hull.
-        // This isn't a complicated constructor -- it contains no loops or recursion -- but you have to call
-        // several other methods (including methods in other classes).
+        hull = findHull(leftSet(this.points, extrema()), extrema());
+        hull.addAll(findHull(leftSet(this.points, extrema().reversed()), extrema().reversed()));
     }
 
     /**
