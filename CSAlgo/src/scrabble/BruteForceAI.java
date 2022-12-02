@@ -14,8 +14,7 @@ public class BruteForceAI implements ScrabbleAI {
     private Location bestDirection;
     private ArrayList<String> tempOptions;
 
-    public BruteForceAI(){
-    }
+    public BruteForceAI(){}
 
     public BruteForceAI(int valueFlag){
         this.valueFlag = valueFlag;
@@ -49,7 +48,7 @@ public class BruteForceAI implements ScrabbleAI {
             if(wordLength == 2) GeneratePermutations(hand, wordLength, 5);
             else if(wordLength == 3) GeneratePermutations(hand, wordLength, 5);
             else if(wordLength == 4 || wordLength == 5) GeneratePermutations(hand, wordLength, 5);
-            else GeneratePermutations(hand, wordLength, 1);
+            else GeneratePermutations(hand, wordLength, 3);
 
             TestOptions();
             if(bestValue > valueFlag) return new PlayWord(bestWord, bestLocation, bestDirection);
