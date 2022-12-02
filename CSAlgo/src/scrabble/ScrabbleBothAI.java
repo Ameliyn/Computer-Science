@@ -111,6 +111,8 @@ public class ScrabbleBothAI {
     private float wins2;
     private int score1;
     private int score2;
+    private String ai1Name;
+    private String ai2Name;
 
     public ScrabbleBothAI() {
         Reset(0);
@@ -126,6 +128,9 @@ public class ScrabbleBothAI {
         board = new Board();
         if(firstPlayer % 2 == 0){ai1 = Contestants[0]; ai2 = Contestants[1];}
         else{ai1 = Contestants[1]; ai2 = Contestants[0];}
+        ai1Name = ai1.toString().substring(9).split("@")[0];
+        ai2Name = ai2.toString().substring(9).split("@")[0];
+        
         ai1.setGateKeeper(new GateKeeper(board, 0));
         ai2.setGateKeeper(new GateKeeper(board, 1));
         mode = Mode.AI1_PLAYING;
@@ -200,15 +205,15 @@ public class ScrabbleBothAI {
                 {
                     StdOut.println("-----FINAL STATS-----");
                     if(numRuns % 2 == 1){
-                        StdOut.println(ai1.toString().substring(9).split("@")[0] + ": " + wins1 + " (Total: " + score1 +
+                        StdOut.println(ai1Name + ": " + wins1 + " (Total: " + score1 +
                                 ", Average: " + ((float)score1 / numRuns) + ")");
-                        StdOut.println(ai2.toString().substring(9).split("@")[0] + ": " + wins2 + " (Total: " + score2 +
+                        StdOut.println(ai2Name + ": " + wins2 + " (Total: " + score2 +
                                 ", Average: " + ((float)score2 / numRuns) +  ")");
                     }
                     else{
-                        StdOut.println(ai1.toString().substring(9).split("@")[0] + ": " + wins2 + " (Total: " + score2 +
+                        StdOut.println(ai1Name + ": " + wins2 + " (Total: " + score2 +
                                 ", Average: " + ((float)score2 / numRuns) + ")");
-                        StdOut.println(ai2.toString().substring(9).split("@")[0] + ": " + wins1 + " (Total: " + score1 +
+                        StdOut.println(ai2Name + ": " + wins1 + " (Total: " + score1 +
                                 ", Average: " + ((float)score1 / numRuns) +  ")");
                     }
                     StdOut.println("Score Differential: " + Math.abs(score1 - score2) + " over " + (numRuns) +
@@ -263,6 +268,7 @@ public class ScrabbleBothAI {
         // Draw board
         // The unusual backward ordering here has to do with overlapping outlines;
         // they produce a nice shadow effect when done in this order
+        StdDraw.text(7, 15, ai1Name + " vs " + ai2Name + " Game " + (numRuns+1));
         for (int r = Board.WIDTH - 1; r >= 0; r--) {
             for (int c = Board.WIDTH - 1; c >= 0; c--) {
                 // r and c are converted to x and y in this call
@@ -281,8 +287,8 @@ public class ScrabbleBothAI {
         }
         StdDraw.setPenColor(Color.WHITE);
         StdDraw.setFont(INTERFACE_FONT);
-        StdDraw.text(19, 13, ai1.toString().substring(9).split("@")[0] + ": " + board.getScore(0));
-        StdDraw.text(19, 10, ai2.toString().substring(9).split("@")[0] + ": " + board.getScore(1));
+        StdDraw.text(19, 13, ai1Name + ": " + board.getScore(0));
+        StdDraw.text(19, 10, ai2Name + ": " + board.getScore(1));
         if (mode == Mode.BOARD) {
             // Draw cursor
             drawBoardCursor();
@@ -332,7 +338,7 @@ public class ScrabbleBothAI {
                 else {
                     wins2 += 1;
                 }
-                StdDraw.text(19, 6, ai1.toString().substring(9).split("@")[0] + " Wins!");
+                StdDraw.text(19, 6, ai1Name + " Wins!");
             }
             else if(board.getScore(1) > board.getScore(0))
             {
@@ -342,7 +348,7 @@ public class ScrabbleBothAI {
                 else {
                     wins1 += 1;
                 }
-                StdDraw.text(19, 6, ai2.toString().substring(9).split("@")[0] + " Wins!");
+                StdDraw.text(19, 6, ai2Name + " Wins!");
             }
             else{
                 StdDraw.text(19, 6, "It's a tie!");
@@ -350,12 +356,12 @@ public class ScrabbleBothAI {
                 wins2 += 0.5;
             }
             if(numRuns % 2 == 0){
-                StdDraw.text(19, 5, ai1.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + score1 + ")");
-                StdDraw.text(19, 4, ai2.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + score2 + ")");
+                StdDraw.text(19, 5, ai1Name + ": " + wins1 + " (" + score1 + ")");
+                StdDraw.text(19, 4, ai2Name + ": " + wins2 + " (" + score2 + ")");
             }
             else{
-                StdDraw.text(19, 5, ai1.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + score2 + ")");
-                StdDraw.text(19, 4, ai2.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + score1 + ")");
+                StdDraw.text(19, 5, ai1Name + ": " + wins2 + " (" + score2 + ")");
+                StdDraw.text(19, 4, ai2Name + ": " + wins1 + " (" + score1 + ")");
             }
             StdDraw.text(19, 3, "Score Differential: " + Math.abs(score1 - score2) + " over " + (numRuns+1) + " games");
             StdDraw.text(19, 2, "Press enter to play again.");
@@ -365,22 +371,22 @@ public class ScrabbleBothAI {
             StdOut.println("-----GAME " + (numRuns+1) + "-----");
             StdOut.println(board);
             if(numRuns %2 == 0){
-                StdOut.println(ai1.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + board.getScore(0) + ")");
-                StdOut.println(ai2.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + board.getScore(1) + ")");
+                StdOut.println(ai1Name + ": " + wins1 + " (" + board.getScore(0) + ")");
+                StdOut.println(ai2Name + ": " + wins2 + " (" + board.getScore(1) + ")");
             }
             else{
-                StdOut.println(ai2.toString().substring(9).split("@")[0] + ": " + wins1 + " (" + board.getScore(1) + ")");
-                StdOut.println(ai1.toString().substring(9).split("@")[0] + ": " + wins2 + " (" + board.getScore(0) + ")");
+                StdOut.println(ai2Name + ": " + wins1 + " (" + board.getScore(1) + ")");
+                StdOut.println(ai1Name + ": " + wins2 + " (" + board.getScore(0) + ")");
             }
             StdOut.println();
         } else if (mode == Mode.AI1_PLAYING) {
             StdDraw.setPenColor(Color.WHITE);
             StdDraw.setFont(INTERFACE_FONT);
-            StdDraw.text(19, 6, ai1.toString().substring(9).split("@")[0] + " thinking...");
+            StdDraw.text(19, 6, ai1Name + " thinking...");
         } else if (mode == Mode.AI2_PLAYING) {
             StdDraw.setPenColor(Color.WHITE);
             StdDraw.setFont(INTERFACE_FONT);
-            StdDraw.text(19, 6, ai2.toString().substring(9).split("@")[0] + " thinking...");
+            StdDraw.text(19, 6, ai2Name + " thinking...");
         }
         StdDraw.show();
     }
