@@ -203,7 +203,8 @@ public class BrutusV2_0 implements ScrabbleAI {
                 else{
                     randomCheck++;
                     if(randomCheck > 30) {
-                        StdOut.println("RANDOMNESS BROKE");
+                        //check if we've been randomly permutating for too long.
+//                        StdOut.println("RANDOMNESS BROKE");
                         break;
                     }
                     i--;

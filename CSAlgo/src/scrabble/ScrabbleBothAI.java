@@ -123,7 +123,7 @@ public class ScrabbleBothAI {
      */
     private void Reset(int firstPlayer){
         //CHOOSE ON THIS LINE
-        Contestants = new ScrabbleAI[]{new BrutusV1_0(), new BrutusV2_0()};
+        Contestants = new ScrabbleAI[]{new BrutusV2_0(), new Incrementalist()};
 
         board = new Board();
         if(firstPlayer % 2 == 0){ai1 = Contestants[0]; ai2 = Contestants[1];}
