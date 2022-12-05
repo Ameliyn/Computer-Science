@@ -29,14 +29,6 @@ public class BrutusV2_0 implements ScrabbleAI {
     public ScrabbleMove chooseMove(){
         ArrayList<Character> hand = gatekeeper.getHand();
 
-        //Treat wilds as 'E'
-//        for(int i = 0; i < hand.size(); i++){
-//            if(hand.get(i) == '_'){
-//                hand.remove(i);
-//                hand.add('E');
-//            }
-//        }
-
         //allow for the word to play with a single character of other words
         bestWord = "";
         bestValue = -1;

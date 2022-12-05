@@ -12,7 +12,7 @@ import java.util.Map;
 import static java.awt.event.KeyEvent.*;
 
 /** GUI allowing a human to play against a ScrabbleAI. To change the AI, edit the constructor. */
-public class ScrabbleBothAI {
+public class ScrabbleAIArena {
 
     private static final Map<Character, Color> COLORS = new HashMap<>();
 
@@ -114,7 +114,7 @@ public class ScrabbleBothAI {
     private String ai1Name;
     private String ai2Name;
 
-    public ScrabbleBothAI() {
+    public ScrabbleAIArena() {
         Reset(0);
     }
 
@@ -123,7 +123,7 @@ public class ScrabbleBothAI {
      */
     private void Reset(int firstPlayer){
         //CHOOSE ON THIS LINE
-        Contestants = new ScrabbleAI[]{new BrutusV2_0(), new Incrementalist()};
+        Contestants = new ScrabbleAI[]{new BrutusV2_0(), new BrutusV1_0()};
 
         board = new Board();
         if(firstPlayer % 2 == 0){ai1 = Contestants[0]; ai2 = Contestants[1];}
@@ -137,7 +137,7 @@ public class ScrabbleBothAI {
     }
 
     public static void main(String[] args) throws IllegalMoveException {
-        new ScrabbleBothAI().run();
+        new ScrabbleAIArena().run();
     }
 
     /** Runs the game. Crashes if the AI opponent plays an illegal move. */
