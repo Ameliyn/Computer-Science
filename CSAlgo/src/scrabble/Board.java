@@ -113,6 +113,9 @@ public class Board {
     /** Number of consecutive tile exchange turns; 2 ends the game. */
     private int numberOfPasses;
 
+    private int numPlayers;
+
+
     public Board() {
         // Create squares on board
         squares = new char[15][15];
@@ -133,6 +136,33 @@ public class Board {
         deal(hands[1], 7);
         // Initialize miscellaneous variables
         scores = new int[2];
+        numPlayers = 2;
+    }
+
+    public Board(int numPlayers){
+        // Create squares on board
+        squares = new char[15][15];
+        for (int r = 0; r < squares.length; r++) {
+            for (int c = 0; c < squares.length; c++) {
+                squares[r][c] = LAYOUT[r].charAt(c);
+            }
+        }
+        // Create bag
+        bag = new ArrayList<Character>();
+        for (char tile : "aaaaaaaaabbccddddeeeeeeeeeeeeffggghhiiiiiiiiijkllllmmnnnnnnooooooooppqrrrrrrssssttttttuuuuvvwwxyyz__".toCharArray()) {
+            bag.add(tile);
+        }
+        Collections.shuffle(bag);
+        // Deal initial hands
+        hands = new ArrayList[numPlayers];
+        for(int i = 0; i < numPlayers; i++){
+            hands[i] = new ArrayList<Character>();
+            deal(hands[i],7);
+        }
+
+        // Initialize miscellaneous variables
+        scores = new int[numPlayers];
+        this.numPlayers = numPlayers;
     }
 
     /** Deals n tiles from the bag into hand. */
@@ -489,7 +519,8 @@ public class Board {
         placeWord(word, location, direction);
         removeTiles(word, hand);
         deal(hand, 7 - hand.size());
-        currentPlayer = 1 - currentPlayer;
+        currentPlayer++;
+        if(currentPlayer >= numPlayers) currentPlayer = 0;
         numberOfPasses = 0;
         if (gameIsOver()) {
             scoreUnplayedTiles();
@@ -518,7 +549,8 @@ public class Board {
         Collections.shuffle(bag);
         // If there weren't enough letters in bag, some dumped letters may return to hand
         deal(hand, 7 - hand.size());
-        currentPlayer = 1 - currentPlayer;
+        currentPlayer++;
+        if(currentPlayer >= numPlayers) currentPlayer = 0;
         numberOfPasses++;
         if (gameIsOver()) {
             scoreUnplayedTiles();
@@ -545,12 +577,13 @@ public class Board {
 
     /** Returns true if the game is over. */
     public boolean gameIsOver() {
-        return numberOfPasses == 2 || hands[0].isEmpty() || hands[1].isEmpty();
+        for(int i = 0; i < numPlayers; i++){ if(hands[i].isEmpty()) {return true;}}
+        return numberOfPasses == numPlayers;
     }
 
     /** Scores any unplayed tiles at the end of the game. */
-    private void scoreUnplayedTiles() {
-        int[] values = new int[2];
+    private void scoreUnplayedTiles(){
+        int[] values = new int[numPlayers];
         for (int i = 0; i < hands.length; i++) {
             for (char c : hands[i]) {
                 values[i] += TILE_VALUES.get(c);
