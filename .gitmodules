@@ -1,3 +1,9 @@
 [submodule "NetworksAndWebDevelopment"]
 	path = NetworksAndWebDevelopment
 	url = https://github.com/Ameliyn/CS293.git
+[submodule "Compe662"]
+	path = Compe662
+	url = https://github.com/Ameliyn/Compe662.git
+[submodule "COMPE571"]
+	path = COMPE571
+	url = https://github.com/Ameliyn/COMPE571.git
